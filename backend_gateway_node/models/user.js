@@ -1,5 +1,9 @@
 module.exports = (sequelize, Sequelize) => {
   const User = sequelize.define("user", {
+    customer_id: {
+      type: Sequelize.STRING,
+      defaultValue: "C1001"
+    },
     name: {
       type: Sequelize.STRING,
       defaultValue: "Elena Rostova"

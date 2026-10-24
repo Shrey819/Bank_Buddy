@@ -110,7 +110,7 @@ export default function Sidebar() {
             </div>
             <div className="flex flex-col overflow-hidden">
               <span className="text-xs font-bold text-slate-900 dark:text-slate-100 truncate">
-                {user?.name || 'Elena Rostova'}
+                {user?.name || user?.username || 'Client'}
               </span>
               <span className="text-[9px] font-semibold text-indigo-600 dark:text-indigo-400 truncate">
                 CRN: {user?.crn || '98234105'} &bull; Private

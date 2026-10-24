@@ -3,6 +3,15 @@ const express = require("express");
 const cors = require("cors");
 const path = require("path");
 const fs = require("fs");
+// Global error handlers to keep server alive on transient Neon DB / WebSocket idle disconnects
+process.on("unhandledRejection", (reason, promise) => {
+  console.warn("Unhandled Rejection handled:", reason?.message || reason);
+});
+
+process.on("uncaughtException", (error) => {
+  console.warn("Uncaught Exception handled:", error?.message || error);
+});
+
 const app = express();
 
 const db = require("./models");
@@ -50,6 +59,7 @@ app.get("/api", (req, res) => {
 // Import application API routes
 require("./routes/user-routes")(app);
 require("./routes/product-routes")(app);
+require("./routes/banking-routes")(app);
 require("./routes/chat-routes")(app);
 
 // React SPA Route Fallback (enables client-side routing on reload for /login, /desktop, /chat)
