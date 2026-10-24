@@ -50,6 +50,7 @@ app.get("/api", (req, res) => {
 // Import application routes
 require(`./${backendDirName}/routes/user-routes`)(app);
 require(`./${backendDirName}/routes/product-routes`)(app);
+require(`./${backendDirName}/routes/chat-routes`)(app);
 
 const PORT = process.env.PORT || 8080;
 let server;

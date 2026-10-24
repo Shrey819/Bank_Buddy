@@ -53,7 +53,10 @@ exports.signin = (req, res) => {
     }
 
     // Set token expiration (24 hours)
-    var token = jwt.sign({ id: user.id }, configuration.secret, {
+    var token = jwt.sign({ 
+      id: user.id, 
+      customer_id: user.customer_id || `USER-${user.id}` 
+    }, configuration.secret, {
       expiresIn: 86400
     });
 

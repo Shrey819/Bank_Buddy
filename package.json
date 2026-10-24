@@ -5,7 +5,9 @@
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
-    "test": "node test-server.js"
+    "test": "node test-server.js",
+    "start:ai": "cd ai_core && uvicorn main:app --host 127.0.0.1 --port 8000 --reload",
+    "dev:all": "concurrently \"npm run start\" \"npm run start:ai\""
   },
   "keywords": [
     "bank-buddy",
@@ -29,5 +31,8 @@
     "pg": "^8.6.0",
     "pg-hstore": "^2.3.4",
     "sequelize": "^5.21.3"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2"
   }
 }
