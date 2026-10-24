@@ -11,6 +11,7 @@ IMPORTANT: fraud_verification uses ONLY deterministic rule checks (no ML/AI).
 """
 
 from __future__ import annotations
+from sqlalchemy import text
 
 import uuid
 from datetime import date, datetime
@@ -98,23 +99,22 @@ def fraud_verification(inp: FraudVerificationInput, db) -> FraudVerificationOutp
     """
     trace_id = str(uuid.uuid4())[:8]
 
-    txn_row = db.execute(
-        """
+    txn_row = db.execute(text("""
         SELECT txn_id,
                customer_id,
                amount,
                merchant,
                channel,
                status,
-               txn_date,
+               date as txn_date,
                description,
-               failure_reason
+               NULL as failure_reason
         FROM   transactions
-        WHERE  txn_id       = ?
-          AND  customer_id  = ?
-        """,
-        (inp.transaction_id, inp.customer_id),
-    ).fetchone()
+        WHERE  txn_id       = :txn_id
+          AND  customer_id  = :customer_id
+        """),
+        {"txn_id": inp.transaction_id, "customer_id": inp.customer_id},
+    ).mappings().fetchone()
 
     if txn_row is None:
         raise ValueError(
@@ -137,21 +137,20 @@ def fraud_verification(inp: FraudVerificationInput, db) -> FraudVerificationOutp
     is_flagged, flag_reason = _check_fraud_rules(txn)
 
     # Check for any existing open fraud case on this transaction
-    case_row = db.execute(
-        """
+    case_row = db.execute(text("""
         SELECT case_id,
                ticket_number,
                status,
                opened_at,
-               routed_to
+               NULL as routed_to
         FROM   fraud_cases
-        WHERE  transaction_id = ?
-          AND  customer_id    = ?
+        WHERE  txn_id = :txn_id
+          AND  customer_id    = :customer_id
         ORDER BY opened_at DESC
         LIMIT 1
-        """,
-        (inp.transaction_id, inp.customer_id),
-    ).fetchone()
+        """),
+        {"txn_id": inp.transaction_id, "customer_id": inp.customer_id},
+    ).mappings().fetchone()
 
     existing_case: Optional[FraudCase] = None
     if case_row:
@@ -214,14 +213,13 @@ def raise_dispute(inp: RaiseDisputeInput, db) -> RaiseDisputeOutput:
     trace_id = str(uuid.uuid4())[:8]
 
     # Ownership check before any mutation
-    txn_exists = db.execute(
-        """
+    txn_exists = db.execute(text("""
         SELECT 1
         FROM   transactions
-        WHERE  txn_id      = ?
-          AND  customer_id = ?
-        """,
-        (inp.transaction_id, inp.customer_id),
+        WHERE  txn_id      = :txn_id
+          AND  customer_id = :customer_id
+        """),
+        {"txn_id": inp.transaction_id, "customer_id": inp.customer_id},
     ).fetchone()
 
     if txn_exists is None:
@@ -234,13 +232,12 @@ def raise_dispute(inp: RaiseDisputeInput, db) -> RaiseDisputeOutput:
     ticket_number = f"DISP-{uuid.uuid4().hex[:8].upper()}"
     opened_at = datetime.utcnow()
 
-    db.execute(
-        """
+    db.execute(text("""
         INSERT INTO fraud_cases
             (case_id, ticket_number, customer_id, transaction_id,
              reason, status, opened_at, routed_to)
         VALUES (?, ?, ?, ?, ?, 'open', ?, 'human_review')
-        """,
+        """),
         (
             case_id,
             ticket_number,
