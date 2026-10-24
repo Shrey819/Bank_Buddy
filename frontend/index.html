@@ -575,7 +575,7 @@
     }
 
     /* ==============================================================
-       EXPEDIPAY AUTONOMOUS WEALTH DASHBOARD (IMAGES 1, 2, 3)
+       BANK BUDDY AUTONOMOUS WEALTH DASHBOARD (IMAGES 1, 2, 3)
        ============================================================== */
     #wealth-dashboard-view {
       display: none;
@@ -743,10 +743,12 @@
       <strong>⚡ Test Login Helper (PRD C1001 Client):</strong>
       Click any chip to auto-fill Bank Buddy Net Banking login:
     </div>
-    <div style="display: flex; gap: 0.4rem; flex-wrap: wrap;">
+    <div style="display: flex; gap: 0.4rem; flex-wrap: wrap; align-items: center;">
       <button class="quick-preset-btn" type="button" onclick="quickFill('98234105', 'BankBuddy@2026')">🔑 CRN: 98234105</button>
       <button class="quick-preset-btn" type="button" onclick="quickFill('elena', 'BankBuddy@2026')">👤 Username: elena</button>
       <button class="quick-preset-btn" type="button" onclick="quickFill('4441', 'BankBuddy@2026')">💳 Card: 4441</button>
+      <a href="desktop.html" class="quick-preset-btn" style="text-decoration: none; background: #003366; color: #fff; font-weight: 700;">🖥️ Open Desktop Page</a>
+      <a href="chat.html" class="quick-preset-btn" style="text-decoration: none; background: #6b38d4; color: #fff; font-weight: 700;">💬 Open Chat Page</a>
     </div>
   </div>
 
@@ -965,15 +967,22 @@
   </div>
 
   <!-- ==============================================================
-       VIEW 2: EXPEDIPAY AUTONOMOUS WEALTH WORKSPACE (IMAGES 1, 2, 3)
+       VIEW 2: BANK BUDDY AUTONOMOUS WEALTH WORKSPACE (IMAGES 1, 2, 3)
        ============================================================== -->
   <div id="wealth-dashboard-view">
     <header class="wealth-top-header">
       <div style="display: flex; align-items: center; gap: 1.5rem;">
-        <div style="display: flex; align-items: center; gap: 0.5rem;">
-          <div style="width: 32px; height: 32px; background: #6366f1; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: #fff; font-weight: 800;">$</div>
+        <div style="display: flex; align-items: center; gap: 0.75rem;">
+          <div class="trust-shield-badge" style="width: 36px; height: 36px;">
+            <svg width="22" height="22" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M18 3L5 8.5V17C5 25.5 10.7 33.3 18 35C25.3 33.3 31 25.5 31 17V8.5L18 3Z" fill="#003366"/>
+              <path d="M18 5L7 9.5V17C7 24.3 11.9 31.2 18 32.8C24.1 31.2 29 24.3 29 17V9.5L18 5Z" stroke="#38bdf8" stroke-width="1.2" fill="none"/>
+              <path d="M13 18L16.5 21.5L23.5 14.5" stroke="#fbbf24" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+              <circle cx="18" cy="10" r="1.5" fill="#38bdf8"/>
+            </svg>
+          </div>
           <div>
-            <div style="font-size: 0.95rem; font-weight: 800; line-height: 1;">Expedipay</div>
+            <div style="font-size: 1.05rem; font-weight: 800; line-height: 1; color: #003366;">Bank <span style="color: #0284c7;">Buddy</span></div>
             <div style="font-size: 0.65rem; font-weight: 700; color: #64748b;">AUTONOMOUS WEALTH</div>
           </div>
         </div>
@@ -981,6 +990,8 @@
         <nav class="wealth-nav-pills">
           <button class="wealth-pill active" id="btn-tab-home" onclick="switchWealthTab('home')">🏠 Home</button>
           <button class="wealth-pill" id="btn-tab-chat" onclick="switchWealthTab('chat')">💬 Chat History <span style="background: #e0e7ff; color: #4338ca; padding: 0.1rem 0.4rem; border-radius: 9999px; font-size: 0.7rem;">14</span></button>
+          <a href="desktop.html" class="wealth-pill" style="text-decoration: none; color: inherit;">🖥️ Full Desktop</a>
+          <a href="chat.html" class="wealth-pill" style="text-decoration: none; color: inherit;">🤖 AI Chat Swarm</a>
           <button class="wealth-pill" onclick="alert('Connecting to Private Banker...')">Help / Support •</button>
         </nav>
       </div>
@@ -1048,7 +1059,7 @@
               <span style="color: #10b981;">● Active</span>
             </div>
             <div class="vault-debit-plastic">
-              <div style="font-size: 0.7rem; letter-spacing: 0.1em; color: #94a3b8;">EXPEDIPAY VAULT DEBIT</div>
+              <div style="font-size: 0.7rem; letter-spacing: 0.1em; color: #94a3b8;">BANK BUDDY VAULT DEBIT</div>
               <div style="font-size: 1.1rem; letter-spacing: 0.2em; font-family: 'Fira Code', monospace;">•••• •••• •••• 4441</div>
               <div style="display: flex; justify-content: space-between; font-size: 0.7rem;">
                 <span>EXP 08/29</span>

@@ -1,0 +1,910 @@
+
+<!DOCTYPE html>
+
+<html class="h-full bg-slate-50" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Bank Buddy — Executive Wealth &amp; Banking</title>
+<!-- Fonts -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS v3 CDN with forms & container queries -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+          },
+          colors: {
+            brand: {
+              50: '#EEF2FF',
+              100: '#E0E7FF',
+              500: '#4F46E5',
+              600: '#4338CA',
+              blue: '#2563EB',
+              violet: '#7C3AED',
+              pink: '#EC4899',
+            }
+          },
+          boxShadow: {
+            'soft': '0 4px 25px -4px rgba(0, 0, 0, 0.04), 0 2px 10px -2px rgba(0, 0, 0, 0.02)',
+            'float': '0 20px 40px -15px rgba(37, 99, 235, 0.15)',
+            'card': '0 10px 30px -5px rgba(15, 23, 42, 0.03)',
+          }
+        }
+      }
+    }
+  </script>
+<!-- BEGIN: Custom Micro-Styles -->
+<style data-purpose="custom-enhancements">
+    /* Custom subtle scrollbar */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #F1F5F9;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #CBD5E1;
+      border-radius: 9999px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #94A3B8;
+    }
+    
+    /* Radial ambient backgrounds reminiscent of Bank Buddy UI */
+    .bg-mesh-glow {
+      background-image: 
+        radial-gradient(circle at 10% 10%, rgba(224, 231, 255, 0.5) 0%, transparent 40%),
+        radial-gradient(circle at 90% 20%, rgba(243, 232, 255, 0.6) 0%, transparent 35%),
+        radial-gradient(circle at 50% 90%, rgba(224, 242, 254, 0.4) 0%, transparent 45%);
+    }
+
+    /* Spline chart stroke animation */
+    .chart-path {
+      stroke-dasharray: 1000;
+      stroke-dashoffset: 0;
+      transition: stroke-dashoffset 1s ease-in-out;
+    }
+  </style>
+<!-- END: Custom Micro-Styles -->
+</head>
+<body class="min-h-full font-sans antialiased text-slate-800 bg-slate-50/80 bg-mesh-glow selection:bg-indigo-500 selection:text-white">
+<!-- BEGIN: Minimalistic Header -->
+<header class="sticky top-0 z-40 w-full border-b border-slate-200/70 bg-white/80 backdrop-blur-md">
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between gap-6">
+<!-- Brand Logo -->
+<div class="flex items-center gap-3">
+<a class="flex items-center gap-3 group" href="desktop.html">
+<div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-[#002244] via-[#003366] to-[#0284c7] flex items-center justify-center shadow-md shadow-blue-900/20 group-hover:scale-105 transition-transform duration-200">
+  <svg width="24" height="24" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M18 3L5 8.5V17C5 25.5 10.7 33.3 18 35C25.3 33.3 31 25.5 31 17V8.5L18 3Z" fill="#003366"/>
+    <path d="M18 5L7 9.5V17C7 24.3 11.9 31.2 18 32.8C24.1 31.2 29 24.3 29 17V9.5L18 5Z" stroke="#38bdf8" stroke-width="1.2" fill="none"/>
+    <path d="M13 18L16.5 21.5L23.5 14.5" stroke="#fbbf24" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+    <circle cx="18" cy="10" r="1.5" fill="#38bdf8"/>
+  </svg>
+</div>
+<div class="flex flex-col">
+  <span class="text-xl font-extrabold tracking-tight text-slate-900 leading-none">Bank <span class="text-[#0284c7]">Buddy</span></span>
+  <span class="text-[10px] font-bold text-slate-500 tracking-wider uppercase mt-1">Autonomous Wealth &bull; Trust Verified</span>
+</div>
+</a>
+</div>
+<!-- Navigation Links -->
+<nav aria-label="Main Navigation" class="hidden md:flex items-center p-1 bg-slate-100/80 rounded-full border border-slate-200/60">
+<!-- Active Link: Home -->
+<a class="px-5 py-2 text-xs font-semibold text-slate-900 bg-white rounded-full shadow-sm transition-all duration-150 flex items-center gap-2" href="desktop.html">
+<svg class="w-3.5 h-3.5 text-[#0284c7]" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+<path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+<polyline points="9 22 9 12 15 12 15 22"></polyline>
+</svg>
+<span>Home</span>
+</a>
+<!-- AI Chat Swarm Link -->
+<a class="px-5 py-2 text-xs font-medium text-slate-600 hover:text-slate-900 rounded-full transition-all duration-150 flex items-center gap-2" href="chat.html">
+<span>AI Chat Agent</span>
+<span class="px-1.5 py-0.5 text-[10px] font-semibold bg-indigo-100 text-indigo-700 rounded-full">Swarm</span>
+</a>
+<!-- Net Banking Login / Switch User Link -->
+<a class="px-5 py-2 text-xs font-medium text-slate-600 hover:text-slate-900 rounded-full transition-all duration-150 flex items-center gap-1.5" href="index.html">
+<span>Net Banking Login</span>
+<span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+</a>
+</nav>
+<!-- Right Action Items: Search, Bell & User Profile -->
+<div class="flex items-center gap-4">
+<!-- Search Pill -->
+<div class="relative hidden sm:block">
+<div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24">
+<circle cx="11" cy="11" r="8"></circle>
+<line x1="21" x2="16.65" y1="21" y2="16.65"></line>
+</svg>
+</div>
+<input class="w-64 pl-9 pr-12 py-2 text-xs bg-white/90 border border-slate-200 rounded-full focus:outline-none focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-500 shadow-sm transition placeholder:text-slate-400" placeholder="Search transactions, cards, dues..." type="text"/>
+<div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+<kbd class="text-[10px] font-semibold text-slate-400 bg-slate-100 px-1.5 py-0.5 rounded border border-slate-200">⌘K</kbd>
+</div>
+</div>
+<!-- Notification Bell -->
+<button aria-label="Notifications" class="relative p-2.5 text-slate-500 hover:text-slate-700 bg-white border border-slate-200 rounded-full shadow-sm hover:bg-slate-50 transition" type="button">
+<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24">
+<path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+<path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+</svg>
+<span class="absolute top-1.5 right-1.5 w-2 h-2 bg-indigo-600 rounded-full ring-2 ring-white"></span>
+</button>
+<div class="h-6 w-px bg-slate-200 hidden sm:block"></div>
+<!-- Profile Avatar & Details -->
+<div class="flex items-center gap-3 pl-1">
+<div class="relative">
+<!-- Deterministic high quality avatar representation -->
+<div class="w-10 h-10 rounded-full ring-2 ring-indigo-500/20 bg-gradient-to-tr from-purple-200 via-pink-100 to-indigo-100 flex items-center justify-center font-bold text-sm text-indigo-700">
+              ER
+            </div>
+<span class="absolute bottom-0 right-0 w-2.5 h-2.5 bg-emerald-500 border-2 border-white rounded-full"></span>
+</div>
+<div class="hidden xl:flex flex-col text-left">
+<span class="text-xs font-bold text-slate-900 leading-tight">Elena Rostova</span>
+<span class="text-[10px] font-semibold text-indigo-600 tracking-tight">CRN: 98234105 &bull; Private Client</span>
+</div>
+<a href="index.html" class="p-2 text-slate-400 hover:text-red-600 rounded-full hover:bg-slate-100 transition" title="Logout &amp; Return to Login">
+  <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
+</a>
+</div>
+</div>
+</div>
+</div>
+</header>
+<!-- END: Minimalistic Header -->
+<!-- BEGIN: Main Page Content -->
+<main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-10" id="home">
+<!-- Executive Overview Hero Banner -->
+<section class="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200/80 shadow-card relative overflow-hidden" data-purpose="executive-overview">
+<div class="absolute -right-14 -top-14 w-64 h-64 bg-indigo-50 rounded-full blur-3xl pointer-events-none opacity-70"></div>
+<div class="absolute right-40 -bottom-10 w-48 h-48 bg-purple-50 rounded-full blur-2xl pointer-events-none opacity-60"></div>
+<div class="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6 relative z-10">
+<div>
+<div class="flex items-center gap-2 mb-2">
+<span class="inline-flex items-center gap-1.5 py-1 px-3 rounded-full text-[11px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200/60">
+<span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+              Real-time ISO 20022 Network Active
+            </span>
+<span class="text-xs text-slate-400 font-medium">Synced 12s ago</span>
+</div>
+<div class="text-xs uppercase tracking-wider font-bold text-slate-400">Total Liquid Net Worth</div>
+<div class="flex items-baseline gap-3 mt-1">
+<h1 class="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-slate-900 tracking-tight">$159,500.00</h1>
+<span class="inline-flex items-center text-xs font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-100">
+<svg class="w-3 h-3 mr-0.5" fill="none" stroke="currentColor" stroke-width="2.5" viewbox="0 0 24 24"><polyline points="18 15 12 9 6 15"></polyline></svg>
+              +4.2% MoM
+            </span>
+</div>
+<p class="text-xs text-slate-500 mt-1.5 max-w-xl">
+            Autonomous treasury sweeps active: Yielding an aggregate +$842.10 monthly return across vault accounts and liquidity pools.
+          </p>
+</div>
+<!-- Quick Top Action Buttons -->
+<div class="flex flex-wrap items-center gap-3">
+<button class="px-4 py-2.5 rounded-2xl bg-slate-900 text-white text-xs font-semibold hover:bg-slate-800 transition shadow-sm flex items-center gap-2" type="button">
+<svg class="w-4 h-4 text-indigo-400" fill="none" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24"><path d="M12 5v14M5 12h14"></path></svg>
+<span>Transfer Funds</span>
+</button>
+<button class="px-4 py-2.5 rounded-2xl bg-white border border-slate-200 text-slate-700 text-xs font-semibold hover:bg-slate-50 transition shadow-sm flex items-center gap-2" type="button">
+<svg class="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24"><rect height="16" rx="2" width="18" x="3" y="4"></rect><path d="M7 15h0M7 9h0M7 12h0M11 15h6M11 9h6M11 12h6"></path></svg>
+<span>Generate Statement</span>
+</button>
+</div>
+</div>
+</section>
+<!-- BEGIN: Executive Account Balances & Interactive Cards Section -->
+<section class="space-y-4" data-purpose="card-controls-section">
+<div class="flex items-center justify-between">
+<div>
+<h2 class="text-lg font-bold text-slate-900 tracking-tight">Active Accounts &amp; Payment Cards</h2>
+<p class="text-xs text-slate-500">Autonomous hardware freeze switches, settlement routing, and EMV profiles.</p>
+</div>
+<a class="text-xs font-semibold text-indigo-600 hover:text-indigo-800 flex items-center gap-1 transition" href="#manage-cards">
+          Card Security Center <span aria-hidden="true">→</span>
+</a>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+<!-- CARD 1: Checking / Vault Debit Card -->
+<div class="bg-white rounded-3xl p-6 border border-slate-200/90 shadow-card hover:shadow-soft transition-all duration-200 flex flex-col justify-between relative overflow-hidden group">
+<!-- Subtle top accent line -->
+<div class="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-slate-800 to-slate-600"></div>
+<div>
+<div class="flex items-center justify-between mb-4">
+<span class="px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider rounded-full bg-slate-100 text-slate-700">Checking • Vault</span>
+<span class="inline-flex items-center gap-1 text-[11px] font-semibold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-100">
+<span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> Active
+              </span>
+</div>
+<!-- Virtual Card Mock Representation (Bank Buddy Style) -->
+<div class="w-full bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-white rounded-2xl p-4 shadow-md mb-5 relative overflow-hidden">
+<div class="absolute -right-6 -bottom-6 w-24 h-24 bg-white/5 rounded-full"></div>
+<div class="flex justify-between items-start">
+<span class="text-[10px] font-mono tracking-widest text-slate-400">BANK BUDDY VAULT DEBIT</span>
+<span class="text-xs font-extrabold italic text-slate-200 tracking-wider">VISA</span>
+</div>
+<div class="my-3 flex items-center gap-2">
+<div class="w-7 h-5 bg-amber-300/80 rounded-sm"></div>
+<svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24"><path d="M2 12a10 10 0 0 1 18-6M2 12a10 10 0 0 0 18 6"></path></svg>
+</div>
+<div class="flex justify-between items-end mt-2">
+<div class="font-mono text-sm tracking-wider text-slate-200">•••• •••• •••• 4441</div>
+<div class="text-[9px] text-slate-400">EXP 08/29</div>
+</div>
+</div>
+<!-- Balance Details -->
+<div class="space-y-1 mb-5">
+<div class="text-xs font-medium text-slate-400">Available Liquid Balance</div>
+<div class="text-2xl font-extrabold text-slate-900 tracking-tight">$125,000.00</div>
+<div class="text-[11px] text-slate-500">Daily limit: $25,000.00 • ISO 20022 Settled</div>
+</div>
+</div>
+<!-- Bottom Control & Toggle Row -->
+<div class="pt-4 border-t border-slate-100 space-y-3">
+<div class="flex items-center justify-between">
+<div class="flex flex-col">
+<span class="text-xs font-semibold text-slate-800">Card Active / Freeze</span>
+<span class="text-[10px] text-slate-400">Lock contactless &amp; online POS</span>
+</div>
+<!-- Interactive Switch Toggle -->
+<label class="relative inline-flex items-center cursor-pointer">
+<input checked="" class="sr-only peer" type="checkbox"/>
+<div class="w-9 h-5 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-slate-900"></div>
+</label>
+</div>
+<a class="w-full inline-flex justify-center items-center py-2 px-3 text-xs font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200/80 rounded-xl transition" href="#debit-profile">
+              View Debit Profile &amp; Limits
+            </a>
+</div>
+</div>
+<!-- CARD 2: Sapphire Reserve Credit Card -->
+<div class="bg-white rounded-3xl p-6 border border-slate-200/90 shadow-card hover:shadow-soft transition-all duration-200 flex flex-col justify-between relative overflow-hidden group">
+<!-- Subtle top accent line -->
+<div class="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-blue-600 to-indigo-500"></div>
+<div>
+<div class="flex items-center justify-between mb-4">
+<span class="px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider rounded-full bg-blue-50 text-blue-700">World Elite • Credit</span>
+<span class="inline-flex items-center gap-1 text-[11px] font-semibold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-100">
+<span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> Active
+              </span>
+</div>
+<!-- Virtual Card Mock Representation -->
+<div class="w-full bg-gradient-to-br from-blue-600 via-indigo-600 to-indigo-700 text-white rounded-2xl p-4 shadow-md mb-5 relative overflow-hidden">
+<div class="absolute -right-6 -bottom-6 w-24 h-24 bg-white/10 rounded-full"></div>
+<div class="flex justify-between items-start">
+<span class="text-[10px] font-mono tracking-widest text-blue-200">SAPPHIRE RESERVE CREDIT</span>
+<div class="flex -space-x-1">
+<div class="w-4 h-4 rounded-full bg-red-400/80"></div>
+<div class="w-4 h-4 rounded-full bg-amber-400/80"></div>
+</div>
+</div>
+<div class="my-3 flex items-center gap-2">
+<div class="w-7 h-5 bg-amber-200/90 rounded-sm"></div>
+<svg class="w-4 h-4 text-blue-200" fill="none" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24"><path d="M2 12a10 10 0 0 1 18-6M2 12a10 10 0 0 0 18 6"></path></svg>
+</div>
+<div class="flex justify-between items-end mt-2">
+<div class="font-mono text-sm tracking-wider text-white">•••• •••• •••• 2343</div>
+<div class="text-[9px] text-blue-200">EXP 11/30</div>
+</div>
+</div>
+<!-- Balance Details & Statement Dues -->
+<div class="space-y-1 mb-5">
+<div class="flex justify-between items-center text-xs">
+<span class="text-slate-400 font-medium">Available Credit</span>
+<span class="text-rose-600 font-bold">Due Nov 18</span>
+</div>
+<div class="text-2xl font-extrabold text-slate-900 tracking-tight">$34,500.00</div>
+<div class="text-[11px] text-slate-500 flex justify-between">
+<span>Statement balance: <strong class="text-slate-700 font-semibold">$9,500.00</strong></span>
+<span class="text-indigo-600 font-medium hover:underline cursor-pointer">Auto-pay ON</span>
+</div>
+</div>
+</div>
+<!-- Bottom Control & Toggle Row -->
+<div class="pt-4 border-t border-slate-100 space-y-3">
+<div class="flex items-center justify-between">
+<div class="flex flex-col">
+<span class="text-xs font-semibold text-slate-800">Card Active / Freeze</span>
+<span class="text-[10px] text-slate-400">Lock transaction dispatch</span>
+</div>
+<!-- Interactive Switch Toggle -->
+<label class="relative inline-flex items-center cursor-pointer">
+<input checked="" class="sr-only peer" type="checkbox"/>
+<div class="w-9 h-5 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-blue-600"></div>
+</label>
+</div>
+<a class="w-full inline-flex justify-center items-center py-2 px-3 text-xs font-semibold text-blue-700 bg-blue-50 hover:bg-blue-100/80 rounded-xl transition" href="#credit-profile">
+              View Credit Card Profile &amp; Rewards
+            </a>
+</div>
+</div>
+<!-- CARD 3: High-Yield Treasury Sweep -->
+<div class="bg-white rounded-3xl p-6 border border-slate-200/90 shadow-card hover:shadow-soft transition-all duration-200 flex flex-col justify-between relative overflow-hidden group">
+<!-- Subtle top accent line -->
+<div class="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-purple-500 to-pink-500"></div>
+<div>
+<div class="flex items-center justify-between mb-4">
+<span class="px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider rounded-full bg-purple-50 text-purple-700">Yield Sweep • Auto-Earn</span>
+<span class="inline-flex items-center gap-1 text-[11px] font-semibold text-indigo-700 bg-indigo-50 px-2 py-0.5 rounded-full border border-indigo-100">
+                7.20% APY
+              </span>
+</div>
+<!-- Virtual Card Representation (Purple/Pink Bank Buddy style) -->
+<div class="w-full bg-gradient-to-br from-purple-500 via-purple-600 to-pink-500 text-white rounded-2xl p-4 shadow-md mb-5 relative overflow-hidden">
+<div class="absolute -right-6 -bottom-6 w-24 h-24 bg-white/10 rounded-full"></div>
+<div class="flex justify-between items-start">
+<span class="text-[10px] font-mono tracking-widest text-purple-100">TREASURY YIELD POOL</span>
+<span class="text-[10px] font-bold bg-white/20 px-2 py-0.5 rounded">SWEEP ON</span>
+</div>
+<div class="my-4 flex items-center gap-2">
+<svg class="w-6 h-6 text-purple-200" fill="none" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24"><path d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path></svg>
+<span class="text-xs font-medium text-white/90">Daily interest compound</span>
+</div>
+<div class="flex justify-between items-end mt-1">
+<div class="font-mono text-sm tracking-wider text-purple-100">FDIC / SIPC Insured</div>
+<div class="text-[9px] text-purple-200">ID: #9902-TR</div>
+</div>
+</div>
+<!-- Balance Details -->
+<div class="space-y-1 mb-5">
+<div class="text-xs font-medium text-slate-400">Total Swept Treasury Balance</div>
+<div class="text-2xl font-extrabold text-slate-900 tracking-tight">$28,200.00</div>
+<div class="text-[11px] text-emerald-600 font-medium">+$169.20 earned this calendar cycle</div>
+</div>
+</div>
+<!-- Bottom Control & Toggle Row -->
+<div class="pt-4 border-t border-slate-100 space-y-3">
+<div class="flex items-center justify-between">
+<div class="flex flex-col">
+<span class="text-xs font-semibold text-slate-800">Auto-Sweep Threshold</span>
+<span class="text-[10px] text-slate-400">Move deposits &gt; $10k to yield</span>
+</div>
+<label class="relative inline-flex items-center cursor-pointer">
+<input checked="" class="sr-only peer" type="checkbox"/>
+<div class="w-9 h-5 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-purple-600"></div>
+</label>
+</div>
+<a class="w-full inline-flex justify-center items-center py-2 px-3 text-xs font-semibold text-purple-700 bg-purple-50 hover:bg-purple-100/80 rounded-xl transition" href="#yield-profile">
+              Manage Treasury &amp; Sweeps
+            </a>
+</div>
+</div>
+</div>
+</section>
+<!-- END: Executive Account Balances Section -->
+<!-- BEGIN: Spending Analytics & Visual Graphs (Bank Buddy Style) -->
+<section class="space-y-4" data-purpose="spending-analytics-graphs">
+<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+<div>
+<h2 class="text-lg font-bold text-slate-900 tracking-tight">Spending &amp; Outflow Analytics</h2>
+<p class="text-xs text-slate-500">Autonomous categorization, velocity trendlines, and progress gauges.</p>
+</div>
+<div class="flex items-center gap-2">
+<!-- Timeframe selector -->
+<div class="inline-flex p-1 bg-white border border-slate-200 rounded-xl text-xs font-medium text-slate-600 shadow-sm">
+<button class="px-2.5 py-1 rounded-lg hover:text-slate-900 transition">24H</button>
+<button class="px-2.5 py-1 rounded-lg hover:text-slate-900 transition">1W</button>
+<button class="px-2.5 py-1 rounded-lg bg-slate-900 text-white font-semibold shadow-xs">1M</button>
+<button class="px-2.5 py-1 rounded-lg hover:text-slate-900 transition">1Y</button>
+</div>
+</div>
+</div>
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+<!-- Left Column: Donut Ring Chart & Category Breakdown (5 Cols) -->
+<div class="lg:col-span-5 bg-white rounded-3xl p-6 border border-slate-200/80 shadow-card flex flex-col justify-between">
+<div>
+<div class="flex items-center justify-between mb-4">
+<span class="text-xs font-bold uppercase tracking-wider text-slate-400">Monthly Outflow Composition</span>
+<span class="text-xs font-semibold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full">-2.4% MoM</span>
+</div>
+<!-- Bank Buddy Circular Donut Chart -->
+<div class="flex flex-col sm:flex-row items-center justify-center gap-6 py-4">
+<!-- SVG Donut Chart with glowing center -->
+<div class="relative w-44 h-44 flex items-center justify-center">
+<svg class="w-full h-full -rotate-90 transform" viewbox="0 0 100 100">
+<!-- Background Circle -->
+<circle cx="50" cy="50" fill="none" r="38" stroke="#F1F5F9" stroke-width="12"></circle>
+<!-- Segment 1: Shopping (42.5%) - Purple/Pink -->
+<circle cx="50" cy="50" fill="none" r="38" stroke="#D946EF" stroke-dasharray="101.4 238.7" stroke-dashoffset="0" stroke-linecap="round" stroke-width="12"></circle>
+<!-- Segment 2: Food & Drinks (30.1%) - Blue -->
+<circle cx="50" cy="50" fill="none" r="38" stroke="#3B82F6" stroke-dasharray="71.9 238.7" stroke-dashoffset="-105" stroke-linecap="round" stroke-width="12"></circle>
+<!-- Segment 3: Transport & Bills (Remaining) - Slate 800 -->
+<circle cx="50" cy="50" fill="none" r="38" stroke="#0F172A" stroke-dasharray="60 238.7" stroke-dashoffset="-180" stroke-linecap="round" stroke-width="12"></circle>
+</svg>
+<div class="absolute inset-0 flex flex-col items-center justify-center text-center">
+<span class="text-2xl font-extrabold text-slate-900 tracking-tight">$28,200</span>
+<span class="text-[11px] font-medium text-slate-400">Total Outflow</span>
+</div>
+</div>
+<!-- Categories Breakdown Legend -->
+<div class="space-y-3 w-full sm:w-auto">
+<div class="flex items-center justify-between sm:justify-start gap-4">
+<div class="flex items-center gap-2">
+<span class="w-2.5 h-2.5 rounded-full bg-fuchsia-500"></span>
+<span class="text-xs font-medium text-slate-600">Shopping</span>
+</div>
+<span class="text-xs font-bold text-slate-900">$12,000.40</span>
+</div>
+<div class="flex items-center justify-between sm:justify-start gap-4">
+<div class="flex items-center gap-2">
+<span class="w-2.5 h-2.5 rounded-full bg-blue-500"></span>
+<span class="text-xs font-medium text-slate-600">Food &amp; Drinks</span>
+</div>
+<span class="text-xs font-bold text-slate-900">$8,500.00</span>
+</div>
+<div class="flex items-center justify-between sm:justify-start gap-4">
+<div class="flex items-center gap-2">
+<span class="w-2.5 h-2.5 rounded-full bg-slate-900"></span>
+<span class="text-xs font-medium text-slate-600">Bills &amp; Utility</span>
+</div>
+<span class="text-xs font-bold text-slate-900">$4,500.00</span>
+</div>
+<div class="flex items-center justify-between sm:justify-start gap-4">
+<div class="flex items-center gap-2">
+<span class="w-2.5 h-2.5 rounded-full bg-slate-400"></span>
+<span class="text-xs font-medium text-slate-600">Transport</span>
+</div>
+<span class="text-xs font-bold text-slate-900">$3,200.00</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Goals Mini Rings (Exact style from IMAGE_7) -->
+<div class="pt-5 border-t border-slate-100">
+<span class="text-[11px] font-bold uppercase tracking-wider text-slate-400 block mb-3">Savings Goals Progress</span>
+<div class="grid grid-cols-3 gap-3 text-center">
+<!-- Goal 1 -->
+<div class="p-2.5 rounded-2xl bg-slate-50 border border-slate-100 flex flex-col items-center">
+<div class="relative w-11 h-11 flex items-center justify-center mb-1">
+<svg class="w-full h-full -rotate-90 transform" viewbox="0 0 36 36">
+<path class="text-slate-200" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="currentColor" stroke-width="3.5"></path>
+<path class="text-indigo-600" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="currentColor" stroke-dasharray="35, 100" stroke-linecap="round" stroke-width="3.5"></path>
+</svg>
+<span class="absolute text-[10px] font-bold text-slate-800">35%</span>
+</div>
+<span class="text-[11px] font-semibold text-slate-700 truncate w-full">EV Sedan</span>
+</div>
+<!-- Goal 2 -->
+<div class="p-2.5 rounded-2xl bg-slate-50 border border-slate-100 flex flex-col items-center">
+<div class="relative w-11 h-11 flex items-center justify-center mb-1">
+<svg class="w-full h-full -rotate-90 transform" viewbox="0 0 36 36">
+<path class="text-slate-200" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="currentColor" stroke-width="3.5"></path>
+<path class="text-emerald-500" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="currentColor" stroke-dasharray="90, 100" stroke-linecap="round" stroke-width="3.5"></path>
+</svg>
+<span class="absolute text-[10px] font-bold text-slate-800">90%</span>
+</div>
+<span class="text-[11px] font-semibold text-slate-700 truncate w-full">Mac Studio</span>
+</div>
+<!-- Goal 3 -->
+<div class="p-2.5 rounded-2xl bg-slate-50 border border-slate-100 flex flex-col items-center">
+<div class="relative w-11 h-11 flex items-center justify-center mb-1">
+<svg class="w-full h-full -rotate-90 transform" viewbox="0 0 36 36">
+<path class="text-slate-200" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="currentColor" stroke-width="3.5"></path>
+<path class="text-purple-600" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="currentColor" stroke-dasharray="14, 100" stroke-linecap="round" stroke-width="3.5"></path>
+</svg>
+<span class="absolute text-[10px] font-bold text-slate-800">14%</span>
+</div>
+<span class="text-[11px] font-semibold text-slate-700 truncate w-full">Tokyo Trip</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Right Column: Interactive Spline Wave Graph (7 Cols) -->
+<div class="lg:col-span-7 bg-white rounded-3xl p-6 border border-slate-200/80 shadow-card flex flex-col justify-between relative overflow-hidden">
+<div>
+<div class="flex items-center justify-between mb-2">
+<div>
+<span class="text-xs font-bold uppercase tracking-wider text-slate-400">Weekly Velocity Trend</span>
+<div class="flex items-baseline gap-2 mt-0.5">
+<span class="text-2xl font-bold text-slate-900">$340.50</span>
+<span class="text-xs text-slate-400">Peak spending reached Jan 18</span>
+</div>
+</div>
+<!-- Summary Filter Pill -->
+<div class="relative inline-block text-left">
+<button class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-slate-700 bg-slate-100 rounded-full hover:bg-slate-200 transition" type="button">
+<span>Summary: All Cards</span>
+<svg class="w-3.5 h-3.5 text-slate-500" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path d="M19 9l-7 7-7-7" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
+</button>
+</div>
+</div>
+<!-- SVG Smooth Area Curve Graph matching image style -->
+<div class="relative mt-6 w-full h-56">
+<!-- Grid line markers -->
+<div class="absolute inset-0 flex flex-col justify-between pointer-events-none text-[10px] text-slate-300 font-mono">
+<div class="border-b border-dashed border-slate-100 pb-1 flex justify-between"><span>$500</span><span class="text-slate-300">Target Ceiling</span></div>
+<div class="border-b border-dashed border-slate-100 pb-1"><span>$350</span></div>
+<div class="border-b border-dashed border-slate-100 pb-1"><span>$200</span></div>
+<div class="border-b border-dashed border-slate-100 pb-1"><span>$50</span></div>
+</div>
+<!-- The Vector Spline Area -->
+<svg class="w-full h-full overflow-visible" preserveaspectratio="none" viewbox="0 0 500 200">
+<defs>
+<!-- Gradient for soft fill under spline -->
+<lineargradient id="splineGradient" x1="0" x2="0" y1="0" y2="1">
+<stop offset="0%" stop-color="#3B82F6" stop-opacity="0.32"></stop>
+<stop offset="65%" stop-color="#60A5FA" stop-opacity="0.08"></stop>
+<stop offset="100%" stop-color="#FFFFFF" stop-opacity="0.0"></stop>
+</lineargradient>
+</defs>
+<!-- Soft area under curve -->
+<path d="M 0 170 
+                     C 70 160, 110 135, 160 145 
+                     C 210 155, 260 110, 310 80 
+                     C 350 50, 390 35, 420 40 
+                     C 460 48, 480 25, 500 15 
+                     L 500 200 L 0 200 Z" fill="url(#splineGradient)"></path>
+<!-- Stroke Line -->
+<path class="chart-path" d="M 0 170 
+                     C 70 160, 110 135, 160 145 
+                     C 210 155, 260 110, 310 80 
+                     C 350 50, 390 35, 420 40 
+                     C 460 48, 480 25, 500 15" fill="none" stroke="#3B82F6" stroke-linecap="round" stroke-width="3.5"></path>
+<!-- Active Tooltip Marker Node (at peak point ~390, 42) -->
+<g transform="translate(390, 40)">
+<circle class="animate-pulse" fill="#FFFFFF" r="7" stroke="#2563EB" stroke-width="3.5"></circle>
+</g>
+</svg>
+<!-- Floating Interactive Tooltip Pill -->
+<div class="absolute top-2 right-24 transform -translate-x-1/2 bg-slate-900 text-white text-[11px] font-bold py-1 px-2.5 rounded-lg shadow-lg pointer-events-none flex items-center gap-1.5">
+<span>$340.50</span>
+<span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
+</div>
+</div>
+<!-- X Axis Months -->
+<div class="flex justify-between items-center text-xs text-slate-400 font-medium px-2 mt-3">
+<span>Jan</span>
+<span>Mar</span>
+<span>Jun</span>
+<span>Sep</span>
+<span>Nov</span>
+<span>Today</span>
+</div>
+</div>
+<!-- Bottom Stat Strip from image -->
+<div class="mt-6 pt-4 border-t border-slate-100 grid grid-cols-2 gap-4">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center">
+<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewbox="0 0 24 24"><path d="M19 14l-7 7m0 0l-7-7m7 7V3"></path></svg>
+</div>
+<div>
+<div class="text-[11px] text-slate-400 font-medium">Total Saved</div>
+<div class="text-sm font-bold text-slate-900 flex items-center gap-1.5">
+                  $1,136.00
+                  <span class="text-[10px] bg-slate-900 text-white px-1.5 py-0.2 rounded font-mono">+1.22%</span>
+</div>
+</div>
+</div>
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded-full bg-indigo-50 text-indigo-600 flex items-center justify-center">
+<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewbox="0 0 24 24"><path d="M5 10l7-7m0 0l7 7m-7-7v18"></path></svg>
+</div>
+<div>
+<div class="text-[11px] text-slate-400 font-medium">Total Spending</div>
+<div class="text-sm font-bold text-slate-900 flex items-center gap-1.5">
+                  $3,342.00
+                  <span class="text-[10px] bg-slate-900 text-white px-1.5 py-0.2 rounded font-mono">+1.01%</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- END: Spending Analytics Section -->
+<!-- BEGIN: Quick Functional Directory / Autonomous Services (All 10 Hackathon Use Cases) -->
+<section class="space-y-4 pt-4" data-purpose="banking-directory">
+<div class="flex flex-col sm:flex-row sm:items-end justify-between gap-2">
+<div>
+<span class="text-xs font-bold text-indigo-600 tracking-wider uppercase">Hackathon Core Engine</span>
+<h2 class="text-xl font-extrabold text-slate-900 tracking-tight">Banking Operations &amp; Autonomous Services</h2>
+<p class="text-xs text-slate-500">Access all 10 verified core banking and deterministic AI features. Hover any tile for operation details.</p>
+</div>
+<div class="text-xs text-slate-400 font-medium hidden sm:block">
+          ISO 20022 Compliant • Zero Hallucination Mode
+        </div>
+</div>
+<!-- 10 Autonomous Service Cards Grid -->
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+<!-- Use Case 1: Account and Balance Inquiry -->
+<div class="group relative bg-white rounded-2xl p-4 border border-slate-200/90 shadow-card hover:shadow-md hover:border-indigo-300 transition-all duration-200 cursor-pointer flex flex-col justify-between">
+<div>
+<div class="flex items-center justify-between mb-3">
+<div class="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center group-hover:scale-110 transition-transform">
+<svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24"><rect height="14" rx="2" width="20" x="2" y="5"></rect><line x1="2" x2="22" y1="10" y2="10"></line></svg>
+</div>
+<span class="text-[10px] font-bold text-slate-400 uppercase font-mono">01</span>
+</div>
+<h3 class="text-xs font-bold text-slate-900 group-hover:text-indigo-600 transition">Balance &amp; Ledger Inquiry</h3>
+<span class="inline-block mt-1 text-[10px] font-semibold text-slate-500 bg-slate-100 px-2 py-0.5 rounded-full">Settled Balances</span>
+</div>
+<!-- On Hover Descriptive Drawer / Tooltip -->
+<div class="mt-3 pt-2 border-t border-slate-100 text-[11px] text-slate-500 leading-snug group-hover:text-slate-700 transition">
+            Retrieve real-time settled balances, account statements, and recent credits &amp; debits.
+          </div>
+</div>
+<!-- Use Case 2: Daily Expense Tracking -->
+<div class="group relative bg-white rounded-2xl p-4 border border-slate-200/90 shadow-card hover:shadow-md hover:border-indigo-300 transition-all duration-200 cursor-pointer flex flex-col justify-between">
+<div>
+<div class="flex items-center justify-between mb-3">
+<div class="w-10 h-10 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center group-hover:scale-110 transition-transform">
+<svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg>
+</div>
+<span class="text-[10px] font-bold text-slate-400 uppercase font-mono">02</span>
+</div>
+<h3 class="text-xs font-bold text-slate-900 group-hover:text-indigo-600 transition">Expense Tracking &amp; AI</h3>
+<span class="inline-block mt-1 text-[10px] font-semibold text-purple-700 bg-purple-50 px-2 py-0.5 rounded-full">Analytics</span>
+</div>
+<div class="mt-3 pt-2 border-t border-slate-100 text-[11px] text-slate-500 leading-snug group-hover:text-slate-700 transition">
+            AI-driven transaction breakdown, monthly trends, and automated budget notifications.
+          </div>
+</div>
+<!-- Use Case 3: Credit Card Assistance -->
+<div class="group relative bg-white rounded-2xl p-4 border border-slate-200/90 shadow-card hover:shadow-md hover:border-indigo-300 transition-all duration-200 cursor-pointer flex flex-col justify-between">
+<div>
+<div class="flex items-center justify-between mb-3">
+<div class="w-10 h-10 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center group-hover:scale-110 transition-transform">
+<svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24"><rect height="16" rx="2" ry="2" width="22" x="1" y="4"></rect><line x1="1" x2="23" y1="10" y2="10"></line></svg>
+</div>
+<span class="text-[10px] font-bold text-slate-400 uppercase font-mono">03</span>
+</div>
+<h3 class="text-xs font-bold text-slate-900 group-hover:text-indigo-600 transition">Credit Card Dues Desk</h3>
+<span class="inline-block mt-1 text-[10px] font-semibold text-rose-700 bg-rose-50 px-2 py-0.5 rounded-full">Due Nov 18</span>
+</div>
+<div class="mt-3 pt-2 border-t border-slate-100 text-[11px] text-slate-500 leading-snug group-hover:text-slate-700 transition">
+            Review statement due dates, minimum payments, and instant payoff schedules.
+          </div>
+</div>
+<!-- Use Case 4: UPI and Payment Assistance -->
+<div class="group relative bg-white rounded-2xl p-4 border border-slate-200/90 shadow-card hover:shadow-md hover:border-indigo-300 transition-all duration-200 cursor-pointer flex flex-col justify-between">
+<div>
+<div class="flex items-center justify-between mb-3">
+<div class="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center group-hover:scale-110 transition-transform">
+<svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+</div>
+<span class="text-[10px] font-bold text-slate-400 uppercase font-mono">04</span>
+</div>
+<h3 class="text-xs font-bold text-slate-900 group-hover:text-indigo-600 transition">UPI &amp; Instant Settlement</h3>
+<span class="inline-block mt-1 text-[10px] font-semibold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full">RRN Lookup</span>
+</div>
+<div class="mt-3 pt-2 border-t border-slate-100 text-[11px] text-slate-500 leading-snug group-hover:text-slate-700 transition">
+            Track live gateway transaction settlement, RRN reference, and NPCI status.
+          </div>
+</div>
+<!-- Use Case 5: EMI and Loan Tracking -->
+<div class="group relative bg-white rounded-2xl p-4 border border-slate-200/90 shadow-card hover:shadow-md hover:border-indigo-300 transition-all duration-200 cursor-pointer flex flex-col justify-between">
+<div>
+<div class="flex items-center justify-between mb-3">
+<div class="w-10 h-10 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center group-hover:scale-110 transition-transform">
+<svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24"><path d="M3 3v18h18"></path><path d="m19 9-5 5-4-4-3 3"></path></svg>
+</div>
+<span class="text-[10px] font-bold text-slate-400 uppercase font-mono">05</span>
+</div>
+<h3 class="text-xs font-bold text-slate-900 group-hover:text-indigo-600 transition">Loan &amp; EMI Schedules</h3>
+<span class="inline-block mt-1 text-[10px] font-semibold text-amber-700 bg-amber-50 px-2 py-0.5 rounded-full">Amortization</span>
+</div>
+<div class="mt-3 pt-2 border-t border-slate-100 text-[11px] text-slate-500 leading-snug group-hover:text-slate-700 transition">
+            Track active home mortgage schedules, interest rates, and remaining principal.
+          </div>
+</div>
+<!-- Use Case 6: Personal Finance Guidance -->
+<div class="group relative bg-white rounded-2xl p-4 border border-slate-200/90 shadow-card hover:shadow-md hover:border-indigo-300 transition-all duration-200 cursor-pointer flex flex-col justify-between">
+<div>
+<div class="flex items-center justify-between mb-3">
+<div class="w-10 h-10 rounded-xl bg-cyan-50 text-cyan-600 flex items-center justify-center group-hover:scale-110 transition-transform">
+<svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><path d="m14 10-4 4M10 10l4 4"></path></svg>
+</div>
+<span class="text-[10px] font-bold text-slate-400 uppercase font-mono">06</span>
+</div>
+<h3 class="text-xs font-bold text-slate-900 group-hover:text-indigo-600 transition">Wealth Sweeps Guidance</h3>
+<span class="inline-block mt-1 text-[10px] font-semibold text-cyan-700 bg-cyan-50 px-2 py-0.5 rounded-full">Safe-to-Spend</span>
+</div>
+<div class="mt-3 pt-2 border-t border-slate-100 text-[11px] text-slate-500 leading-snug group-hover:text-slate-700 transition">
+            Algorithmic liquidity projection, safe-to-spend analysis, and high-yield sweeps.
+          </div>
+</div>
+<!-- Use Case 7: Smart Bill Reminder -->
+<div class="group relative bg-white rounded-2xl p-4 border border-slate-200/90 shadow-card hover:shadow-md hover:border-indigo-300 transition-all duration-200 cursor-pointer flex flex-col justify-between">
+<div>
+<div class="flex items-center justify-between mb-3">
+<div class="w-10 h-10 rounded-xl bg-orange-50 text-orange-600 flex items-center justify-center group-hover:scale-110 transition-transform">
+<svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
+</div>
+<span class="text-[10px] font-bold text-slate-400 uppercase font-mono">07</span>
+</div>
+<h3 class="text-xs font-bold text-slate-900 group-hover:text-indigo-600 transition">Smart Bill Reminders</h3>
+<span class="inline-block mt-1 text-[10px] font-semibold text-orange-700 bg-orange-50 px-2 py-0.5 rounded-full">3 Dues Pending</span>
+</div>
+<div class="mt-3 pt-2 border-t border-slate-100 text-[11px] text-slate-500 leading-snug group-hover:text-slate-700 transition">
+            Auto-detect upcoming utility dues, electricity, broadband, and subscriptions.
+          </div>
+</div>
+<!-- Use Case 8: Card Services -->
+<div class="group relative bg-white rounded-2xl p-4 border border-slate-200/90 shadow-card hover:shadow-md hover:border-indigo-300 transition-all duration-200 cursor-pointer flex flex-col justify-between">
+<div>
+<div class="flex items-center justify-between mb-3">
+<div class="w-10 h-10 rounded-xl bg-slate-100 text-slate-700 flex items-center justify-center group-hover:scale-110 transition-transform">
+<svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24"><rect height="11" rx="2" ry="2" width="18" x="3" y="11"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+</div>
+<span class="text-[10px] font-bold text-slate-400 uppercase font-mono">08</span>
+</div>
+<h3 class="text-xs font-bold text-slate-900 group-hover:text-indigo-600 transition">Card Freeze &amp; Re-Issue</h3>
+<span class="inline-block mt-1 text-[10px] font-semibold text-slate-700 bg-slate-100 px-2 py-0.5 rounded-full">EMV Control</span>
+</div>
+<div class="mt-3 pt-2 border-t border-slate-100 text-[11px] text-slate-500 leading-snug group-hover:text-slate-700 transition">
+            Lock cards, re-issue EMV chips, and manage international POS limits.
+          </div>
+</div>
+<!-- Use Case 9: Fraud Support & Disputes -->
+<div class="group relative bg-white rounded-2xl p-4 border border-slate-200/90 shadow-card hover:shadow-md hover:border-rose-300 transition-all duration-200 cursor-pointer flex flex-col justify-between">
+<div>
+<div class="flex items-center justify-between mb-3">
+<div class="w-10 h-10 rounded-xl bg-rose-50 text-rose-600 flex items-center justify-center group-hover:scale-110 transition-transform">
+<svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24"><polygon points="7.86 2 16.14 2 22 7.86 22 16.14 16.14 22 7.86 22 2 16.14 2 7.86 7.86 2"></polygon><line x1="12" x2="12" y1="8" y2="12"></line><line x1="12" x2="12.01" y1="16" y2="16"></line></svg>
+</div>
+<span class="text-[10px] font-bold text-rose-400 uppercase font-mono">09</span>
+</div>
+<h3 class="text-xs font-bold text-slate-900 group-hover:text-rose-600 transition">Fraud &amp; Dispute Desk</h3>
+<span class="inline-block mt-1 text-[10px] font-semibold text-rose-700 bg-rose-50 px-2 py-0.5 rounded-full">Zero Liability</span>
+</div>
+<div class="mt-3 pt-2 border-t border-slate-100 text-[11px] text-slate-500 leading-snug group-hover:text-slate-700 transition">
+            Inspect suspicious charges, initiate chargebacks, and connect to fraud specialists.
+          </div>
+</div>
+<!-- Use Case 10: Personalized Pre-Approved Offers -->
+<div class="group relative bg-white rounded-2xl p-4 border border-slate-200/90 shadow-card hover:shadow-md hover:border-indigo-300 transition-all duration-200 cursor-pointer flex flex-col justify-between">
+<div>
+<div class="flex items-center justify-between mb-3">
+<div class="w-10 h-10 rounded-xl bg-violet-50 text-violet-600 flex items-center justify-center group-hover:scale-110 transition-transform">
+<svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+</div>
+<span class="text-[10px] font-bold text-violet-400 uppercase font-mono">10</span>
+</div>
+<h3 class="text-xs font-bold text-slate-900 group-hover:text-indigo-600 transition">Pre-Approved Liquidity</h3>
+<span class="inline-block mt-1 text-[10px] font-semibold text-violet-700 bg-violet-50 px-2 py-0.5 rounded-full">$50k Instant</span>
+</div>
+<div class="mt-3 pt-2 border-t border-slate-100 text-[11px] text-slate-500 leading-snug group-hover:text-slate-700 transition">
+            Check instant pre-approved credit lines and personalized liquidity facilities.
+          </div>
+</div>
+</div>
+</section>
+<!-- END: Quick Functional Directory -->
+<!-- Recent Transactions Mini Stream matching Bank Buddy Style -->
+<section class="bg-white rounded-3xl p-6 border border-slate-200/80 shadow-card" data-purpose="recent-stream">
+<div class="flex items-center justify-between mb-4">
+<div>
+<h3 class="text-sm font-bold text-slate-900">Recent Settled Transactions</h3>
+<p class="text-xs text-slate-400">Direct debit and card authorization feeds</p>
+</div>
+<a class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-slate-700 bg-slate-100 rounded-full hover:bg-slate-200 transition" href="#view-more">
+<svg class="w-3.5 h-3.5 text-slate-500" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
+          View More Statements
+        </a>
+</div>
+<div class="divide-y divide-slate-100">
+<!-- Item 1 -->
+<div class="py-3 flex items-center justify-between hover:bg-slate-50/50 px-2 rounded-xl transition">
+<div class="flex items-center gap-3">
+<div class="w-9 h-9 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center font-bold text-xs">IK</div>
+<div>
+<span class="text-xs font-bold text-slate-900 block leading-tight">IKEA Home Furnishings</span>
+<span class="text-[10px] text-slate-400">Debit card •••• 4441</span>
+</div>
+</div>
+<div class="text-right">
+<span class="text-xs font-bold text-slate-900 block leading-tight">-$489.20</span>
+<span class="text-[10px] text-slate-400">Jan 22, 2025</span>
+</div>
+</div>
+<!-- Item 2 -->
+<div class="py-3 flex items-center justify-between hover:bg-slate-50/50 px-2 rounded-xl transition">
+<div class="flex items-center gap-3">
+<div class="w-9 h-9 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center font-bold text-xs">SL</div>
+<div>
+<span class="text-xs font-bold text-slate-900 block leading-tight">Sport Life Gym Club</span>
+<span class="text-[10px] text-slate-400">Recurring Subscription</span>
+</div>
+</div>
+<div class="text-right">
+<span class="text-xs font-bold text-slate-900 block leading-tight">-$120.00</span>
+<span class="text-[10px] text-slate-400">Jan 17, 2025</span>
+</div>
+</div>
+<!-- Item 3 -->
+<div class="py-3 flex items-center justify-between hover:bg-slate-50/50 px-2 rounded-xl transition">
+<div class="flex items-center gap-3">
+<div class="w-9 h-9 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center font-bold text-xs">CS</div>
+<div>
+<span class="text-xs font-bold text-slate-900 block leading-tight">Coursera Pro Certification</span>
+<span class="text-[10px] text-slate-400">Credit card •••• 2343</span>
+</div>
+</div>
+<div class="text-right">
+<span class="text-xs font-bold text-slate-900 block leading-tight">-$399.00</span>
+<span class="text-[10px] text-slate-400">Jan 16, 2025</span>
+</div>
+</div>
+</div>
+</section>
+</main>
+<!-- END: Main Page Content -->
+<!-- BEGIN: Minimal Footer -->
+<footer class="mt-16 border-t border-slate-200/70 bg-white/70 py-6 text-center text-xs text-slate-400">
+<div class="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-3">
+<div class="flex items-center gap-2">
+<span class="font-bold text-slate-700">Bank Buddy Private Banking</span>
+<span>•</span>
+<span>Deterministic Financial Orchestrator</span>
+</div>
+<div>
+        Security Grade Tier-1 • End-to-End Encrypted EMV Tokenization
+      </div>
+</div>
+</footer>
+<!-- END: Minimal Footer -->
+<!-- BEGIN: Floating Deterministic AI Banking Co-Pilot Widget -->
+<aside class="fixed bottom-6 right-6 z-50 flex flex-col items-end gap-3" data-purpose="floating-assistant">
+<!-- Open Preview Co-Pilot Overlay Card -->
+<div class="w-80 sm:w-96 bg-white rounded-3xl p-5 border border-slate-200 shadow-float backdrop-blur-xl relative transition-all duration-300">
+<!-- Card Header -->
+<div class="flex items-center justify-between pb-3 border-b border-slate-100">
+<div class="flex items-center gap-2.5">
+<div class="w-8 h-8 rounded-full bg-gradient-to-tr from-brand-blue to-brand-violet text-white flex items-center justify-center shadow-sm">
+<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.2" viewbox="0 0 24 24"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"></path></svg>
+</div>
+<div>
+<h4 class="text-xs font-bold text-slate-900 leading-tight">Bank Buddy Assistant</h4>
+<div class="flex items-center gap-1.5">
+<span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+<span class="text-[10px] text-slate-400 font-medium">Deterministic Core • ISO 20022</span>
+</div>
+</div>
+</div>
+<span class="text-[9px] font-bold text-indigo-700 bg-indigo-50 px-2 py-0.5 rounded-full uppercase tracking-wider">Zero Hallucination</span>
+</div>
+<!-- Assistant Insight Snippet -->
+<div class="my-3 p-3 bg-slate-50/90 rounded-2xl border border-slate-100 text-xs text-slate-700 leading-relaxed">
+<p class="font-medium">
+          Good morning, <span class="font-bold text-slate-900">Elena</span>. You have a safe spending surplus of <strong class="text-slate-900 font-bold">$90,000.00</strong> after calculating your Nov 18 Sapphire credit due ($9,500.00).
+        </p>
+</div>
+<!-- Quick Action Prompt Pills -->
+<div class="flex flex-wrap gap-1.5 mb-3">
+<button class="px-2.5 py-1 text-[11px] font-semibold text-slate-700 bg-slate-100 hover:bg-indigo-50 hover:text-indigo-600 rounded-full transition" type="button">
+          Verify Amazon $2,499
+        </button>
+<button class="px-2.5 py-1 text-[11px] font-semibold text-slate-700 bg-slate-100 hover:bg-rose-50 hover:text-rose-600 rounded-full transition" type="button">
+          Freeze Debit Card
+        </button>
+<button class="px-2.5 py-1 text-[11px] font-semibold text-slate-700 bg-slate-100 hover:bg-emerald-50 hover:text-emerald-700 rounded-full transition" type="button">
+          Pay $9,500 Card Due
+        </button>
+</div>
+<!-- Interactive Input Bar -->
+<div class="relative flex items-center">
+<input class="w-full text-xs pl-3.5 pr-10 py-2.5 bg-slate-50 border border-slate-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 text-slate-800 placeholder:text-slate-400" placeholder="Ask balances, dues, transfers, fraud..." type="text"/>
+<button aria-label="Send query" class="absolute right-1.5 p-1.5 rounded-xl bg-slate-900 text-white hover:bg-indigo-600 transition flex items-center justify-center" type="button">
+<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewbox="0 0 24 24"><line x1="22" x2="11" y1="2" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+</button>
+</div>
+</div>
+<!-- Floating Trigger Pill Button -->
+<button class="inline-flex items-center gap-2.5 px-4 py-3 bg-slate-900 hover:bg-slate-800 text-white rounded-full shadow-float border border-slate-700/50 transition-all duration-200 hover:scale-105 active:scale-95 group" type="button" onclick="window.location.href='chat.html'">
+<div class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></div>
+<span class="text-xs font-bold tracking-tight">AI Banking Co-Pilot (Swarm)</span>
+<div class="w-5 h-5 rounded-full bg-white/10 flex items-center justify-center text-indigo-300">
+<svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"></path></svg>
+</div>
+</button>
+</aside>
+<!-- END: Floating Deterministic AI Banking Co-Pilot Widget -->
+</body></html>

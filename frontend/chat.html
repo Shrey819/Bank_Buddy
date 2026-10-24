@@ -1,0 +1,448 @@
+<!-- Bank Buddy AI Chat Agent - Multi-Agent Orchestrator -->
+<!DOCTYPE html><html lang="en" style=""><head><title>Bank Buddy — Autonomous AI Swarm Orchestrator</title><meta charset="utf-8"><meta content="width=device-width, initial-scale=1.0" name="viewport"><meta content="web_dashboard" name="shell-type"><link href="https://fonts.googleapis.com" rel="preconnect"><link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"><link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&amp;display=swap" rel="stylesheet"><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"><style>@layer base{html,body{margin:0;padding:0;}body{overscroll-behavior:none;}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config={darkMode:"class",theme:{extend:{colors:{"surface-variant":"#dae2fd","on-tertiary-container":"#fffbff","secondary":"#6b38d4","background":"#faf8ff","surface-container":"#eaedff","on-error":"#ffffff","on-primary-fixed-variant":"#004395","inverse-surface":"#283044","tertiary-fixed":"#ffd9e4","surface-container-high":"#e2e7ff","on-surface":"#131b2e","secondary-container":"#8455ef","tertiary-container":"#d23284","surface-container-lowest":"#ffffff","secondary-fixed-dim":"#d0bcff","on-background":"#131b2e","surface-tint":"#005ac2","on-secondary-fixed-variant":"#5516be","tertiary":"#b10e6b","on-surface-variant":"#424754","on-primary-container":"#fefcff","on-secondary-fixed":"#23005c","on-tertiary-fixed-variant":"#8c0053","inverse-primary":"#adc6ff","on-error-container":"#93000a","on-secondary-container":"#fffbff","outline-variant":"#c2c6d6","on-primary-fixed":"#001a42","on-secondary":"#ffffff","error":"#ba1a1a","tertiary-fixed-dim":"#ffb0cd","inverse-on-surface":"#eef0ff","primary":"#0058be","on-primary":"#ffffff","surface-bright":"#faf8ff","surface-container-highest":"#dae2fd","on-tertiary-fixed":"#3e0022","surface-container-low":"#f2f3ff","primary-fixed-dim":"#adc6ff","outline":"#727785","primary-container":"#2170e4","on-tertiary":"#ffffff","surface-dim":"#d2d9f4","surface":"#faf8ff","secondary-fixed":"#e9ddff","error-container":"#ffdad6","primary-fixed":"#d8e2ff"},borderRadius:{DEFAULT:"1rem",lg:"2rem",xl:"3rem",full:"9999px"},spacing:{"margin-mobile":"1rem",margin:"2rem","space-xs":"0.375rem","space-md":"1rem",gutter:"1.5rem","space-xl":"2.25rem","space-sm":"0.75rem","space-lg":"1.5rem","gutter-mobile":"1rem"},fontFamily:{"label-sm":["Plus Jakarta Sans"],"headline-md":["Plus Jakarta Sans"],"headline-lg":["Plus Jakarta Sans"],"display-lg-mobile":["Plus Jakarta Sans"],"headline-xl":["Plus Jakarta Sans"],"body-lg":["Plus Jakarta Sans"],"label-md":["Plus Jakarta Sans"],"display-lg":["Plus Jakarta Sans"],"body-md":["Plus Jakarta Sans"],"body-sm":["Plus Jakarta Sans"]},fontSize:{"label-sm":["11px",{lineHeight:"14px",letterSpacing:"0.03em",fontWeight:"600"}],"headline-md":["18px",{lineHeight:"26px",letterSpacing:"-0.01em",fontWeight:"600"}],"headline-lg":["22px",{lineHeight:"30px",letterSpacing:"-0.015em",fontWeight:"600"}],"display-lg-mobile":["32px",{lineHeight:"38px",letterSpacing:"-0.02em",fontWeight:"700"}],"headline-xl":["28px",{lineHeight:"36px",letterSpacing:"-0.02em",fontWeight:"700"}],"body-lg":["16px",{lineHeight:"24px",letterSpacing:"-0.005em",fontWeight:"500"}],"label-md":["12px",{lineHeight:"16px",letterSpacing:"0.02em",fontWeight:"600"}],"display-lg":["40px",{lineHeight:"48px",letterSpacing:"-0.03em",fontWeight:"700"}],"body-md":["14px",{lineHeight:"20px",letterSpacing:"0em",fontWeight:"400"}],"body-sm":["13px",{lineHeight:"18px",letterSpacing:"0em",fontWeight:"400"}]}}}}</script></head><body class="bg-background font-body-md text-on-surface antialiased"><header class="fixed top-0 left-0 right-0 h-16 z-50 bg-surface/90 backdrop-blur-xl border-b border-surface-container-high/60 shadow-[0_1px_8px_rgba(0,0,0,0.03)] flex items-center justify-between px-6">
+  <!-- Brand Group with Bank Buddy Trust Shield -->
+  <div class="flex items-center gap-3">
+    <a href="desktop.html" class="flex items-center gap-3 group">
+      <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-[#002244] via-[#003366] to-[#0284c7] flex items-center justify-center shadow-md shadow-blue-900/20 group-hover:scale-105 transition-transform duration-200">
+        <svg width="24" height="24" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M18 3L5 8.5V17C5 25.5 10.7 33.3 18 35C25.3 33.3 31 25.5 31 17V8.5L18 3Z" fill="#003366"/>
+          <path d="M18 5L7 9.5V17C7 24.3 11.9 31.2 18 32.8C24.1 31.2 29 24.3 29 17V9.5L18 5Z" stroke="#38bdf8" stroke-width="1.2" fill="none"/>
+          <path d="M13 18L16.5 21.5L23.5 14.5" stroke="#fbbf24" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+          <circle cx="18" cy="10" r="1.5" fill="#38bdf8"/>
+        </svg>
+      </div>
+      <div class="flex flex-col">
+        <span class="text-xl font-extrabold tracking-tight text-on-surface leading-none">Bank <span class="text-primary font-extrabold">Buddy</span></span>
+        <span class="font-label-sm text-[10px] text-on-surface-variant tracking-wider uppercase font-bold mt-0.5">Autonomous Wealth Swarm</span>
+      </div>
+    </a>
+  </div>
+
+  <!-- Center Navigation / State Badge -->
+  <div class="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-full bg-surface-container-low border border-surface-container-high">
+    <a href="desktop.html" class="px-3.5 py-1.5 rounded-full text-body-sm font-semibold text-on-surface-variant hover:text-on-surface transition">
+      Desktop Banking
+    </a>
+    <span class="px-3.5 py-1.5 rounded-full bg-primary text-on-primary text-body-sm font-bold shadow-sm flex items-center gap-1.5">
+      <span class="w-2 h-2 rounded-full bg-white animate-pulse"></span>
+      AI Chat Agent
+    </span>
+    <a href="index.html" class="px-3.5 py-1.5 rounded-full text-body-sm font-semibold text-on-surface-variant hover:text-on-surface transition">
+      Net Banking Login
+    </a>
+  </div>
+
+  <!-- Right Profile & Security Indicator -->
+  <div class="flex items-center gap-4">
+    <div class="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-xl bg-emerald-50 text-emerald-800 border border-emerald-200 font-label-sm text-[11px] font-bold">
+      <span class="material-symbols-outlined text-[16px] text-emerald-600">verified</span>
+      ISO-20022 Verified
+    </div>
+    <div class="flex items-center gap-3">
+      <div class="w-9 h-9 rounded-full bg-primary/10 text-primary font-bold text-sm flex items-center justify-center border border-primary/20">
+        ER
+      </div>
+      <div class="hidden lg:flex flex-col text-left">
+        <span class="font-label-md text-label-md text-on-surface font-bold leading-tight">Elena Rostova</span>
+        <span class="font-label-sm text-[10px] text-on-surface-variant">CRN: 98234105</span>
+      </div>
+      <a href="index.html" class="p-2 text-on-surface-variant hover:text-error rounded-xl hover:bg-surface-container transition" title="Logout &amp; Return to Login">
+        <span class="material-symbols-outlined text-[20px]">logout</span>
+      </a>
+    </div>
+  </div>
+</header><aside class="fixed left-0 top-16 bottom-0 w-60 bg-surface-container-lowest/80 backdrop-blur-xl border-r border-surface-container-high/60 z-40 flex flex-col justify-between py-6"><div class="px-4 flex flex-col gap-6"><div class="px-3"><span class="font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant/80 font-bold">Wealth Workspace</span></div><nav class="flex flex-col gap-1" data-active-classes="bg-surface-container text-primary font-bold rounded-xl">
+<a class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-body-sm text-body-sm text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-all" href="desktop.html"><span class="material-symbols-outlined text-[19px]">account_balance</span>Overview</a>
+<a class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-body-sm text-body-sm text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-all" href="desktop.html#transactions"><span class="material-symbols-outlined text-[19px]">receipt_long</span>Transactions</a>
+<a class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-body-sm text-body-sm text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-all" href="desktop.html#cards"><span class="material-symbols-outlined text-[19px]">credit_card</span>Cards &amp; Limits</a>
+<a class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-body-sm text-body-sm text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-all" href="desktop.html#analytics"><span class="material-symbols-outlined text-[19px]">insights</span>Analytics</a>
+<a aria-current="page" class="flex items-center justify-between px-3.5 py-2.5 transition-all bg-surface-container text-primary font-bold rounded-xl" href="chat.html"><div class="flex items-center gap-3"><span class="material-symbols-outlined text-[19px]">forum</span>Chat Agent</div><span class="px-1.5 py-0.5 rounded-full bg-secondary text-on-secondary font-label-sm text-[10px]">Swarm</span></a>
+<a class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-body-sm text-body-sm text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-all" href="index.html"><span class="material-symbols-outlined text-[19px]">logout</span>Net Banking Login</a>
+</nav></div><div class="px-4"><div class="p-3.5 rounded-xl bg-surface-container-low border border-surface-container-high flex items-center justify-between"><div class="flex flex-col"><span class="font-label-sm text-label-sm text-on-surface-variant uppercase">Vault State</span><span class="font-label-md text-label-md text-primary font-semibold">Autonomous: On</span></div><span class="w-2.5 h-2.5 rounded-full bg-primary animate-pulse"></span></div></div></aside><div class="pl-60"><main class="relative pt-16 min-h-screen bg-background w-full px-8 pb-12"><div class="flex flex-col w-full">
+<!-- Top Workspace Context Canvas (Two-Panel Conversational Flow) -->
+<div class="w-full gap-8 items-start flex flex-col">
+<!-- LEFT PANEL: Conversation History & Swarm Agent Live Telemetry (xl:col-span-3) -->
+
+<!-- RIGHT/MAIN PANEL: ChatGPT Style Conversational Workspace (xl:col-span-9) -->
+<div class="flex flex-col gap-6 w-full">
+<!-- Conversation Context Control Header -->
+<div class="bg-surface-container-lowest p-4 rounded-2xl border border-surface-container-high/60 shadow-sm flex items-center justify-between flex-wrap gap-4">
+  <div class="flex items-center gap-3">
+    <div class="w-10 h-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center">
+      <span class="material-symbols-outlined text-[24px]">account_balance_wallet</span>
+    </div>
+    <div class="flex flex-col">
+      <div class="flex items-center gap-2">
+        <h2 class="font-headline-md text-headline-md text-on-surface font-bold">Autonomous Private Vault Session</h2>
+        <span class="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 font-label-sm text-[11px] font-bold flex items-center gap-1">
+          <span class="w-1.5 h-1.5 rounded-full bg-emerald-600 animate-pulse"></span> Live Swarm
+        </span>
+      </div>
+      <span class="font-body-sm text-body-sm text-on-surface-variant">Account: Vault Checking (*9802) &bull; Primary CRN: 98234105 &bull; Certified Deterministic Execution</span>
+    </div>
+  </div>
+  <div class="flex items-center gap-2">
+    <a href="desktop.html" class="px-3.5 py-2 rounded-xl bg-surface-container text-on-surface font-label-md text-body-sm hover:bg-surface-container-high transition flex items-center gap-1.5">
+      <span class="material-symbols-outlined text-[18px]">dashboard</span> View Desktop
+    </a>
+    <button type="button" onclick="window.print()" class="px-3.5 py-2 rounded-xl bg-surface-container text-on-surface font-label-md text-body-sm hover:bg-surface-container-high transition flex items-center gap-1.5">
+      <span class="material-symbols-outlined text-[18px]">download</span> Export Audit Log
+    </button>
+  </div>
+</div>
+
+<!-- Agent Dispatcher Ribbon (Horizontal interactive nodes) -->
+<div class="flex items-center gap-3 overflow-x-auto pb-1 scrollbar-none">
+  <!-- Node 1: Master Dispatcher -->
+  <div class="flex items-center gap-2.5 px-3.5 py-2 rounded-xl bg-surface-container-lowest border border-primary/30 shadow-sm shrink-0">
+    <div class="w-7 h-7 rounded-lg bg-primary text-on-primary flex items-center justify-center">
+      <span class="material-symbols-outlined text-[16px]">hub</span>
+    </div>
+    <div class="flex flex-col">
+      <span class="font-label-sm text-label-sm font-bold text-on-surface">Master Dispatcher</span>
+      <span class="font-label-sm text-[10px] text-primary font-semibold">Active &bull; 0.08s</span>
+    </div>
+  </div>
+
+  <!-- Node 2: Card Agent -->
+  <div class="flex items-center gap-2.5 px-3.5 py-2 rounded-xl bg-surface-container-lowest border border-surface-container-high shadow-sm shrink-0">
+    <div class="w-7 h-7 rounded-lg bg-secondary text-on-secondary flex items-center justify-center">
+      <span class="material-symbols-outlined text-[16px]">credit_card</span>
+    </div>
+    <div class="flex flex-col">
+      <span class="font-label-sm text-label-sm font-bold text-on-surface">Card Guard Agent</span>
+      <span class="font-label-sm text-[10px] text-secondary font-semibold">Standby &bull; Active</span>
+    </div>
+  </div>
+
+  <!-- Node 3: Payments Router -->
+  <div class="flex items-center gap-2.5 px-3.5 py-2 rounded-xl bg-surface-container-lowest border border-surface-container-high shadow-sm shrink-0">
+    <div class="w-7 h-7 rounded-lg bg-emerald-600 text-white flex items-center justify-center">
+      <span class="material-symbols-outlined text-[16px]">swap_horiz</span>
+    </div>
+    <div class="flex flex-col">
+      <span class="font-label-sm text-label-sm font-bold text-on-surface">Payment Router</span>
+      <span class="font-label-sm text-[10px] text-emerald-600 font-semibold">ISO-20022 Ready</span>
+    </div>
+  </div>
+
+  <!-- Node 4: Fraud Detection -->
+  <div class="flex items-center gap-2.5 px-3.5 py-2 rounded-xl bg-surface-container-lowest border border-surface-container-high shadow-sm shrink-0">
+    <div class="w-7 h-7 rounded-lg bg-amber-500 text-white flex items-center justify-center">
+      <span class="material-symbols-outlined text-[16px]">security</span>
+    </div>
+    <div class="flex flex-col">
+      <span class="font-label-sm text-label-sm font-bold text-on-surface">Fraud Sentinel</span>
+      <span class="font-label-sm text-[10px] text-amber-600 font-semibold">Zero Tolerance</span>
+    </div>
+  </div>
+
+  <!-- Node 5: Wealth Engine -->
+  <div class="flex items-center gap-2.5 px-3.5 py-2 rounded-xl bg-surface-container-lowest border border-surface-container-high shadow-sm shrink-0">
+    <div class="w-7 h-7 rounded-lg bg-indigo-600 text-white flex items-center justify-center">
+      <span class="material-symbols-outlined text-[16px]">trending_up</span>
+    </div>
+    <div class="flex flex-col">
+      <span class="font-label-sm text-label-sm font-bold text-on-surface">Wealth Forecaster</span>
+      <span class="font-label-sm text-[10px] text-indigo-600 font-semibold">Yield Optimized</span>
+    </div>
+  </div>
+</div>
+
+<!-- Main Conversational Feed -->
+<div class="flex flex-col gap-6 w-full" id="chat-thread">
+<!-- TURN 1: USER MESSAGE -->
+<div class="flex items-start justify-end gap-3 pl-8">
+  <div class="flex flex-col items-end gap-1.5 max-w-2xl">
+    <div class="px-5 py-3.5 rounded-2xl rounded-tr-sm bg-on-surface text-surface-container-lowest shadow-sm font-body-md text-body-md leading-relaxed">
+      Good morning Bank Buddy. Can you analyze my safe-to-spend surplus for this month and check if my Vault Debit card has contactless transactions enabled?
+    </div>
+    <span class="font-label-sm text-label-sm text-on-surface-variant pr-1">Today 10:14 AM</span>
+  </div>
+  <div class="w-9 h-9 rounded-full bg-primary/10 text-primary font-bold text-sm flex items-center justify-center shrink-0 border border-primary/20">
+    ER
+  </div>
+</div>
+
+<!-- TURN 1: ASSISTANT MULTI-AGENT RESPONSE -->
+<div class="flex items-start gap-3.5 pr-4">
+  <div class="w-9 h-9 rounded-xl bg-primary flex items-center justify-center shrink-0 text-on-primary shadow-sm">
+    <span class="material-symbols-outlined text-[20px]">smart_toy</span>
+  </div>
+  <div class="flex flex-col gap-3 max-w-4xl w-full">
+    <div class="flex items-center gap-2 flex-wrap">
+      <span class="px-2.5 py-1 rounded-full bg-surface-container-high text-on-surface font-label-sm text-label-sm font-semibold flex items-center gap-1.5">
+        <span class="material-symbols-outlined text-[14px] text-primary">verified</span> Dispatched by: Master Orchestrator + Card Agent
+      </span>
+      <span class="font-label-sm text-label-sm text-on-surface-variant">Telemetry Latency: 94ms &bull; Zero Hallucination Mode</span>
+    </div>
+    <div class="bg-surface-container-lowest p-6 rounded-2xl shadow-sm border border-surface-container-high/60 flex flex-col gap-4">
+      <p class="font-body-md text-body-md text-on-surface leading-relaxed">
+        Good morning, <strong>Elena</strong>! I've queried your live ledger balances and card parameters:
+      </p>
+
+      <!-- Account Summary Matrix -->
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+        <div class="p-3.5 rounded-xl bg-surface-container-low border border-surface-container-high flex flex-col">
+          <span class="font-label-sm text-label-sm text-on-surface-variant uppercase">Liquid Vault Checking</span>
+          <span class="font-headline-md text-headline-md text-on-surface font-bold mt-1">$99,500.00</span>
+          <span class="font-label-sm text-[10px] text-emerald-600 font-semibold mt-0.5">&bull; Instant Access</span>
+        </div>
+        <div class="p-3.5 rounded-xl bg-surface-container-low border border-surface-container-high flex flex-col">
+          <span class="font-label-sm text-label-sm text-on-surface-variant uppercase">Sapphire Credit Due (Nov 18)</span>
+          <span class="font-headline-md text-headline-md text-error font-bold mt-1">-$9,500.00</span>
+          <span class="font-label-sm text-[10px] text-on-surface-variant font-semibold mt-0.5">&bull; Auto-pay Scheduled</span>
+        </div>
+        <div class="p-3.5 rounded-xl bg-primary/5 border border-primary/20 flex flex-col">
+          <span class="font-label-sm text-label-sm text-primary uppercase font-bold">Safe Spending Surplus</span>
+          <span class="font-headline-md text-headline-md text-primary font-extrabold mt-1">$90,000.00</span>
+          <span class="font-label-sm text-[10px] text-primary font-semibold mt-0.5">&bull; 100% Risk Free</span>
+        </div>
+      </div>
+
+      <!-- Card Status Snippet -->
+      <div class="p-3.5 rounded-xl bg-surface-container-low border border-surface-container-high flex items-center justify-between">
+        <div class="flex items-center gap-3">
+          <span class="material-symbols-outlined text-[22px] text-primary">contactless</span>
+          <div class="flex flex-col">
+            <span class="font-label-md text-label-md text-on-surface font-semibold">Vault Debit (*4441) Contactless NFC</span>
+            <span class="font-label-sm text-label-sm text-on-surface-variant">Configured limit: $500.00/tx &bull; Daily cap: $2,500.00</span>
+          </div>
+        </div>
+        <span class="px-2.5 py-1 rounded-full bg-emerald-100 text-emerald-800 font-label-sm text-label-sm font-bold flex items-center gap-1">
+          <span class="w-1.5 h-1.5 rounded-full bg-emerald-600"></span> ACTIVE
+        </span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- TURN 2: USER MESSAGE -->
+<div class="flex items-start justify-end gap-3 pl-8">
+  <div class="flex flex-col items-end gap-1.5 max-w-2xl">
+    <div class="px-5 py-3.5 rounded-2xl rounded-tr-sm bg-on-surface text-surface-container-lowest shadow-sm font-body-md text-body-md leading-relaxed">
+      Please temporarily freeze my Vault Debit card (*4441) now for security precaution.
+    </div>
+    <span class="font-label-sm text-label-sm text-on-surface-variant pr-1">Today 10:15 AM</span>
+  </div>
+  <div class="w-9 h-9 rounded-full bg-primary/10 text-primary font-bold text-sm flex items-center justify-center shrink-0 border border-primary/20">
+    ER
+  </div>
+</div>
+
+<!-- TURN 2: ASSISTANT MULTI-AGENT EXECUTION (Card Agent + Payments Agent + Fraud Detection) -->
+<div class="flex items-start gap-3.5 pr-4">
+  <div class="w-9 h-9 rounded-xl bg-secondary flex items-center justify-center shrink-0 text-on-secondary shadow-sm">
+    <span class="material-symbols-outlined text-[20px]">credit_card</span>
+  </div>
+  <div class="flex flex-col gap-3 max-w-4xl w-full">
+    <div class="flex items-center gap-2 flex-wrap">
+      <span class="px-2.5 py-1 rounded-full bg-secondary/15 text-secondary font-label-sm text-label-sm font-bold flex items-center gap-1.5">
+        <span class="material-symbols-outlined text-[14px]">lock</span> Executed by: Card Guard Agent &bull; Verified
+      </span>
+      <span class="font-label-sm text-label-sm text-on-surface-variant">Core Execution: 42ms &bull; Hardware Token Locked</span>
+    </div>
+
+    <!-- Interactive Card Freeze Control Card (Matched to JS ids) -->
+    <div class="bg-surface-container-lowest p-6 rounded-2xl shadow-sm border border-surface-container-high/60 flex flex-col gap-4">
+      <div class="flex items-center justify-between pb-3 border-b border-surface-container-high/60">
+        <div class="flex items-center gap-3">
+          <div class="w-12 h-8 rounded-md bg-gradient-to-r from-slate-900 to-slate-700 text-white flex items-center justify-center text-[11px] font-mono font-bold tracking-wider shadow-inner">
+            4441
+          </div>
+          <div class="flex flex-col">
+            <span class="font-label-md text-label-md text-on-surface font-bold">Bank Buddy Vault Debit</span>
+            <span class="font-label-sm text-label-sm text-on-surface-variant">Primary Plastic &bull; Cardholder: Elena Rostova</span>
+          </div>
+        </div>
+        <!-- Card Status Badge target for JS: card-status-badge -->
+        <span id="card-status-badge" class="px-3 py-1 rounded-full bg-error/10 text-error font-label-sm text-label-sm font-bold flex items-center gap-1">
+          <span class="w-2 h-2 rounded-full bg-error"></span> FROZEN / LOCKED
+        </span>
+      </div>
+
+      <div class="flex items-center justify-between p-4 rounded-xl bg-surface-container-low border border-surface-container-high">
+        <div class="flex flex-col">
+          <span class="font-label-md text-label-md text-on-surface font-bold">Interactive Card Freeze Switch</span>
+          <!-- Card State Text target for JS: card-state-text -->
+          <span id="card-state-text" class="font-label-sm text-label-sm text-error font-medium">Card Active State: OFF (Locked for transactions)</span>
+        </div>
+        <!-- Toggle Button target for JS: card-toggle-btn & card-toggle-thumb -->
+        <button id="card-toggle-btn" class="w-14 h-8 rounded-full bg-surface-container-high transition-colors relative flex items-center px-1 focus:outline-none" type="button" aria-label="Toggle card freeze status">
+          <div id="card-toggle-thumb" class="w-6 h-6 rounded-full bg-outline-variant shadow-sm transition-transform translate-x-0"></div>
+        </button>
+      </div>
+
+      <div class="p-3.5 rounded-xl bg-amber-500/10 border border-amber-500/20 text-on-surface font-body-sm text-body-sm flex items-start gap-2.5">
+        <span class="material-symbols-outlined text-[18px] text-amber-600 mt-0.5">shield</span>
+        <div>
+          <strong class="text-amber-800">Security Safeguard Active:</strong>
+          All POS, ATM withdrawals, and contactless tap-and-go transactions on this card are immediately rejected with code <code class="font-mono text-xs bg-amber-100 px-1 py-0.5 rounded">BB-CARD-LOCKED</code>. Recurring subscriptions will be held in pending escrow. Click the switch above anytime to instantly unlock.
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+<!-- Quick Action Prompt Suggestion Pills -->
+<div class="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none pt-2">
+<button class="prompt-chip px-3.5 py-2 rounded-full bg-surface-container-lowest hover:bg-surface-container-high text-on-surface font-label-md text-body-sm transition-all shadow-sm shrink-0 flex items-center gap-1.5" type="button">
+<span class="">💳</span> Turn ON contactless limits on debit card
+        </button>
+<button class="prompt-chip px-3.5 py-2 rounded-full bg-surface-container-lowest hover:bg-surface-container-high text-on-surface font-label-md text-body-sm transition-all shadow-sm shrink-0 flex items-center gap-1.5" type="button">
+<span class="">📊</span> What is my next Home Mortgage EMI amount?
+        </button>
+<button class="prompt-chip px-3.5 py-2 rounded-full bg-surface-container-lowest hover:bg-surface-container-high text-on-surface font-label-md text-body-sm transition-all shadow-sm shrink-0 flex items-center gap-1.5" type="button">
+<span class="">🛡️</span> I don't recognize an international charge
+        </button>
+<button class="prompt-chip px-3.5 py-2 rounded-full bg-surface-container-lowest hover:bg-surface-container-high text-on-surface font-label-md text-body-sm transition-all shadow-sm shrink-0 flex items-center gap-1.5" type="button">
+<span class="">📈</span> Project my compound interest for 6 months
+        </button>
+<button class="prompt-chip px-3.5 py-2 rounded-full bg-surface-container-lowest hover:bg-surface-container-high text-on-surface font-label-md text-body-sm transition-all shadow-sm shrink-0 flex items-center gap-1.5" type="button">
+<span class="">👨‍💼</span> Connect to Customer Care Specialist
+        </button>
+</div>
+<!-- Floating Bottom ChatGPT Prompt Box -->
+<div class="bg-surface-container-lowest p-3 rounded-2xl shadow-md flex flex-col gap-2 relative border border-surface-container-high/60">
+<div class="flex items-center gap-3">
+<button aria-label="Attach documents or statements" class="p-2.5 rounded-xl text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high transition-all" title="Attach Bank Statement or Receipt" type="button">
+<span class="material-symbols-outlined text-[20px]">attach_file</span>
+</button>
+<input class="w-full bg-transparent text-on-surface placeholder:text-on-surface-variant/70 font-body-md text-body-md focus:outline-none py-2" id="chat-input" placeholder="Ask about expenses, loans, card controls, investments, or type command..." type="text">
+<div class="flex items-center gap-2 shrink-0 pr-1">
+<button aria-label="Voice input" class="p-2.5 rounded-xl text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high transition-all" title="Speak to Bank Buddy Swarm" type="button">
+<span class="material-symbols-outlined text-[20px]">mic</span>
+</button>
+<button aria-label="Send query" class="w-10 h-10 rounded-xl bg-primary hover:bg-primary-container text-on-primary flex items-center justify-center transition-all shadow-sm" id="send-btn" type="button">
+<span class="material-symbols-outlined text-[19px]">arrow_upward</span>
+</button>
+</div>
+</div>
+<div class="flex items-center justify-between px-2 pt-1 font-label-sm text-label-sm text-on-surface-variant">
+<span class="flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px] text-primary">verified_user</span> ISO-20022 Financial Gateway Encrypted
+          </span>
+<span class="">Bank Buddy Swarm v4.2 • Autonomous Wealth Ops</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+<script>
+  (function() {
+    // Card Toggle state handling
+    const cardToggleBtn = document.getElementById('card-toggle-btn');
+    const cardToggleThumb = document.getElementById('card-toggle-thumb');
+    const cardStatusBadge = document.getElementById('card-status-badge');
+    const cardStateText = document.getElementById('card-state-text');
+    let isLocked = true;
+
+    if (cardToggleBtn) {
+      cardToggleBtn.addEventListener('click', function() {
+        isLocked = !isLocked;
+        if (isLocked) {
+          // Locked State
+          cardToggleBtn.classList.remove('bg-primary');
+          cardToggleBtn.classList.add('bg-surface-container-high');
+          cardToggleThumb.classList.remove('translate-x-6', 'bg-on-primary');
+          cardToggleThumb.classList.add('translate-x-0', 'bg-outline-variant');
+          cardStatusBadge.className = 'px-3 py-1 rounded-full bg-error/10 text-error font-label-sm text-label-sm font-bold flex items-center gap-1';
+          cardStatusBadge.innerHTML = '<span class="w-2 h-2 rounded-full bg-error"></span> FROZEN / LOCKED';
+          cardStateText.className = 'font-label-sm text-label-sm text-error font-medium';
+          cardStateText.innerText = 'Card Active State: OFF (Locked for transactions)';
+        } else {
+          // Active State
+          cardToggleBtn.classList.remove('bg-surface-container-high');
+          cardToggleBtn.classList.add('bg-primary');
+          cardToggleThumb.classList.remove('translate-x-0', 'bg-outline-variant');
+          cardToggleThumb.classList.add('translate-x-6', 'bg-surface-container-lowest');
+          cardStatusBadge.className = 'px-3 py-1 rounded-full bg-primary/10 text-primary font-label-sm text-label-sm font-bold flex items-center gap-1';
+          cardStatusBadge.innerHTML = '<span class="w-2 h-2 rounded-full bg-primary animate-pulse"></span> ACTIVE & UNRESTRICTED';
+          cardStateText.className = 'font-label-sm text-label-sm text-primary font-medium';
+          cardStateText.innerText = 'Card Active State: ON (Instant authorization enabled)';
+        }
+      });
+    }
+
+    // Prompt Chips click to fill input
+    const chatInput = document.getElementById('chat-input');
+    const promptChips = document.querySelectorAll('.prompt-chip');
+    promptChips.forEach(chip => {
+      chip.addEventListener('click', () => {
+        const text = chip.innerText.replace(/^[^\w]+/, '').trim();
+        if (chatInput) {
+          chatInput.value = text;
+          chatInput.focus();
+        }
+      });
+    });
+
+    // Send mock interaction
+    const sendBtn = document.getElementById('send-btn');
+    const chatThread = document.getElementById('chat-thread');
+
+    function handleSend() {
+      if (!chatInput || !chatInput.value.trim() || !chatThread) return;
+      const userText = chatInput.value.trim();
+      chatInput.value = '';
+
+      // Append user turn
+      const userTurn = document.createElement('div');
+      userTurn.className = 'flex items-start justify-end gap-3 pl-8';
+      userTurn.innerHTML = `
+        <div class="flex flex-col items-end gap-1.5 max-w-2xl">
+          <div class="px-5 py-3.5 rounded-2xl rounded-tr-sm bg-on-surface text-surface-container-lowest shadow-sm font-body-md text-body-md leading-relaxed">
+            ${userText}
+          </div>
+          <span class="font-label-sm text-label-sm text-on-surface-variant pr-1">Just now</span>
+        </div>
+        <div class="w-8 h-8 rounded-full bg-surface-container-high flex items-center justify-center shrink-0 text-on-surface font-headline-md text-label-md font-bold">
+          ER
+        </div>
+      `;
+      chatThread.appendChild(userTurn);
+
+      // Simulate Swarm Agent Response
+      setTimeout(() => {
+        const aiTurn = document.createElement('div');
+        aiTurn.className = 'flex items-start gap-3.5 pr-4';
+        aiTurn.innerHTML = `
+          <div class="w-9 h-9 rounded-xl bg-primary flex items-center justify-center shrink-0 text-on-primary shadow-sm">
+            <span class="material-symbols-outlined text-[20px]">smart_toy</span>
+          </div>
+          <div class="flex flex-col gap-3 max-w-4xl w-full">
+            <div class="flex items-center gap-2 flex-wrap">
+              <span class="px-2.5 py-1 rounded-full bg-surface-container-high text-on-surface-variant font-label-sm text-label-sm font-semibold flex items-center gap-1.5">
+                <span class="material-symbols-outlined text-[14px] text-primary">verified</span> Handled by: Multi-Agent Dispatcher
+              </span>
+              <span class="font-label-sm text-label-sm text-on-surface-variant">Latency: 110ms</span>
+            </div>
+            <div class="bg-surface-container-lowest p-5 rounded-2xl shadow-sm flex flex-col gap-3">
+              <p class="font-body-md text-body-md text-on-surface">
+                I have processed your query: "<em>${userText}</em>". Relevant ledger records have been indexed and telemetry has confirmed standard operating thresholds across all active accounts.
+              </p>
+              <div class="p-3 rounded-xl bg-surface-container-low flex items-center justify-between">
+                <span class="font-label-sm text-label-sm text-on-surface-variant">Autonomous Check: Complete</span>
+                <span class="font-label-sm text-label-sm text-primary font-bold">Safe State Confirmed</span>
+              </div>
+            </div>
+          </div>
+        `;
+        chatThread.appendChild(aiTurn);
+      }, 700);
+    }
+
+    if (sendBtn) {
+      sendBtn.addEventListener('click', handleSend);
+    }
+    if (chatInput) {
+      chatInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') handleSend();
+      });
+    }
+  })();
+</script></main></div>
+
+</body></html>
+
