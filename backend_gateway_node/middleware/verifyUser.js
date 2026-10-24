@@ -1,5 +1,6 @@
 const database = require("../models");
 const User = database.user;
+const Sequelize = database.Sequelize;
 
 // OWASP Input Validation Middleware for Registration
 const validateSignup = (req, res, next) => {
@@ -54,15 +55,26 @@ const validateSignup = (req, res, next) => {
 
 const checkExistingUsername = async (req, res, next) => {
   try {
+    const cleanUsername = (req.body.username || "").toString().trim();
+    const cleanEmail = (req.body.email || "").toString().trim();
+
+    // Case-insensitive search in PostgreSQL
     const user = await User.findOne({
-      where: {
-        username: req.body.username
-      }
+      where: Sequelize.where(
+        Sequelize.fn('lower', Sequelize.col('username')),
+        cleanUsername.toLowerCase()
+      )
     });
 
     if (user) {
+      // If the email also matches, allow updating the user's password in database
+      if (user.email && user.email.toLowerCase() === cleanEmail.toLowerCase()) {
+        req.isUserUpdate = true;
+        req.existingUserId = user.id;
+        return next();
+      }
       return res.status(400).send({
-        message: "Username already used!"
+        message: "Username already used! Please choose a different username."
       });
     }
 
@@ -76,10 +88,18 @@ const checkExistingUsername = async (req, res, next) => {
 
 const checkExistingEmail = async (req, res, next) => {
   try {
+    if (req.isUserUpdate) {
+      return next();
+    }
+
+    const cleanEmail = (req.body.email || "").toString().trim();
+
+    // Case-insensitive search in PostgreSQL
     const user = await User.findOne({
-      where: {
-        email: req.body.email
-      }
+      where: Sequelize.where(
+        Sequelize.fn('lower', Sequelize.col('email')),
+        cleanEmail.toLowerCase()
+      )
     });
 
     if (user) {

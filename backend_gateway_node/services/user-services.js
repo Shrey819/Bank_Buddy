@@ -3,6 +3,7 @@ const configuration = require("../config/config-jwt.js");
 const jwtAuth = require("../middleware/jwtAuth.js");
 const User = database.user;
 const Op = database.Sequelize.Op;
+const Sequelize = database.Sequelize;
 
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcryptjs");
@@ -85,7 +86,7 @@ exports.seedDefaultUser = async () => {
 };
 
 // ==========================================
-// User Signup
+// User Signup / Creation in Database
 // ==========================================
 exports.signup = async (req, res) => {
   try {
@@ -97,35 +98,68 @@ exports.signup = async (req, res) => {
       });
     }
 
-    // Auto-generate CRN and Card Number if not provided
-    const randomCrn = crn || Math.floor(10000000 + Math.random() * 90000000).toString();
-    const randomCard = cardNumber || Math.floor(1000 + Math.random() * 9000).toString();
-
-    // Secure password hashing with 10 salt rounds (OWASP compliant)
+    const cleanUsername = username.toString().trim();
+    const cleanEmail = email.toString().trim().toLowerCase();
     const hashedPassword = bcrypt.hashSync(password, BCRYPT_SALT_ROUNDS);
 
-    const newUser = await User.create({
-      name: name || username,
-      username: username.trim(),
-      email: email.trim(),
-      password: hashedPassword,
-      crn: randomCrn,
-      cardNumber: randomCard,
-      phone: phone || "+91 9876543210",
-      role: "Private Wealth Client",
-      kycStatus: "VERIFIED",
-      otpSecret: "123456"
-    });
+    let targetUser = null;
+
+    // If existing user update was detected in verifyUser middleware
+    if (req.isUserUpdate && req.existingUserId) {
+      targetUser = await User.findByPk(req.existingUserId);
+      if (targetUser) {
+        targetUser.password = hashedPassword;
+        if (name) targetUser.name = name.toString().trim();
+        if (phone) targetUser.phone = phone.toString().trim();
+        await targetUser.save();
+        console.log(`Updated user ${targetUser.username} in database (ID: ${targetUser.id})`);
+      }
+    }
+
+    // Otherwise create brand new user
+    if (!targetUser) {
+      const randomCrn = crn || Math.floor(10000000 + Math.random() * 90000000).toString();
+      const randomCard = cardNumber || Math.floor(1000 + Math.random() * 9000).toString();
+
+      targetUser = await User.create({
+        name: name ? name.toString().trim() : cleanUsername,
+        username: cleanUsername,
+        email: cleanEmail,
+        password: hashedPassword,
+        crn: randomCrn,
+        cardNumber: randomCard,
+        phone: phone || "+91 9876543210",
+        role: "Private Wealth Client",
+        kycStatus: "VERIFIED",
+        otpSecret: "123456"
+      });
+      console.log(`Created new user ${targetUser.username} in database (CRN: ${targetUser.crn})`);
+    }
+
+    // Mint elevated JWT token so the user is immediately authenticated
+    const token = jwt.sign(
+      {
+        id: targetUser.id,
+        username: targetUser.username,
+        crn: targetUser.crn,
+        role: targetUser.role,
+        acr: "mfa"
+      },
+      configuration.secret,
+      { expiresIn: 86400 } // 24 hours
+    );
 
     res.status(200).send({
-      message: "User successfully registered",
+      message: "User successfully registered in database",
+      accessToken: token,
       user: {
-        id: newUser.id,
-        name: newUser.name,
-        username: newUser.username,
-        email: newUser.email,
-        crn: newUser.crn,
-        cardNumber: newUser.cardNumber
+        id: targetUser.id,
+        name: targetUser.name,
+        username: targetUser.username,
+        email: targetUser.email,
+        crn: targetUser.crn,
+        cardNumber: targetUser.cardNumber,
+        role: targetUser.role
       }
     });
   } catch (exception) {
@@ -134,7 +168,7 @@ exports.signup = async (req, res) => {
 };
 
 // ==========================================
-// User Signin (CRN, Username or Card Number)
+// User Signin (Case-Insensitive CRN, Username, Email, or Card Number)
 // ==========================================
 exports.signin = async (req, res) => {
   try {
@@ -150,12 +184,12 @@ exports.signin = async (req, res) => {
 
     const cleanIdentifier = identifier.toString().trim();
 
-    // Lookup by username, email, CRN, or Card Number
+    // Case-insensitive lookup by username, email, CRN, or Card Number
     const user = await User.findOne({
       where: {
         [Op.or]: [
-          { username: cleanIdentifier },
-          { email: cleanIdentifier },
+          Sequelize.where(Sequelize.fn('lower', Sequelize.col('username')), cleanIdentifier.toLowerCase()),
+          Sequelize.where(Sequelize.fn('lower', Sequelize.col('email')), cleanIdentifier.toLowerCase()),
           { crn: cleanIdentifier },
           { cardNumber: cleanIdentifier }
         ]
@@ -185,7 +219,7 @@ exports.signin = async (req, res) => {
         { expiresIn: 600 } // 10 minutes to verify OTP
       );
 
-      // Mask phone and email for security (OWASP sensitive data exposure prevention)
+      // Mask phone and email for security
       const phone = user.phone || "+91 9876543210";
       const maskedPhone = "•••• •••• " + phone.slice(-4);
       const emailParts = user.email ? user.email.split("@") : ["user", "bank.com"];
@@ -263,12 +297,14 @@ exports.verifyOtp = async (req, res) => {
         return res.status(401).send({ message: "OTP session has expired. Please log in again." });
       }
     } else if (identifier) {
+      const cleanId = identifier.toString().trim();
       const user = await User.findOne({
         where: {
           [Op.or]: [
-            { username: identifier },
-            { crn: identifier },
-            { cardNumber: identifier }
+            Sequelize.where(Sequelize.fn('lower', Sequelize.col('username')), cleanId.toLowerCase()),
+            Sequelize.where(Sequelize.fn('lower', Sequelize.col('email')), cleanId.toLowerCase()),
+            { crn: cleanId },
+            { cardNumber: cleanId }
           ]
         }
       });
@@ -291,12 +327,12 @@ exports.verifyOtp = async (req, res) => {
       return res.status(400).send({ message: "Invalid OTP! Hint: Demo OTP is 123456." });
     }
 
-    // Invalidate pre-MFA sessionToken to prevent replay attacks (OWASP Session Management)
+    // Invalidate pre-MFA sessionToken to prevent replay attacks
     if (sessionToken) {
       jwtAuth.revokeToken(sessionToken);
     }
 
-    // Mint elevated JWT with acr: "mfa" (PRD Section 10 requirement)
+    // Mint elevated JWT with acr: "mfa"
     const token = jwt.sign(
       {
         id: user.id,

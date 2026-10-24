@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { ShieldCheck, Eye, EyeOff, CheckCircle2 } from 'lucide-react';
+import { ShieldCheck, Eye, EyeOff, CheckCircle2, ArrowRight } from 'lucide-react';
 
 export default function LoginPage() {
   const navigate = useNavigate();
@@ -19,6 +19,7 @@ export default function LoginPage() {
   const [regUser, setRegUser] = useState('');
   const [regEmail, setRegEmail] = useState('');
   const [regPass, setRegPass] = useState('');
+  const [registeredUser, setRegisteredUser] = useState(null);
 
   // 2FA OTP Modal state
   const [showOtpModal, setShowOtpModal] = useState(false);
@@ -130,17 +131,34 @@ export default function LoginPage() {
         password: regPass
       });
 
-      alert(
-        `Bank Buddy Net Banking Registration Successful!\n\nYour Generated CRN: ${data.user.crn}\nCard Number: ${data.user.cardNumber}\nUsername: ${data.user.username}`
-      );
-
-      // Switch to login tab and prefill
-      setActiveTab('login');
-      handleQuickFill(data.user.crn, regPass);
+      setRegisteredUser({
+        ...data.user,
+        accessToken: data.accessToken,
+        password: regPass
+      });
     } catch (err) {
       setErrorMsg(err.message);
     } finally {
       setLoading(false);
+    }
+  };
+
+  // Direct enter dashboard after registration
+  const handleDirectDashboard = () => {
+    if (registeredUser && registeredUser.accessToken) {
+      const sessionData = {
+        token: registeredUser.accessToken,
+        accessToken: registeredUser.accessToken,
+        id: registeredUser.id,
+        name: registeredUser.name,
+        username: registeredUser.username,
+        email: registeredUser.email,
+        crn: registeredUser.crn,
+        cardNumber: registeredUser.cardNumber,
+        role: registeredUser.role
+      };
+      localStorage.setItem('bankBuddyUser', JSON.stringify(sessionData));
+      window.location.href = '/desktop';
     }
   };
 
@@ -271,14 +289,14 @@ export default function LoginPage() {
             <form onSubmit={handleLoginSubmit} className="flex flex-col gap-4">
               <div>
                 <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
-                  CRN / Username / Card Number
+                  CRN / Username / Email / Card Number
                 </label>
                 <input
                   type="text"
                   required
                   value={identifier}
                   onChange={(e) => setIdentifier(e.target.value)}
-                  placeholder="e.g. 98234105 or elena"
+                  placeholder="e.g. 98234105, elena, or elena.rostova@wealth.client"
                   className="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-lg text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-red-500"
                 />
               </div>
@@ -335,7 +353,7 @@ export default function LoginPage() {
                   required
                   value={regName}
                   onChange={(e) => setRegName(e.target.value)}
-                  placeholder="e.g. Elena Rostova"
+                  placeholder="e.g. Sanjna Verma"
                   className="w-full px-3.5 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-lg text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-red-500"
                 />
               </div>
@@ -347,7 +365,7 @@ export default function LoginPage() {
                   required
                   value={regUser}
                   onChange={(e) => setRegUser(e.target.value)}
-                  placeholder="e.g. elena_wealth"
+                  placeholder="e.g. sanjna_wealth"
                   className="w-full px-3.5 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-lg text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-red-500"
                 />
               </div>
@@ -359,7 +377,7 @@ export default function LoginPage() {
                   required
                   value={regEmail}
                   onChange={(e) => setRegEmail(e.target.value)}
-                  placeholder="e.g. client@bankbuddy.in"
+                  placeholder="e.g. sanjna@bankbuddy.in"
                   className="w-full px-3.5 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-lg text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-red-500"
                 />
               </div>
@@ -393,12 +411,75 @@ export default function LoginPage() {
                 disabled={loading}
                 className="w-full py-2.5 bg-red-600 hover:bg-red-700 text-white rounded-lg text-sm font-bold transition shadow-sm mt-1 cursor-pointer"
               >
-                {loading ? 'Creating Net Banking Account...' : 'Register Net Banking Account'}
+                {loading ? 'Saving User to Database...' : 'Register Net Banking Account'}
               </button>
             </form>
           )}
         </div>
       </main>
+
+      {/* Registration Success Confirmation Modal */}
+      {registeredUser && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-in fade-in">
+          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl max-w-md w-full p-6 text-center shadow-2xl flex flex-col items-center">
+            <div className="w-14 h-14 bg-emerald-100 dark:bg-emerald-950/80 text-emerald-600 dark:text-emerald-400 rounded-full flex items-center justify-center mb-4">
+              <CheckCircle2 className="w-8 h-8" />
+            </div>
+
+            <h3 className="font-extrabold text-lg text-slate-900 dark:text-white mb-1">
+              User Successfully Saved in Database!
+            </h3>
+            <p className="text-xs text-slate-500 dark:text-slate-400 mb-5 leading-relaxed">
+              Your Net Banking user profile and ledger record have been created in PostgreSQL.
+            </p>
+
+            <div className="w-full bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 rounded-xl p-4 text-left text-xs mb-5 space-y-2">
+              <div className="flex justify-between">
+                <span className="text-slate-500">Full Name:</span>
+                <span className="font-bold text-slate-900 dark:text-white">{registeredUser.name}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-slate-500">Username:</span>
+                <span className="font-bold text-indigo-600 dark:text-indigo-400 font-mono">{registeredUser.username}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-slate-500">Generated CRN:</span>
+                <span className="font-bold text-emerald-600 dark:text-emerald-400 font-mono text-sm">{registeredUser.crn}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-slate-500">Card Number:</span>
+                <span className="font-bold text-slate-900 dark:text-white font-mono">•••• {registeredUser.cardNumber}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-slate-500">Email:</span>
+                <span className="font-bold text-slate-900 dark:text-white truncate max-w-[200px]">{registeredUser.email}</span>
+              </div>
+            </div>
+
+            <button
+              type="button"
+              onClick={handleDirectDashboard}
+              className="w-full py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold transition shadow-sm mb-2 flex items-center justify-center gap-1.5 cursor-pointer"
+            >
+              Enter Dashboard Directly <ArrowRight className="w-4 h-4" />
+            </button>
+
+            <button
+              type="button"
+              onClick={() => {
+                const crn = registeredUser.crn;
+                const pass = registeredUser.password;
+                setRegisteredUser(null);
+                setActiveTab('login');
+                handleQuickFill(crn, pass);
+              }}
+              className="text-xs text-slate-500 dark:text-slate-400 hover:underline"
+            >
+              Or return to Login tab
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* 2-Factor OTP Modal */}
       {showOtpModal && (
