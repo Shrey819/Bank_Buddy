@@ -162,7 +162,7 @@
 </head>
 <body class="min-h-full font-sans antialiased text-slate-800 bg-slate-50/80 bg-mesh-glow selection:bg-indigo-500 selection:text-white">
   <!-- ==============================================================
-       GLOBAL SIDEBAR: BANK BUDDY TRUST SHIELD, SEARCH, NAV, DESKTOP CONTROLS & PROFILE
+       GLOBAL SIDEBAR: BANK BUDDY TRUST SHIELD, SEARCH, NAV, DOWNSIDE CONTROLS & PROFILE
        ============================================================== -->
   <aside class="fixed left-0 top-0 bottom-0 w-64 bg-white border-r border-slate-200/80 z-40 flex flex-col justify-between py-5 px-4 shadow-sm overflow-y-auto" id="global-sidebar">
     <div class="flex flex-col gap-4">
@@ -183,7 +183,7 @@
         </div>
       </a>
 
-      <!-- 2. Search Pill (Integrated from desktop.html header) -->
+      <!-- 2. Search Pill -->
       <div class="relative">
         <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
           <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
@@ -231,70 +231,44 @@
           <span>Logout</span>
         </a>
       </nav>
-
-      <div class="h-px bg-slate-200/80 my-0.5"></div>
-
-      <!-- 4. Desktop Features in Sidebar: High Contrast Mode, Notifications & Vault Status -->
-      <div class="flex flex-col gap-2">
-        <!-- High Contrast Mode Toggle (BETA Spec) -->
-        <div class="flex items-center justify-between px-3 py-2 rounded-xl bg-slate-50 border border-slate-200/80">
-          <div class="flex items-center gap-1.5">
-            <span class="text-xs font-semibold text-slate-700">Contrast</span>
-            <span class="px-1.5 py-0.5 text-[9px] font-extrabold uppercase bg-red-600 text-white rounded">BETA</span>
-          </div>
-          <label class="relative inline-flex items-center cursor-pointer" title="Toggle High Contrast Mode">
-            <input type="checkbox" id="contrast-toggle" class="sr-only peer" onchange="toggleHighContrast(this.checked)">
-            <div class="w-8 h-4 bg-slate-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-3 after:w-3 after:transition-all peer-checked:bg-blue-600"></div>
-          </label>
-        </div>
-
-        <!-- Notification Bell & Badge -->
-        <div class="flex items-center justify-between px-3 py-2 rounded-xl bg-slate-50 border border-slate-200/80">
-          <div class="flex items-center gap-2">
-            <div class="relative">
-              <svg class="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
-                <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
-              </svg>
-              <span class="absolute -top-0.5 -right-0.5 w-1.5 h-1.5 bg-indigo-600 rounded-full"></span>
-            </div>
-            <span class="text-xs font-semibold text-slate-700">Alerts</span>
-          </div>
-          <span class="px-1.5 py-0.5 text-[10px] font-bold bg-indigo-50 text-indigo-700 rounded-full border border-indigo-200">3 new</span>
-        </div>
-
-        <!-- Vault State Status -->
-        <div class="px-3 py-2 rounded-xl bg-slate-50 border border-slate-200/80 flex items-center justify-between">
-          <div class="flex flex-col">
-            <span class="text-[9px] uppercase font-bold text-slate-500 tracking-wider">Vault State</span>
-            <span class="text-xs font-semibold text-blue-700">Autonomous: On</span>
-          </div>
-          <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse" title="ISO 20022 Network Active"></span>
-        </div>
-      </div>
     </div>
 
-    <!-- 5. User Profile Card & Direct Logout (from desktop.html header) -->
-    <div class="pt-3 border-t border-slate-200/80 flex items-center justify-between gap-2">
-      <div class="flex items-center gap-2.5 overflow-hidden">
-        <div class="relative shrink-0">
-          <div class="w-9 h-9 rounded-full ring-2 ring-indigo-500/20 bg-gradient-to-tr from-purple-200 via-pink-100 to-indigo-100 flex items-center justify-center font-bold text-xs text-indigo-700">
-            ER
-          </div>
-          <span class="absolute bottom-0 right-0 w-2 h-2 bg-emerald-500 border border-white rounded-full"></span>
+    <!-- 4. Downside: High Contrast Mode Toggle & User Profile -->
+    <div class="flex flex-col gap-3 pt-3 border-t border-slate-200/80">
+      <!-- High Contrast Mode Toggle (BETA Spec) -->
+      <div class="flex items-center justify-between px-3 py-2 rounded-xl bg-slate-50 border border-slate-200/80">
+        <div class="flex items-center gap-1.5">
+          <span class="text-xs font-semibold text-slate-700">Contrast</span>
+          <span class="px-1.5 py-0.5 text-[9px] font-extrabold uppercase bg-red-600 text-white rounded">BETA</span>
         </div>
-        <div class="flex flex-col overflow-hidden">
-          <span class="text-xs font-bold text-slate-900 truncate">Elena Rostova</span>
-          <span class="text-[9px] font-semibold text-indigo-600 truncate">CRN: 98234105 &bull; Private</span>
-        </div>
+        <label class="relative inline-flex items-center cursor-pointer" title="Toggle High Contrast Mode">
+          <input type="checkbox" id="contrast-toggle" class="sr-only peer" onchange="toggleHighContrast(this.checked)">
+          <div class="w-8 h-4 bg-slate-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-3 after:w-3 after:transition-all peer-checked:bg-blue-600"></div>
+        </label>
       </div>
-      <a href="login.html" class="p-1.5 text-slate-400 hover:text-red-600 rounded-lg hover:bg-slate-100 transition shrink-0" title="Logout &amp; Return to Login">
-        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-          <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
-          <polyline points="16 17 21 12 16 7"></polyline>
-          <line x1="21" y1="12" x2="9" y2="12"></line>
-        </svg>
-      </a>
+
+      <!-- User Profile Card & Direct Logout -->
+      <div class="flex items-center justify-between gap-2 px-1">
+        <div class="flex items-center gap-2.5 overflow-hidden">
+          <div class="relative shrink-0">
+            <div class="w-9 h-9 rounded-full ring-2 ring-indigo-500/20 bg-gradient-to-tr from-purple-200 via-pink-100 to-indigo-100 flex items-center justify-center font-bold text-xs text-indigo-700">
+              ER
+            </div>
+            <span class="absolute bottom-0 right-0 w-2 h-2 bg-emerald-500 border border-white rounded-full"></span>
+          </div>
+          <div class="flex flex-col overflow-hidden">
+            <span class="text-xs font-bold text-slate-900 truncate">Elena Rostova</span>
+            <span class="text-[9px] font-semibold text-indigo-600 truncate">CRN: 98234105 &bull; Private</span>
+          </div>
+        </div>
+        <a href="login.html" class="p-1.5 text-slate-400 hover:text-red-600 rounded-lg hover:bg-slate-100 transition shrink-0" title="Logout &amp; Return to Login">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+            <polyline points="16 17 21 12 16 7"></polyline>
+            <line x1="21" y1="12" x2="9" y2="12"></line>
+          </svg>
+        </a>
+      </div>
     </div>
   </aside>
 
