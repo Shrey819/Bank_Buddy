@@ -4,7 +4,7 @@
 <html class="h-full bg-slate-50" lang="en"><head>
   <script>
     if (localStorage.getItem('bankBuddyContrast') === 'true') {
-      document.documentElement.classList.add('high-contrast');
+      document.documentElement.classList.add('high-contrast', 'dark');
     }
   </script>
 <meta charset="utf-8"/>
@@ -1158,28 +1158,44 @@
 
 <script>
   
-  // High Contrast Mode Handler
+    // High Contrast & Dark Mode Handler
   function toggleHighContrast(isHigh) {
     if (isHigh) {
-      document.documentElement.classList.add('high-contrast');
-      document.body.classList.add('high-contrast');
+      document.documentElement.classList.add('high-contrast', 'dark');
+      document.body.classList.add('high-contrast', 'dark');
       localStorage.setItem('bankBuddyContrast', 'true');
     } else {
-      document.documentElement.classList.remove('high-contrast');
-      document.body.classList.remove('high-contrast');
+      document.documentElement.classList.remove('high-contrast', 'dark');
+      document.body.classList.remove('high-contrast', 'dark');
       localStorage.setItem('bankBuddyContrast', 'false');
     }
     const toggle = document.getElementById('contrast-toggle');
     if (toggle) toggle.checked = isHigh;
   }
+  window.toggleHighContrast = toggleHighContrast;
 
   // Restore saved contrast state on startup
   if (localStorage.getItem('bankBuddyContrast') === 'true') {
-    document.documentElement.classList.add('high-contrast');
-    document.body.classList.add('high-contrast');
+    document.documentElement.classList.add('high-contrast', 'dark');
+    if (document.body) document.body.classList.add('high-contrast', 'dark');
     const toggle = document.getElementById('contrast-toggle');
     if (toggle) toggle.checked = true;
   }
+
+  document.addEventListener('DOMContentLoaded', function() {
+    if (localStorage.getItem('bankBuddyContrast') === 'true') {
+      document.documentElement.classList.add('high-contrast', 'dark');
+      if (document.body) document.body.classList.add('high-contrast', 'dark');
+      const toggle = document.getElementById('contrast-toggle');
+      if (toggle) toggle.checked = true;
+    }
+    const toggle = document.getElementById('contrast-toggle');
+    if (toggle) {
+      toggle.addEventListener('change', function() {
+        toggleHighContrast(this.checked);
+      });
+    }
+  });
 
   function toggleCopilotPopup() {
     const card = document.getElementById('copilot-card');

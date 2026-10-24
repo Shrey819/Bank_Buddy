@@ -3,7 +3,7 @@
 <head>
   <script>
     if (localStorage.getItem('bankBuddyContrast') === 'true') {
-      document.documentElement.classList.add('high-contrast');
+      document.documentElement.classList.add('high-contrast', 'dark');
     }
   </script>
   <meta charset="UTF-8">
@@ -881,26 +881,42 @@
     // Accessibility handlers
 
     function toggleHighContrast(isHigh) {
-    if (isHigh) {
-      document.documentElement.classList.add('high-contrast');
-      document.body.classList.add('high-contrast');
-      localStorage.setItem('bankBuddyContrast', 'true');
-    } else {
-      document.documentElement.classList.remove('high-contrast');
-      document.body.classList.remove('high-contrast');
-      localStorage.setItem('bankBuddyContrast', 'false');
+      if (isHigh) {
+        document.documentElement.classList.add('high-contrast', 'dark');
+        if (document.body) document.body.classList.add('high-contrast', 'dark');
+        localStorage.setItem('bankBuddyContrast', 'true');
+      } else {
+        document.documentElement.classList.remove('high-contrast', 'dark');
+        if (document.body) document.body.classList.remove('high-contrast', 'dark');
+        localStorage.setItem('bankBuddyContrast', 'false');
+      }
+      const toggle = document.getElementById('contrast-toggle');
+      if (toggle) toggle.checked = isHigh;
     }
-    const toggle = document.getElementById('contrast-toggle');
-    if (toggle) toggle.checked = isHigh;
-  }
+    window.toggleHighContrast = toggleHighContrast;
 
-  // Restore saved contrast state on startup
-  if (localStorage.getItem('bankBuddyContrast') === 'true') {
-    document.documentElement.classList.add('high-contrast');
-    document.body.classList.add('high-contrast');
-    const toggle = document.getElementById('contrast-toggle');
-    if (toggle) toggle.checked = true;
-  }
+    // Restore saved contrast state
+    if (localStorage.getItem('bankBuddyContrast') === 'true') {
+      document.documentElement.classList.add('high-contrast', 'dark');
+      if (document.body) document.body.classList.add('high-contrast', 'dark');
+      const toggle = document.getElementById('contrast-toggle');
+      if (toggle) toggle.checked = true;
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+      if (localStorage.getItem('bankBuddyContrast') === 'true') {
+        document.documentElement.classList.add('high-contrast', 'dark');
+        if (document.body) document.body.classList.add('high-contrast', 'dark');
+        const toggle = document.getElementById('contrast-toggle');
+        if (toggle) toggle.checked = true;
+      }
+      const toggle = document.getElementById('contrast-toggle');
+      if (toggle) {
+        toggle.addEventListener('change', function() {
+          toggleHighContrast(this.checked);
+        });
+      }
+    });
 
     // Quick Fill Helper
     function quickFill(id, pass) {

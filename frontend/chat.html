@@ -4,7 +4,7 @@
 <head>
   <script>
     if (localStorage.getItem('bankBuddyContrast') === 'true') {
-      document.documentElement.classList.add('high-contrast');
+      document.documentElement.classList.add('high-contrast', 'dark');
     }
   </script>
   <meta charset="utf-8">
@@ -26,123 +26,166 @@
        CHAT DARK MODE / HIGH CONTRAST (ALL ELEMENTS)
        ========================================================================== */
     html.high-contrast,
-    body.high-contrast {
+    body.high-contrast,
+    html.dark,
+    body.dark {
       background-color: #0b0f19 !important;
       color: #f1f5f9 !important;
     }
 
     /* Global Sidebar in Dark Mode */
-    body.high-contrast aside#global-sidebar {
+    body.high-contrast aside#global-sidebar,
+    body.dark aside#global-sidebar {
       background-color: #0f172a !important;
       border-color: #1e293b !important;
       box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4) !important;
     }
-    body.high-contrast aside#global-sidebar .bg-white {
+    body.high-contrast aside#global-sidebar .bg-white,
+    body.dark aside#global-sidebar .bg-white {
       background-color: #1e293b !important;
       border-color: #334155 !important;
     }
-    body.high-contrast aside#global-sidebar .bg-slate-50 {
+    body.high-contrast aside#global-sidebar .bg-slate-50,
+    body.dark aside#global-sidebar .bg-slate-50 {
       background-color: #1e293b !important;
       border-color: #334155 !important;
     }
-    body.high-contrast aside#global-sidebar input {
+    body.high-contrast aside#global-sidebar input,
+    body.dark aside#global-sidebar input {
       background-color: #1e293b !important;
       border-color: #334155 !important;
       color: #f8fafc !important;
     }
-    body.high-contrast aside#global-sidebar input::placeholder {
+    body.high-contrast aside#global-sidebar input::placeholder,
+    body.dark aside#global-sidebar input::placeholder {
       color: #94a3b8 !important;
     }
     body.high-contrast aside#global-sidebar .text-slate-900,
     body.high-contrast aside#global-sidebar .text-slate-800,
-    body.high-contrast aside#global-sidebar .text-slate-700 {
+    body.high-contrast aside#global-sidebar .text-slate-700,
+    body.dark aside#global-sidebar .text-slate-900,
+    body.dark aside#global-sidebar .text-slate-800,
+    body.dark aside#global-sidebar .text-slate-700 {
       color: #f8fafc !important;
     }
     body.high-contrast aside#global-sidebar .text-slate-600,
     body.high-contrast aside#global-sidebar .text-slate-500,
-    body.high-contrast aside#global-sidebar .text-slate-400 {
+    body.high-contrast aside#global-sidebar .text-slate-400,
+    body.dark aside#global-sidebar .text-slate-600,
+    body.dark aside#global-sidebar .text-slate-500,
+    body.dark aside#global-sidebar .text-slate-400 {
       color: #94a3b8 !important;
     }
     body.high-contrast aside#global-sidebar .border-slate-200,
-    body.high-contrast aside#global-sidebar .border-slate-200\/80 {
+    body.high-contrast aside#global-sidebar .border-slate-200\/80,
+    body.dark aside#global-sidebar .border-slate-200,
+    body.dark aside#global-sidebar .border-slate-200\/80 {
       border-color: #1e293b !important;
     }
-    body.high-contrast aside#global-sidebar .hover\:bg-slate-100:hover {
+    body.high-contrast aside#global-sidebar .hover\:bg-slate-100:hover,
+    body.dark aside#global-sidebar .hover\:bg-slate-100:hover {
       background-color: #1e293b !important;
     }
 
+    /* Active Sidebar Navigation Pill on Chat */
+    body.high-contrast aside#global-sidebar #nav-chat.bg-indigo-50,
+    body.dark aside#global-sidebar #nav-chat.bg-indigo-50 {
+      background-color: rgba(99, 102, 241, 0.2) !important;
+      color: #a5b4fc !important;
+      border-color: rgba(99, 102, 241, 0.4) !important;
+    }
+
     /* Main Chat Layout */
-    body.high-contrast .bg-background {
+    body.high-contrast .bg-background,
+    body.dark .bg-background {
       background-color: #0b0f19 !important;
     }
     body.high-contrast .border-surface-container-high,
-    body.high-contrast .border-surface-container-high\/60 {
+    body.high-contrast .border-surface-container-high\/60,
+    body.dark .border-surface-container-high,
+    body.dark .border-surface-container-high\/60 {
       border-color: #1f2937 !important;
     }
-    body.high-contrast .text-on-surface {
+    body.high-contrast .text-on-surface,
+    body.dark .text-on-surface {
       color: #f8fafc !important;
     }
-    body.high-contrast .text-on-surface-variant {
+    body.high-contrast .text-on-surface-variant,
+    body.dark .text-on-surface-variant {
       color: #94a3b8 !important;
     }
 
     /* Empty state card */
-    body.high-contrast #empty-chat-state .bg-primary\/10 {
+    body.high-contrast #empty-chat-state .bg-primary\/10,
+    body.dark #empty-chat-state .bg-primary\/10 {
       background-color: rgba(37, 99, 235, 0.2) !important;
       color: #38bdf8 !important;
     }
 
     /* Suggestion Prompt Chips */
-    body.high-contrast .prompt-chip {
+    body.high-contrast .prompt-chip,
+    body.dark .prompt-chip {
       background-color: #111827 !important;
       border-color: #1f2937 !important;
       color: #cbd5e1 !important;
     }
-    body.high-contrast .prompt-chip:hover {
+    body.high-contrast .prompt-chip:hover,
+    body.dark .prompt-chip:hover {
       background-color: #1e293b !important;
       color: #ffffff !important;
       border-color: #374151 !important;
     }
 
     /* User Message Bubble */
-    body.high-contrast #chat-thread .bg-on-surface {
+    body.high-contrast #chat-thread .bg-on-surface,
+    body.dark #chat-thread .bg-on-surface {
       background-color: #1e293b !important;
       color: #f8fafc !important;
       border: 1px solid #334155 !important;
     }
 
     /* AI Message Card */
-    body.high-contrast #chat-thread .bg-surface-container-lowest {
+    body.high-contrast #chat-thread .bg-surface-container-lowest,
+    body.dark #chat-thread .bg-surface-container-lowest {
       background-color: #111827 !important;
       border-color: #1f2937 !important;
       color: #f8fafc !important;
     }
-    body.high-contrast #chat-thread .bg-surface-container-low {
+    body.high-contrast #chat-thread .bg-surface-container-low,
+    body.dark #chat-thread .bg-surface-container-low {
       background-color: #1e293b !important;
       border-color: #334155 !important;
     }
-    body.high-contrast #chat-thread code {
+    body.high-contrast #chat-thread code,
+    body.dark #chat-thread code {
       background-color: #0f172a !important;
       color: #38bdf8 !important;
       border: 1px solid #334155 !important;
     }
-    body.high-contrast #chat-thread .bg-primary\/10 {
+    body.high-contrast #chat-thread .bg-primary\/10,
+    body.dark #chat-thread .bg-primary\/10 {
       background-color: rgba(37, 99, 235, 0.2) !important;
       border-color: rgba(37, 99, 235, 0.4) !important;
     }
+    body.high-contrast #chat-thread .bg-surface-container-high,
+    body.dark #chat-thread .bg-surface-container-high {
+      background-color: #334155 !important;
+    }
 
     /* Bottom Prompt Box */
-    body.high-contrast .bg-surface-container-lowest {
+    body.high-contrast .bg-surface-container-lowest,
+    body.dark .bg-surface-container-lowest {
       background-color: #111827 !important;
       border-color: #1f2937 !important;
     }
-    body.high-contrast #chat-input {
+    body.high-contrast #chat-input,
+    body.dark #chat-input {
       color: #f8fafc !important;
     }
-    body.high-contrast #chat-input::placeholder {
+    body.high-contrast #chat-input::placeholder,
+    body.dark #chat-input::placeholder {
       color: #64748b !important;
     }
-
   </style>
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
@@ -368,6 +411,72 @@
 
     </main>
   </div>
+
+    <!-- Global Contrast & Accessibility Controller -->
+  <script>
+    function toggleHighContrast(isHigh) {
+      if (isHigh) {
+        document.documentElement.classList.add('high-contrast', 'dark');
+        if (document.body) document.body.classList.add('high-contrast', 'dark');
+        localStorage.setItem('bankBuddyContrast', 'true');
+      } else {
+        document.documentElement.classList.remove('high-contrast', 'dark');
+        if (document.body) document.body.classList.remove('high-contrast', 'dark');
+        localStorage.setItem('bankBuddyContrast', 'false');
+      }
+      const toggle = document.getElementById('contrast-toggle');
+      if (toggle) toggle.checked = isHigh;
+    }
+    window.toggleHighContrast = toggleHighContrast;
+
+    // Instant check & sync
+    if (localStorage.getItem('bankBuddyContrast') === 'true') {
+      document.documentElement.classList.add('high-contrast', 'dark');
+      if (document.body) document.body.classList.add('high-contrast', 'dark');
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+      if (localStorage.getItem('bankBuddyContrast') === 'true') {
+        document.documentElement.classList.add('high-contrast', 'dark');
+        if (document.body) document.body.classList.add('high-contrast', 'dark');
+        const toggle = document.getElementById('contrast-toggle');
+        if (toggle) toggle.checked = true;
+      }
+      const toggle = document.getElementById('contrast-toggle');
+      if (toggle) {
+        toggle.addEventListener('change', function() {
+          toggleHighContrast(this.checked);
+        });
+      }
+
+      // Quick Search ⌘K shortcut
+      window.addEventListener('keydown', function(e) {
+        if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+          e.preventDefault();
+          const s = document.getElementById('sidebar-search-input');
+          if (s) s.focus();
+        }
+      });
+
+      const sidebarSearch = document.getElementById('sidebar-search-input');
+      if (sidebarSearch) {
+        sidebarSearch.addEventListener('keydown', function(e) {
+          if (e.key === 'Enter') {
+            const val = sidebarSearch.value.trim();
+            if (val) {
+              sidebarSearch.value = '';
+              const mainInput = document.getElementById('chat-input');
+              const mainSend = document.getElementById('send-btn');
+              if (mainInput && mainSend) {
+                mainInput.value = val;
+                mainSend.click();
+              }
+            }
+          }
+        });
+      }
+    });
+  </script>
 
   <!-- Interactive Logic -->
   <script>
