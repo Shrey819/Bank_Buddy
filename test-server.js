@@ -13,9 +13,12 @@ function assert(condition, message) {
   console.log(`✅ PASSED: ${message}`);
 }
 
-async function runTests() {
-  console.log("🚀 Starting Integration Tests for nodejs-crud-using-jwt-auth...\n");
+const db = require("./backend_gateway_node/models");
 
+async function runTests() {
+  console.log("🚀 Starting Integration Tests for Bank Buddy...\n");
+
+  await db.sequelize.sync();
   testServer = app.listen(PORT);
 
   try {
