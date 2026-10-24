@@ -2,6 +2,11 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+  <script>
+    if (localStorage.getItem('bankBuddyContrast') === 'true') {
+      document.documentElement.classList.add('high-contrast');
+    }
+  </script>
   <meta charset="utf-8">
   <meta content="width=device-width, initial-scale=1.0" name="viewport">
   <title>Bank Buddy — AI Banking Chat</title>
@@ -17,14 +22,20 @@
     ::-webkit-scrollbar { width: 6px; height: 6px; }
     ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 9999px; }
   
-    /* High Contrast Mode Dark Styling */
+/* ==========================================================================
+       CHAT DARK MODE / HIGH CONTRAST (ALL ELEMENTS)
+       ========================================================================== */
+    html.high-contrast,
     body.high-contrast {
       background-color: #0b0f19 !important;
       color: #f1f5f9 !important;
     }
+
+    /* Global Sidebar in Dark Mode */
     body.high-contrast aside#global-sidebar {
       background-color: #0f172a !important;
-      border-color: #334155 !important;
+      border-color: #1e293b !important;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4) !important;
     }
     body.high-contrast aside#global-sidebar .bg-white {
       background-color: #1e293b !important;
@@ -39,6 +50,9 @@
       border-color: #334155 !important;
       color: #f8fafc !important;
     }
+    body.high-contrast aside#global-sidebar input::placeholder {
+      color: #94a3b8 !important;
+    }
     body.high-contrast aside#global-sidebar .text-slate-900,
     body.high-contrast aside#global-sidebar .text-slate-800,
     body.high-contrast aside#global-sidebar .text-slate-700 {
@@ -51,17 +65,19 @@
     }
     body.high-contrast aside#global-sidebar .border-slate-200,
     body.high-contrast aside#global-sidebar .border-slate-200\/80 {
-      border-color: #334155 !important;
+      border-color: #1e293b !important;
     }
     body.high-contrast aside#global-sidebar .hover\:bg-slate-100:hover {
-      background-color: #334155 !important;
+      background-color: #1e293b !important;
     }
-    body.high-contrast .bg-background,
-    body.high-contrast .bg-surface-container-lowest,
-    body.high-contrast .bg-surface-container-low {
-      background-color: #0f172a !important;
-      border-color: #334155 !important;
-      color: #f8fafc !important;
+
+    /* Main Chat Layout */
+    body.high-contrast .bg-background {
+      background-color: #0b0f19 !important;
+    }
+    body.high-contrast .border-surface-container-high,
+    body.high-contrast .border-surface-container-high\/60 {
+      border-color: #1f2937 !important;
     }
     body.high-contrast .text-on-surface {
       color: #f8fafc !important;
@@ -69,12 +85,62 @@
     body.high-contrast .text-on-surface-variant {
       color: #94a3b8 !important;
     }
-    body.high-contrast .border-surface-container-high,
-    body.high-contrast .border-surface-container-high\/60 {
+
+    /* Empty state card */
+    body.high-contrast #empty-chat-state .bg-primary\/10 {
+      background-color: rgba(37, 99, 235, 0.2) !important;
+      color: #38bdf8 !important;
+    }
+
+    /* Suggestion Prompt Chips */
+    body.high-contrast .prompt-chip {
+      background-color: #111827 !important;
+      border-color: #1f2937 !important;
+      color: #cbd5e1 !important;
+    }
+    body.high-contrast .prompt-chip:hover {
+      background-color: #1e293b !important;
+      color: #ffffff !important;
+      border-color: #374151 !important;
+    }
+
+    /* User Message Bubble */
+    body.high-contrast #chat-thread .bg-on-surface {
+      background-color: #1e293b !important;
+      color: #f8fafc !important;
+      border: 1px solid #334155 !important;
+    }
+
+    /* AI Message Card */
+    body.high-contrast #chat-thread .bg-surface-container-lowest {
+      background-color: #111827 !important;
+      border-color: #1f2937 !important;
+      color: #f8fafc !important;
+    }
+    body.high-contrast #chat-thread .bg-surface-container-low {
+      background-color: #1e293b !important;
       border-color: #334155 !important;
+    }
+    body.high-contrast #chat-thread code {
+      background-color: #0f172a !important;
+      color: #38bdf8 !important;
+      border: 1px solid #334155 !important;
+    }
+    body.high-contrast #chat-thread .bg-primary\/10 {
+      background-color: rgba(37, 99, 235, 0.2) !important;
+      border-color: rgba(37, 99, 235, 0.4) !important;
+    }
+
+    /* Bottom Prompt Box */
+    body.high-contrast .bg-surface-container-lowest {
+      background-color: #111827 !important;
+      border-color: #1f2937 !important;
     }
     body.high-contrast #chat-input {
       color: #f8fafc !important;
+    }
+    body.high-contrast #chat-input::placeholder {
+      color: #64748b !important;
     }
 
   </style>

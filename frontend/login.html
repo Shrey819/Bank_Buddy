@@ -1,6 +1,11 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+  <script>
+    if (localStorage.getItem('bankBuddyContrast') === 'true') {
+      document.documentElement.classList.add('high-contrast');
+    }
+  </script>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Bank Buddy | Net Banking Login</title>
@@ -509,6 +514,107 @@
       box-shadow: 0 0 0 2px rgba(0, 102, 204, 0.2);
     }
 
+  
+    /* Dark Mode Theme Extensions */
+    body.high-contrast, html.high-contrast {
+      background: #0b0f19 !important;
+      color: #f1f5f9 !important;
+    }
+    body.high-contrast header.kotak-top-nav {
+      background: #111827 !important;
+      border-color: #1f2937 !important;
+    }
+    body.high-contrast .demo-credentials-strip {
+      background: #0f172a !important;
+      border-color: #1e293b !important;
+      color: #94a3b8 !important;
+    }
+    body.high-contrast .quick-preset-btn {
+      background: #1e293b !important;
+      border-color: #38bdf8 !important;
+      color: #38bdf8 !important;
+    }
+    body.high-contrast .quick-preset-btn:hover {
+      background: #0284c7 !important;
+      color: #ffffff !important;
+    }
+    body.high-contrast .kotak-login-card {
+      background: #111827 !important;
+      border-color: #1f2937 !important;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5) !important;
+    }
+    body.high-contrast .kotak-text-input {
+      background: #1e293b !important;
+      border-color: #374151 !important;
+      color: #f8fafc !important;
+    }
+    body.high-contrast .kotak-text-input:focus {
+      border-color: #38bdf8 !important;
+      box-shadow: 0 0 0 1px #38bdf8 !important;
+    }
+    body.high-contrast .kotak-text-input::placeholder {
+      color: #64748b !important;
+    }
+    body.high-contrast .show-password-trigger {
+      color: #94a3b8 !important;
+    }
+    body.high-contrast .show-password-trigger:hover {
+      color: #f8fafc !important;
+    }
+    body.high-contrast .login-tabs-row {
+      border-color: #1f2937 !important;
+    }
+    body.high-contrast .tab-header {
+      color: #94a3b8 !important;
+    }
+    body.high-contrast .tab-header.active {
+      color: #38bdf8 !important;
+      border-bottom-color: #38bdf8 !important;
+    }
+    body.high-contrast .forgot-link-box a,
+    body.high-contrast .netbanking-dropdown {
+      color: #38bdf8 !important;
+    }
+    body.high-contrast .terms-text,
+    body.high-contrast .terms-text a {
+      color: #64748b !important;
+    }
+    body.high-contrast .credit-card-bill-tag {
+      background: #111827 !important;
+      border-color: #7f1d1d !important;
+      color: #fca5a5 !important;
+    }
+    body.high-contrast .hero-svg circle[fill="#fff5f5"] {
+      fill: #1e293b !important;
+    }
+    body.high-contrast .hero-svg rect[fill="#ffffff"] {
+      fill: #1e293b !important;
+    }
+    body.high-contrast .hero-text-content p {
+      color: #94a3b8 !important;
+    }
+    body.high-contrast .bottom-safety-bar {
+      color: #64748b !important;
+    }
+    body.high-contrast .bottom-safety-bar a {
+      color: #94a3b8 !important;
+    }
+    body.high-contrast .otp-modal-box {
+      background: #111827 !important;
+      border-color: #1f2937 !important;
+      color: #f8fafc !important;
+      box-shadow: 0 20px 45px rgba(0,0,0,0.7) !important;
+    }
+    body.high-contrast .otp-single-box {
+      background: #1e293b !important;
+      border-color: #374151 !important;
+      color: #f8fafc !important;
+    }
+    body.high-contrast .otp-single-box:focus {
+      border-color: #38bdf8 !important;
+      box-shadow: 0 0 0 2px rgba(56, 189, 248, 0.25) !important;
+    }
+
   </style>
 </head>
 <body>
@@ -775,21 +881,26 @@
     // Accessibility handlers
 
     function toggleHighContrast(isHigh) {
-      if (isHigh) {
-        document.body.classList.add('high-contrast');
-        localStorage.setItem('bankBuddyContrast', 'true');
-      } else {
-        document.body.classList.remove('high-contrast');
-        localStorage.setItem('bankBuddyContrast', 'false');
-      }
-    }
-
-    // Restore saved contrast state
-    if (localStorage.getItem('bankBuddyContrast') === 'true') {
+    if (isHigh) {
+      document.documentElement.classList.add('high-contrast');
       document.body.classList.add('high-contrast');
-      const toggle = document.getElementById('contrast-toggle');
-      if (toggle) toggle.checked = true;
+      localStorage.setItem('bankBuddyContrast', 'true');
+    } else {
+      document.documentElement.classList.remove('high-contrast');
+      document.body.classList.remove('high-contrast');
+      localStorage.setItem('bankBuddyContrast', 'false');
     }
+    const toggle = document.getElementById('contrast-toggle');
+    if (toggle) toggle.checked = isHigh;
+  }
+
+  // Restore saved contrast state on startup
+  if (localStorage.getItem('bankBuddyContrast') === 'true') {
+    document.documentElement.classList.add('high-contrast');
+    document.body.classList.add('high-contrast');
+    const toggle = document.getElementById('contrast-toggle');
+    if (toggle) toggle.checked = true;
+  }
 
     // Quick Fill Helper
     function quickFill(id, pass) {
