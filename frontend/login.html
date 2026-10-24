@@ -1116,6 +1116,15 @@
       window.location.href = 'index.html';
     }
 
+    
+    function fillSampleRegister() {
+      const rand = Math.floor(1000 + Math.random() * 9000);
+      document.getElementById('reg-name').value = 'Test Client ' + rand;
+      document.getElementById('reg-user').value = 'client_' + rand;
+      document.getElementById('reg-email').value = 'client_' + rand + '@bankbuddy.in';
+      document.getElementById('reg-pass').value = 'BankBuddy@2026';
+    }
+
     // Register Form Handler
     async function handleKotakRegister(e) {
       e.preventDefault();

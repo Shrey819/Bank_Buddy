@@ -9,20 +9,18 @@ const bcrypt = require("bcryptjs");
 
 const BCRYPT_SALT_ROUNDS = 10; // OWASP recommendation: minimum 10 rounds
 
-// Seed default Elena Rostova (PRD C1001 Private Wealth Client)
+// Seed default banking users (PRD C1001 Private Wealth Clients)
 exports.seedDefaultUser = async () => {
   try {
-    const existing = await User.findOne({
+    const hashedPassword = bcrypt.hashSync("BankBuddy@2026", BCRYPT_SALT_ROUNDS);
+
+    // 1. Elena Rostova
+    const elena = await User.findOne({
       where: {
-        [Op.or]: [
-          { username: "elena" },
-          { crn: "98234105" }
-        ]
+        [Op.or]: [{ username: "elena" }, { crn: "98234105" }]
       }
     });
-
-    if (!existing) {
-      const hashedPassword = bcrypt.hashSync("BankBuddy@2026", BCRYPT_SALT_ROUNDS);
+    if (!elena) {
       await User.create({
         name: "Elena Rostova",
         username: "elena",
@@ -35,7 +33,51 @@ exports.seedDefaultUser = async () => {
         kycStatus: "VERIFIED",
         otpSecret: "123456"
       });
-      console.log("Seeded default banking user: Elena Rostova (CRN: 98234105, Card: 4441, User: elena, Pass: BankBuddy@2026)");
+      console.log("Seeded default banking user: Elena Rostova (CRN: 98234105)");
+    }
+
+    // 2. Aarav Patel
+    const aarav = await User.findOne({
+      where: {
+        [Op.or]: [{ username: "aarav_patel" }, { crn: "77889900" }]
+      }
+    });
+    if (!aarav) {
+      await User.create({
+        name: "Aarav Patel",
+        username: "aarav_patel",
+        email: "aarav.patel@bankbuddy.in",
+        password: hashedPassword,
+        crn: "77889900",
+        cardNumber: "7788",
+        phone: "+91 9876543212",
+        role: "Private Wealth Client",
+        kycStatus: "VERIFIED",
+        otpSecret: "123456"
+      });
+      console.log("Seeded default banking user: Aarav Patel (CRN: 77889900)");
+    }
+
+    // 3. Shrey819
+    const shrey = await User.findOne({
+      where: {
+        [Op.or]: [{ username: "Shrey819" }, { crn: "49880079" }]
+      }
+    });
+    if (!shrey) {
+      await User.create({
+        name: "Shrey",
+        username: "Shrey819",
+        email: "try.shrey@gmail.com",
+        password: hashedPassword,
+        crn: "49880079",
+        cardNumber: "5135",
+        phone: "+91 9876543210",
+        role: "Private Wealth Client",
+        kycStatus: "VERIFIED",
+        otpSecret: "123456"
+      });
+      console.log("Seeded default banking user: Shrey (CRN: 49880079)");
     }
   } catch (err) {
     console.error("User seeder note:", err.message);
