@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bank Buddy | Secure Banking & JWT Auth API</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #0f172a;
+      --card-bg: #1e293b;
+      --card-border: #334155;
+      --primary: #38bdf8;
+      --primary-hover: #0284c7;
+      --success: #22c55e;
+      --danger: #ef4444;
+      --text: #f8fafc;
+      --text-muted: #94a3b8;
+      --code-bg: #020617;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    header {
+      background: #020617;
+      border-bottom: 1px solid var(--card-border);
+      padding: 1rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .brand h1 { font-size: 1.2rem; font-weight: 700; color: #fff; }
+    .brand p { font-size: 0.8rem; color: var(--text-muted); }
+
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      background: rgba(34, 197, 94, 0.1);
+      border: 1px solid rgba(34, 197, 94, 0.3);
+      padding: 0.35rem 0.75rem;
+      border-radius: 9999px;
+      font-size: 0.75rem;
+      color: #4ade80;
+    }
+    .dot { width: 8px; height: 8px; border-radius: 50%; background: #22c55e; }
+
+    main {
+      flex: 1;
+      max-width: 1300px;
+      width: 100%;
+      margin: 0 auto;
+      padding: 1.5rem;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.5rem;
+    }
+
+    @media (max-width: 900px) {
+      main { grid-template-columns: 1fr; }
+    }
+
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 10px;
+      padding: 1.25rem;
+      margin-bottom: 1.25rem;
+    }
+
+    .card h2 {
+      font-size: 1rem;
+      font-weight: 600;
+      margin-bottom: 1rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0.35rem;
+      margin-bottom: 0.75rem;
+    }
+
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.75rem;
+    }
+
+    label { font-size: 0.75rem; color: var(--text-muted); font-weight: 500; }
+
+    input {
+      background: #020617;
+      border: 1px solid var(--card-border);
+      border-radius: 6px;
+      padding: 0.55rem 0.75rem;
+      color: var(--text);
+      font-size: 0.85rem;
+      outline: none;
+    }
+    input:focus { border-color: var(--primary); }
+
+    .btn-group { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+
+    button {
+      background: #334155;
+      border: none;
+      color: #fff;
+      padding: 0.55rem 0.9rem;
+      font-size: 0.8rem;
+      font-weight: 600;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+    button:hover { background: #475569; }
+    button.btn-primary { background: var(--primary); color: #020617; }
+    button.btn-primary:hover { background: var(--primary-hover); color: #fff; }
+    button.btn-success { background: var(--success); color: #020617; }
+    button.btn-danger { background: var(--danger); color: #fff; }
+
+    .token-display {
+      background: var(--code-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 6px;
+      padding: 0.65rem;
+      font-family: 'Fira Code', monospace;
+      font-size: 0.75rem;
+      color: #38bdf8;
+      word-break: break-all;
+      max-height: 60px;
+      overflow-y: auto;
+      margin-top: 0.5rem;
+    }
+
+    /* Product Table */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.8rem;
+      margin-top: 0.75rem;
+    }
+    th, td {
+      padding: 0.6rem;
+      text-align: left;
+      border-bottom: 1px solid var(--card-border);
+    }
+    th { color: var(--text-muted); font-weight: 600; }
+
+    pre#console-log {
+      background: var(--code-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 8px;
+      padding: 1rem;
+      font-family: 'Fira Code', monospace;
+      font-size: 0.75rem;
+      color: #e2e8f0;
+      min-height: 250px;
+      max-height: 550px;
+      overflow: auto;
+      white-space: pre-wrap;
+      word-break: break-all;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="brand">
+      <h1>🏦 Bank Buddy</h1>
+      <p>Secure Banking System &bull; PostgreSQL &bull; JWT Authentication</p>
+    </div>
+    <div class="status-badge">
+      <span class="dot"></span> Server Online (Port 8080)
+    </div>
+  </header>
+
+  <main>
+    <!-- LEFT COLUMN -->
+    <div>
+      <!-- 1. AUTHENTICATION -->
+      <div class="card">
+        <h2>🔐 User Authentication</h2>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Username</label>
+            <input type="text" id="username" value="user_demo" placeholder="Username">
+          </div>
+          <div class="form-group">
+            <label>Email</label>
+            <input type="email" id="email" value="user_demo@test.com" placeholder="Email">
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Password</label>
+          <input type="password" id="password" value="password123" placeholder="Password">
+        </div>
+        <div class="btn-group">
+          <button class="btn-primary" onclick="signin()">🔑 Sign In (POST /api/v1/signin)</button>
+          <button onclick="signup()">📝 Sign Up (POST /api/v1/signup)</button>
+        </div>
+        <div class="token-display" id="token-box">
+          No JWT access token yet. Sign in or sign up first.
+        </div>
+      </div>
+
+      <!-- 2. PRODUCT CRUD -->
+      <div class="card">
+        <h2>📦 Product Management (JWT Protected)</h2>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Product Name</label>
+            <input type="text" id="prodName" value="Gaming Laptop" placeholder="e.g. Mechanical Keyboard">
+          </div>
+          <div class="form-group">
+            <label>Price</label>
+            <input type="number" id="prodPrice" value="1299.99" placeholder="Price">
+          </div>
+        </div>
+        <div class="btn-group" style="margin-bottom: 1rem;">
+          <button class="btn-success" onclick="addProduct()">➕ Add Product</button>
+          <button class="btn-primary" onclick="getProducts()">🔄 Fetch All Products</button>
+        </div>
+
+        <div style="border-top: 1px solid var(--card-border); padding-top: 0.75rem;">
+          <div class="form-row">
+            <div class="form-group">
+              <label>Target Product ID</label>
+              <input type="number" id="targetId" placeholder="Product ID (e.g. 1)">
+            </div>
+            <div class="form-group" style="justify-content: flex-end;">
+              <label>&nbsp;</label>
+              <div class="btn-group">
+                <button onclick="getProductById()">🔍 Find ID</button>
+                <button onclick="updateProduct()">✏️ Update</button>
+                <button class="btn-danger" onclick="deleteProduct()">🗑️ Delete</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Products Table -->
+        <table id="products-table">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Name</th>
+              <th>Price</th>
+              <th>Created At</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody id="products-tbody">
+            <tr>
+              <td colspan="5" style="text-align: center; color: var(--text-muted);">
+                Click "Fetch All Products" to load data from PostgreSQL.
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- RIGHT COLUMN -->
+    <div>
+      <div class="card" style="position: sticky; top: 1.5rem;">
+        <h2>
+          <span>📡 API Request & Response Log</span>
+          <button style="padding: 0.25rem 0.5rem; font-size: 0.7rem;" onclick="clearLog()">Clear</button>
+        </h2>
+        <pre id="console-log">// API responses will appear here...</pre>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    let token = '';
+
+    function log(method, url, status, data) {
+      const box = document.getElementById('console-log');
+      const formatted = typeof data === 'object' ? JSON.stringify(data, null, 2) : data;
+      box.textContent = 
+`[${new Date().toLocaleTimeString()}] ${method} ${url}
+Status: ${status}
+Response:
+${formatted}`;
+    }
+
+    function clearLog() {
+      document.getElementById('console-log').textContent = '// Console cleared.';
+    }
+
+    async function apiCall(method, url, body = null, requireAuth = true) {
+      const headers = { 'Content-Type': 'application/json' };
+      if (requireAuth && token) {
+        headers['Authorization'] = `Bearer ${token}`;
+      }
+
+      const options = { method, headers };
+      if (body) options.body = JSON.stringify(body);
+
+      try {
+        const res = await fetch(url, options);
+        let data;
+        try {
+          data = await res.json();
+        } catch (e) {
+          data = await res.text();
+        }
+        log(method, url, res.status, data);
+        return { ok: res.ok, status: res.status, data };
+      } catch (err) {
+        log(method, url, 'Network Error', { error: err.message });
+      }
+    }
+
+    async function signup() {
+      const username = document.getElementById('username').value;
+      const email = document.getElementById('email').value;
+      const password = document.getElementById('password').value;
+
+      const res = await apiCall('POST', '/api/v1/signup', { username, email, password }, false);
+      if (res && res.ok) {
+        alert('Signup successful! Now click Sign In.');
+      }
+    }
+
+    async function signin() {
+      const username = document.getElementById('username').value;
+      const password = document.getElementById('password').value;
+
+      const res = await apiCall('POST', '/api/v1/signin', { username, password }, false);
+      if (res && res.data && res.data.accessToken) {
+        token = res.data.accessToken;
+        document.getElementById('token-box').textContent = token;
+        getProducts();
+      }
+    }
+
+    async function addProduct() {
+      const name = document.getElementById('prodName').value;
+      const price = parseFloat(document.getElementById('prodPrice').value);
+
+      const res = await apiCall('POST', '/api/auth/addproduct', { name, price });
+      if (res && res.ok) {
+        getProducts();
+      }
+    }
+
+    async function getProducts() {
+      const res = await apiCall('GET', '/api/auth/getproducts');
+      const tbody = document.getElementById('products-tbody');
+      if (res && res.data && Array.isArray(res.data)) {
+        if (res.data.length === 0) {
+          tbody.innerHTML = '<tr><td colspan="5" style="text-align: center;">No products found in database.</td></tr>';
+          return;
+        }
+        tbody.innerHTML = res.data.map(p => `
+          <tr>
+            <td>${p.id}</td>
+            <td><strong>${p.name}</strong></td>
+            <td>$${p.price}</td>
+            <td style="font-size: 0.7rem; color: var(--text-muted);">${new Date(p.createdAt).toLocaleDateString()}</td>
+            <td>
+              <button style="padding: 0.2rem 0.5rem; font-size: 0.7rem;" onclick="selectProduct(${p.id}, '${p.name.replace(/'/g, "\\'")}', ${p.price})">Select</button>
+            </td>
+          </tr>
+        `).join('');
+      }
+    }
+
+    function selectProduct(id, name, price) {
+      document.getElementById('targetId').value = id;
+      document.getElementById('prodName').value = name;
+      document.getElementById('prodPrice').value = price;
+    }
+
+    async function getProductById() {
+      const id = parseInt(document.getElementById('targetId').value);
+      if (!id) return alert('Enter target product ID');
+      await apiCall('POST', '/api/auth/getproductbyid', { id });
+    }
+
+    async function updateProduct() {
+      const id = parseInt(document.getElementById('targetId').value);
+      const name = document.getElementById('prodName').value;
+      const price = parseFloat(document.getElementById('prodPrice').value);
+      if (!id) return alert('Enter target product ID');
+
+      const res = await apiCall('POST', '/api/auth/update', { id, name, price });
+      if (res && res.ok) getProducts();
+    }
+
+    async function deleteProduct() {
+      const id = parseInt(document.getElementById('targetId').value);
+      if (!id) return alert('Enter target product ID');
+      if (!confirm(`Delete product ${id}?`)) return;
+
+      const res = await apiCall('POST', '/api/auth/delete', { id });
+      if (res && res.ok) getProducts();
+    }
+  </script>
+</body>
+</html>
