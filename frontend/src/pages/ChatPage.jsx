@@ -7,9 +7,24 @@ export default function ChatPage() {
   const { user } = useAuth();
   const messagesEndRef = useRef(null);
 
-  // User-scoped storage keys
-  const storageKey = `bankBuddy_chat_${user?.username || user?.customer_id || 'guest'}`;
-  const sessionKey = `bankBuddy_session_${user?.username || user?.customer_id || 'guest'}`;
+  // Derive stable storage keys - checking bankBuddyUser fallback in localStorage directly
+  const getActiveUserIdentifier = () => {
+    if (user?.username) return user.username;
+    if (user?.customer_id) return user.customer_id;
+    try {
+      const raw = localStorage.getItem('bankBuddyUser');
+      if (raw) {
+        const u = JSON.parse(raw);
+        if (u.username) return u.username;
+        if (u.customer_id) return u.customer_id;
+      }
+    } catch (e) {}
+    return 'default_user';
+  };
+
+  const userIdentifier = getActiveUserIdentifier();
+  const storageKey = `bankBuddy_chat_${userIdentifier}`;
+  const sessionKey = `bankBuddy_session_${userIdentifier}`;
 
   const sessionId = useRef(
     localStorage.getItem(sessionKey) ||
@@ -18,7 +33,12 @@ export default function ChatPage() {
 
   const getInitialMessages = () => {
     try {
-      const saved = localStorage.getItem(storageKey);
+      // 1. Try active user key
+      let saved = localStorage.getItem(storageKey);
+      // 2. Fallback to guest or legacy key if empty
+      if (!saved) {
+        saved = localStorage.getItem('bankBuddy_chat_guest') || localStorage.getItem('bankBuddy_chat_default_user');
+      }
       if (saved) {
         const parsed = JSON.parse(saved);
         if (Array.isArray(parsed) && parsed.length > 0) {
@@ -41,11 +61,34 @@ export default function ChatPage() {
   const [input, setInput] = useState('');
   const [messages, setMessages] = useState(getInitialMessages);
   const [isTyping, setIsTyping] = useState(false);
+  const isInitialMount = useRef(true);
 
-  // Sync messages and session ID to localStorage on change
+  // If user object finishes hydrating from AuthContext after mount, reload messages if current state is just the default 1 message
   useEffect(() => {
+    if (user?.username || user?.customer_id) {
+      try {
+        const activeKey = `bankBuddy_chat_${user.username || user.customer_id}`;
+        const saved = localStorage.getItem(activeKey);
+        if (saved) {
+          const parsed = JSON.parse(saved);
+          if (Array.isArray(parsed) && parsed.length > 0) {
+            setMessages(parsed);
+          }
+        }
+      } catch (e) {}
+    }
+  }, [user?.username, user?.customer_id]);
+
+  // Sync messages and session ID to localStorage on change (skipping first mount to prevent accidental overwrite)
+  useEffect(() => {
+    if (isInitialMount.current) {
+      isInitialMount.current = false;
+      return;
+    }
     try {
       localStorage.setItem(storageKey, JSON.stringify(messages));
+      // Also write to default fallback so switching user states doesn't lose messages
+      localStorage.setItem('bankBuddy_chat_default_user', JSON.stringify(messages));
       localStorage.setItem(sessionKey, sessionId.current);
     } catch (e) {
       console.warn('Failed to save chat to localStorage:', e);
