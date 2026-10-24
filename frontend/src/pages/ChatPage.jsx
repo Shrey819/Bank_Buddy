@@ -1,23 +1,76 @@
 import React, { useState, useRef, useEffect } from 'react';
 import Sidebar from '../components/Sidebar';
 import { useAuth } from '../context/AuthContext';
-import { Send, Bot, ShieldCheck, CheckCircle2, AlertTriangle, Cpu, Wrench } from 'lucide-react';
+import { Send, Bot, ShieldCheck, CheckCircle2, AlertTriangle, Cpu, Wrench, Trash2 } from 'lucide-react';
 
 export default function ChatPage() {
   const { user } = useAuth();
   const messagesEndRef = useRef(null);
-  const sessionId = useRef(`SESSION-${Math.random().toString(36).substring(2, 9).toUpperCase()}`);
+
+  // User-scoped storage keys
+  const storageKey = `bankBuddy_chat_${user?.username || user?.customer_id || 'guest'}`;
+  const sessionKey = `bankBuddy_session_${user?.username || user?.customer_id || 'guest'}`;
+
+  const sessionId = useRef(
+    localStorage.getItem(sessionKey) ||
+    `SESSION-${Math.random().toString(36).substring(2, 9).toUpperCase()}`
+  );
+
+  const getInitialMessages = () => {
+    try {
+      const saved = localStorage.getItem(storageKey);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          return parsed;
+        }
+      }
+    } catch (e) {
+      console.warn('Failed to parse saved chat messages:', e);
+    }
+    return [
+      {
+        id: 1,
+        sender: 'assistant',
+        text: `Hello ${user?.name || 'Elena'}! I am your Bank Buddy AI Financial Copilot. How can I assist your private wealth portfolio today?`,
+        time: 'Just now'
+      }
+    ];
+  };
 
   const [input, setInput] = useState('');
-  const [messages, setMessages] = useState([
-    {
-      id: 1,
-      sender: 'assistant',
-      text: `Hello ${user?.name || 'Elena'}! I am your Bank Buddy AI Financial Copilot. How can I assist your private wealth portfolio today?`,
-      time: 'Just now'
-    }
-  ]);
+  const [messages, setMessages] = useState(getInitialMessages);
   const [isTyping, setIsTyping] = useState(false);
+
+  // Sync messages and session ID to localStorage on change
+  useEffect(() => {
+    try {
+      localStorage.setItem(storageKey, JSON.stringify(messages));
+      localStorage.setItem(sessionKey, sessionId.current);
+    } catch (e) {
+      console.warn('Failed to save chat to localStorage:', e);
+    }
+  }, [messages, storageKey, sessionKey]);
+
+  // Clear chat handler
+  const handleClearChat = () => {
+    const defaultMsg = [
+      {
+        id: Date.now(),
+        sender: 'assistant',
+        text: `Chat cleared. Hello ${user?.name || 'Elena'}! How can I assist your banking queries today?`,
+        time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+      }
+    ];
+    setMessages(defaultMsg);
+    sessionId.current = `SESSION-${Math.random().toString(36).substring(2, 9).toUpperCase()}`;
+    try {
+      localStorage.setItem(storageKey, JSON.stringify(defaultMsg));
+      localStorage.setItem(sessionKey, sessionId.current);
+    } catch (e) {
+      console.warn('Failed to update localStorage on clear:', e);
+    }
+  };
 
   const quickPrompts = [
     'What is my account balance?',
@@ -193,6 +246,13 @@ export default function ChatPage() {
             <span className="px-2.5 py-1 bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-200 dark:border-emerald-800 text-emerald-700 dark:text-emerald-400 rounded-full text-[10px] font-bold flex items-center gap-1">
               <ShieldCheck className="w-3.5 h-3.5" /> ISO 20022 Verified Gateway
             </span>
+            <button
+              onClick={handleClearChat}
+              title="Clear saved chat history"
+              className="px-2.5 py-1 text-xs text-slate-500 hover:text-rose-600 dark:text-slate-400 dark:hover:text-rose-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition flex items-center gap-1 font-medium cursor-pointer"
+            >
+              <Trash2 className="w-3.5 h-3.5" /> Clear Chat
+            </button>
           </div>
         </header>
 
