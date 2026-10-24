@@ -4,6 +4,10 @@
   "description": "Bank Buddy - Autonomous Wealth & Net Banking Application",
   "scripts": {
     "start": "node backend_gateway_node/server.js",
+    "server": "node backend_gateway_node/server.js",
+    "frontend": "cd frontend && npm run dev",
+    "build:frontend": "cd frontend && npm run build",
+    "build": "cd frontend && npm run build",
     "test": "cd backend_gateway_node && npm test",
     "db:seed": "cd backend_gateway_node && npm run db:seed",
     "start:ai": "cd ai_core && uvicorn main:app --host 127.0.0.1 --port 8000 --reload",
@@ -12,9 +16,10 @@
   "keywords": [
     "bank-buddy",
     "net-banking",
+    "react",
+    "vite",
     "jwt",
-    "postgresql",
-    "frontend"
+    "postgresql"
   ],
   "author": "Shrey819",
   "license": "ISC",

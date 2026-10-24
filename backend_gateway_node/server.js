@@ -31,23 +31,15 @@ app.use(express.urlencoded({
   extended: true 
 }));
 
-// Serve static frontend UI from ../frontend
+// Serve frontend assets (prioritizing modern React build in ../frontend/dist)
 const frontendPath = path.join(__dirname, "..", "frontend");
-if (fs.existsSync(frontendPath)) {
+const distPath = path.join(frontendPath, "dist");
+const legacyPath = path.join(frontendPath, "legacy");
+
+if (fs.existsSync(distPath)) {
+  app.use(express.static(distPath));
+} else if (fs.existsSync(frontendPath)) {
   app.use(express.static(frontendPath));
-
-  // Direct route aliases for desktop and chat pages
-  app.get("/desktop", (req, res) => {
-    res.sendFile(path.join(frontendPath, "desktop.html"));
-  });
-
-  app.get("/login", (req, res) => {
-    res.sendFile(path.join(frontendPath, "login.html"));
-  });
-
-  app.get("/chat", (req, res) => {
-    res.sendFile(path.join(frontendPath, "chat.html"));
-  });
 }
 
 // Default API route for JSON clients
@@ -55,10 +47,31 @@ app.get("/api", (req, res) => {
   res.json({ message: "Bank Buddy API - Secure Node.js, PostgreSQL and JWT Authentication" });
 });
 
-// Import application routes
+// Import application API routes
 require("./routes/user-routes")(app);
 require("./routes/product-routes")(app);
 require("./routes/chat-routes")(app);
+
+// React SPA Route Fallback (enables client-side routing on reload for /login, /desktop, /chat)
+app.get("*", (req, res, next) => {
+  if (req.path.startsWith("/api")) {
+    return next();
+  }
+  if (fs.existsSync(path.join(distPath, "index.html"))) {
+    return res.sendFile(path.join(distPath, "index.html"));
+  }
+  // Fallback to legacy static files if dist is not present
+  const alias = req.path.replace(/^\//, '') + ".html";
+  const legacyFile = path.join(legacyPath, alias);
+  if (fs.existsSync(legacyFile)) {
+    return res.sendFile(legacyFile);
+  }
+  const rootFile = path.join(frontendPath, alias);
+  if (fs.existsSync(rootFile)) {
+    return res.sendFile(rootFile);
+  }
+  next();
+});
 
 const PORT = process.env.PORT || 8080;
 let server;
@@ -66,7 +79,7 @@ if (require.main === module) {
   server = app.listen(PORT, () => {
     console.log(`====================================================`);
     console.log(`Bank Buddy Backend Server is running on port ${PORT}`);
-    console.log(`Open in browser: http://localhost:${PORT}`);
+    console.log(`Open React UI in browser: http://localhost:${PORT}`);
     console.log(`====================================================`);
   });
 }
