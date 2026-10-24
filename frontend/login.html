@@ -998,36 +998,14 @@
       hideKotakAlert();
 
       try {
-        // Try real backend API
-        let data;
-        try {
-          const res = await fetch('/api/v1/signin', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ identifier, password })
-          });
-          data = await res.json();
-          if (!res.ok) throw new Error(data.message || 'Invalid credentials');
-        } catch (netErr) {
-          // Graceful client fallback for standalone demo testing
-          if (
-            (identifier === '98234105' || identifier.toLowerCase() === 'elena' || identifier === '4441') &&
-            (password === 'BankBuddy@2026' || password === 'password123')
-          ) {
-            data = {
-              step: 'OTP_REQUIRED',
-              sessionToken: 'demo-session-token-' + Date.now(),
-              user: {
-                id: 1,
-                name: 'Elena Rostova',
-                username: 'elena',
-                crn: '98234105',
-                maskedPhone: '•••• •••• 4321'
-              }
-            };
-          } else {
-            throw new Error(netErr.message || 'Invalid credentials! Try CRN: 98234105 or User: elena');
-          }
+        const res = await fetch('/api/v1/signin', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ identifier, password })
+        });
+        const data = await res.json();
+        if (!res.ok) {
+          throw new Error(data.message || 'Invalid credentials');
         }
 
         if (data.step === 'OTP_REQUIRED') {
@@ -1097,27 +1075,17 @@
       btn.textContent = 'Authenticating ISO 20022 Token...';
 
       try {
-        let data;
-        try {
-          const res = await fetch('/api/v1/verify-otp', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              sessionToken: authState.sessionToken,
-              otp: otp
-            })
-          });
-          data = await res.json();
-          if (!res.ok) throw new Error(data.message || 'OTP verification failed');
-        } catch (netErr) {
-          if (otp === '123456') {
-            data = {
-              accessToken: 'mock-jwt-token-mfa-elevated',
-              name: (authState.user && authState.user.name) || 'Elena Rostova'
-            };
-          } else {
-            throw new Error('Invalid OTP! Demo OTP is 123456');
-          }
+        const res = await fetch('/api/v1/verify-otp', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            sessionToken: authState.sessionToken,
+            otp: otp
+          })
+        });
+        const data = await res.json();
+        if (!res.ok) {
+          throw new Error(data.message || 'OTP verification failed');
         }
 
         enterDashboard(data);
@@ -1134,7 +1102,17 @@
     function enterDashboard(data) {
       authState.accessToken = data.accessToken;
       closeOtpModal();
-      localStorage.setItem('bankBuddyUser', JSON.stringify(data));
+      localStorage.setItem('bankBuddyUser', JSON.stringify({
+        token: data.accessToken,
+        accessToken: data.accessToken,
+        id: data.id,
+        name: data.name,
+        username: data.username,
+        email: data.email,
+        crn: data.crn,
+        cardNumber: data.cardNumber,
+        role: data.role
+      }));
       window.location.href = 'index.html';
     }
 

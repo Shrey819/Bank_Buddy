@@ -1,10 +1,13 @@
 const database = require("../models");
 const configuration = require("../config/config-jwt.js");
+const jwtAuth = require("../middleware/jwtAuth.js");
 const User = database.user;
 const Op = database.Sequelize.Op;
 
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcryptjs");
+
+const BCRYPT_SALT_ROUNDS = 10; // OWASP recommendation: minimum 10 rounds
 
 // Seed default Elena Rostova (PRD C1001 Private Wealth Client)
 exports.seedDefaultUser = async () => {
@@ -19,7 +22,7 @@ exports.seedDefaultUser = async () => {
     });
 
     if (!existing) {
-      const hashedPassword = bcrypt.hashSync("BankBuddy@2026", 8);
+      const hashedPassword = bcrypt.hashSync("BankBuddy@2026", BCRYPT_SALT_ROUNDS);
       await User.create({
         name: "Elena Rostova",
         username: "elena",
@@ -56,11 +59,14 @@ exports.signup = async (req, res) => {
     const randomCrn = crn || Math.floor(10000000 + Math.random() * 90000000).toString();
     const randomCard = cardNumber || Math.floor(1000 + Math.random() * 9000).toString();
 
+    // Secure password hashing with 10 salt rounds (OWASP compliant)
+    const hashedPassword = bcrypt.hashSync(password, BCRYPT_SALT_ROUNDS);
+
     const newUser = await User.create({
       name: name || username,
       username: username.trim(),
       email: email.trim(),
-      password: bcrypt.hashSync(password, 8),
+      password: hashedPassword,
       crn: randomCrn,
       cardNumber: randomCard,
       phone: phone || "+91 9876543210",
@@ -102,7 +108,7 @@ exports.signin = async (req, res) => {
 
     const cleanIdentifier = identifier.toString().trim();
 
-    // Flexible lookup by username, email, CRN, or Card Number
+    // Lookup by username, email, CRN, or Card Number
     const user = await User.findOne({
       where: {
         [Op.or]: [
@@ -115,8 +121,8 @@ exports.signin = async (req, res) => {
     });
 
     if (!user) {
-      return res.status(404).send({
-        message: "User not found with the provided CRN, Username, or Card Number!"
+      return res.status(401).send({
+        message: "Invalid credentials! User not found."
       });
     }
 
@@ -124,23 +130,23 @@ exports.signin = async (req, res) => {
     if (!passwordIsValid) {
       return res.status(401).send({
         accessToken: null,
-        message: "Invalid password!"
+        message: "Invalid credentials! Incorrect password."
       });
     }
 
-    // Step 1: If OTP Step-up is enabled (as per PRD non-negotiable requirement)
+    // Step 1: If OTP Step-up is enabled (PRD non-negotiable requirement)
     if (!skipOtp) {
-      // Issue temporary OTP verification session token
+      // Issue temporary OTP verification session token (strictly pre-MFA)
       const sessionToken = jwt.sign(
         { id: user.id, pendingMfa: true },
         configuration.secret,
         { expiresIn: 600 } // 10 minutes to verify OTP
       );
 
-      // Mask phone and email for security
+      // Mask phone and email for security (OWASP sensitive data exposure prevention)
       const phone = user.phone || "+91 9876543210";
       const maskedPhone = "•••• •••• " + phone.slice(-4);
-      const emailParts = user.email.split("@");
+      const emailParts = user.email ? user.email.split("@") : ["user", "bank.com"];
       const maskedEmail = emailParts[0].charAt(0) + "••••@" + (emailParts[1] || "wealth.client");
 
       return res.status(200).send({
@@ -160,7 +166,7 @@ exports.signin = async (req, res) => {
       });
     }
 
-    // Direct token issuance if skipOtp is requested
+    // Direct token issuance if skipOtp is explicitly requested
     const token = jwt.sign(
       {
         id: user.id,
@@ -170,7 +176,7 @@ exports.signin = async (req, res) => {
         acr: "pwd"
       },
       configuration.secret,
-      { expiresIn: 86400 }
+      { expiresIn: 86400 } // 24 hours
     );
 
     res.status(200).send({
@@ -203,6 +209,11 @@ exports.verifyOtp = async (req, res) => {
     let userId = null;
 
     if (sessionToken) {
+      // Check if sessionToken has been revoked or tampered
+      if (jwtAuth.isTokenRevoked(sessionToken)) {
+        return res.status(401).send({ message: "OTP session has already been used or revoked. Please log in again." });
+      }
+
       try {
         const decoded = jwt.verify(sessionToken, configuration.secret);
         userId = decoded.id;
@@ -233,8 +244,14 @@ exports.verifyOtp = async (req, res) => {
 
     // Check OTP: matches user.otpSecret or default demo '123456'
     const validOtp = user.otpSecret || "123456";
-    if (otp.toString().trim() !== validOtp && otp.toString().trim() !== "123456") {
+    const cleanedOtp = otp.toString().trim();
+    if (cleanedOtp !== validOtp && cleanedOtp !== "123456") {
       return res.status(400).send({ message: "Invalid OTP! Hint: Demo OTP is 123456." });
+    }
+
+    // Invalidate pre-MFA sessionToken to prevent replay attacks (OWASP Session Management)
+    if (sessionToken) {
+      jwtAuth.revokeToken(sessionToken);
     }
 
     // Mint elevated JWT with acr: "mfa" (PRD Section 10 requirement)
@@ -261,6 +278,55 @@ exports.verifyOtp = async (req, res) => {
       cardNumber: user.cardNumber,
       role: user.role,
       accessToken: token
+    });
+  } catch (err) {
+    res.status(500).send({ message: err.message });
+  }
+};
+
+// ==========================================
+// Session Verification / Get Current User (/api/v1/me)
+// ==========================================
+exports.getMe = async (req, res) => {
+  try {
+    const user = await User.findByPk(req.userId, {
+      attributes: { exclude: ["password", "otpSecret"] }
+    });
+
+    if (!user) {
+      return res.status(404).send({ message: "User not found!" });
+    }
+
+    res.status(200).send({
+      user: {
+        id: user.id,
+        name: user.name,
+        username: user.username,
+        email: user.email,
+        crn: user.crn,
+        cardNumber: user.cardNumber,
+        phone: user.phone,
+        role: user.role,
+        kycStatus: user.kycStatus
+      }
+    });
+  } catch (err) {
+    res.status(500).send({ message: err.message });
+  }
+};
+
+// ==========================================
+// User Logout & Session Invalidation (/api/v1/logout)
+// ==========================================
+exports.logout = async (req, res) => {
+  try {
+    const token = req.token;
+    if (token) {
+      jwtAuth.revokeToken(token);
+    }
+
+    res.status(200).send({
+      message: "Successfully logged out. Session has been revoked."
     });
   } catch (err) {
     res.status(500).send({ message: err.message });

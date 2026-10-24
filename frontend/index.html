@@ -322,7 +322,7 @@
         </a>
 
         <!-- Logout Link -->
-        <a class="nav-item flex items-center gap-2.5 px-3.5 py-2.5 rounded-xl text-xs font-medium text-rose-600 hover:bg-rose-50 transition-all" href="login.html">
+        <a class="nav-item flex items-center gap-2.5 px-3.5 py-2.5 rounded-xl text-xs font-medium text-rose-600 hover:bg-rose-50 transition-all cursor-pointer" onclick="handleLogout(event)" href="login.html">
           <svg class="w-4 h-4 text-rose-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
             <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
             <polyline points="16 17 21 12 16 7"></polyline>
@@ -357,11 +357,11 @@
             <span class="absolute bottom-0 right-0 w-2 h-2 bg-emerald-500 border border-white rounded-full"></span>
           </div>
           <div class="flex flex-col overflow-hidden">
-            <span class="text-xs font-bold text-slate-900 truncate">Elena Rostova</span>
-            <span class="text-[9px] font-semibold text-indigo-600 truncate">CRN: 98234105 &bull; Private</span>
+            <span class="user-name-display text-xs font-bold text-slate-900 truncate">Elena Rostova</span>
+            <span class="user-crn-display text-[9px] font-semibold text-indigo-600 truncate">CRN: 98234105 &bull; Private</span>
           </div>
         </div>
-        <a href="login.html" class="p-1.5 text-slate-400 hover:text-red-600 rounded-lg hover:bg-slate-100 transition shrink-0" title="Logout &amp; Return to Login">
+        <a href="login.html" onclick="handleLogout(event)" class="p-1.5 text-slate-400 hover:text-red-600 rounded-lg hover:bg-slate-100 transition shrink-0 cursor-pointer" title="Logout &amp; Return to Login">
           <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
             <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
             <polyline points="16 17 21 12 16 7"></polyline>
@@ -1246,5 +1246,75 @@
       feed.scrollTop = feed.scrollHeight;
     }, 400);
   }
+</script>
+<script>
+  // End-to-end Session Guard & Auth Management
+  async function syncSession() {
+    const raw = localStorage.getItem('bankBuddyUser');
+    if (!raw) {
+      window.location.href = 'login.html';
+      return;
+    }
+    try {
+      const userObj = JSON.parse(raw);
+      const token = userObj.token || userObj.accessToken;
+      if (!token) {
+        window.location.href = 'login.html';
+        return;
+      }
+
+      if (userObj.name) {
+        const nameElems = document.querySelectorAll('.user-name-display');
+        nameElems.forEach(el => el.textContent = userObj.name);
+        const initials = userObj.name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
+        const avatarElems = document.querySelectorAll('.user-avatar-display');
+        avatarElems.forEach(el => el.textContent = initials || 'BB');
+      }
+      if (userObj.crn) {
+        const crnElems = document.querySelectorAll('.user-crn-display');
+        crnElems.forEach(el => el.textContent = 'CRN: ' + userObj.crn + ' • Private');
+      }
+
+      // Verify active session with backend /api/v1/me
+      const res = await fetch('/api/v1/me', {
+        headers: { 'Authorization': 'Bearer ' + token }
+      });
+      if (!res.ok) {
+        localStorage.removeItem('bankBuddyUser');
+        window.location.href = 'login.html';
+      }
+    } catch (err) {
+      // Graceful offline/network fallback
+    }
+  }
+
+  async function handleLogout(e) {
+    if (e) e.preventDefault();
+    try {
+      const raw = localStorage.getItem('bankBuddyUser');
+      if (raw) {
+        const userObj = JSON.parse(raw);
+        const token = userObj.token || userObj.accessToken;
+        if (token) {
+          await fetch('/api/v1/logout', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': 'Bearer ' + token
+            }
+          });
+        }
+      }
+    } catch (err) {
+      console.warn('Logout notification error:', err);
+    } finally {
+      localStorage.removeItem('bankBuddyUser');
+      window.location.href = 'login.html';
+    }
+  }
+
+  window.handleLogout = handleLogout;
+  window.syncSession = syncSession;
+  document.addEventListener('DOMContentLoaded', syncSession);
 </script>
 </body></html>
