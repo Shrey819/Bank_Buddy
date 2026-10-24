@@ -3,75 +3,83 @@ const sequelize = db.sequelize;
 const jwt = require("jsonwebtoken");
 const configJwt = require("../config/config-jwt.js");
 
-// Customer ID for the banking portal (defaults to seeded ISO 20022 customer C1001)
-const DEFAULT_CUSTOMER_ID = "C1001";
-
 /**
- * Helper to fetch customer ID from query, body, or authenticated user JWT token
+ * Resolve customer ID strictly from PostgreSQL database tables:
+ * 1. Checks `customers` table for requested customerId in query or body
+ * 2. Or queries `users` table for user's assigned customer_id
+ * 3. Or falls back to first customer in `customers` table
  */
-function resolveCustomerId(req) {
-  // 1. Explicit query param (e.g. ?customerId=C1002 or ?customerId=C1003)
+async function resolveCustomerId(req) {
+  // 1. Explicit query or body parameter from frontend selection
   if (req.query && req.query.customerId) {
     const qCid = req.query.customerId.trim().toUpperCase();
-    if (['C1001', 'C1002', 'C1003'].includes(qCid)) return qCid;
+    const [rows] = await sequelize.query(
+      `SELECT customer_id FROM customers WHERE customer_id = :qCid`,
+      { replacements: { qCid } }
+    );
+    if (rows.length > 0) return rows[0].customer_id;
   }
 
-  // 2. Explicit body param
   if (req.body && req.body.customerId) {
     const bCid = req.body.customerId.trim().toUpperCase();
-    if (['C1001', 'C1002', 'C1003'].includes(bCid)) return bCid;
+    const [rows] = await sequelize.query(
+      `SELECT customer_id FROM customers WHERE customer_id = :bCid`,
+      { replacements: { bCid } }
+    );
+    if (rows.length > 0) return rows[0].customer_id;
   }
 
-  // 3. Resolve from JWT Token in Authorization header
+  // 2. Resolve from JWT Token by looking up users table directly
   const authHeader = req.headers["authorization"] || req.headers["x-access-token"];
   if (authHeader) {
     try {
       const token = authHeader.startsWith("Bearer ") ? authHeader.slice(7) : authHeader;
       const decoded = jwt.verify(token, configJwt.secret);
-      if (decoded) {
-        const u = (decoded.username || '').toLowerCase();
-        // User Shrey / Sanjna maps to C1002
-        if (u.includes("shrey") || u.includes("sanjna") || u === "meera" || decoded.id === 6 || decoded.id === 8) {
-          return "C1002";
-        }
-        // User Neon / Hello maps to C1003
-        if (u.includes("neon") || u === "hello" || u.includes("kabir") || decoded.id === 9 || decoded.id === 10) {
-          return "C1003";
-        }
-        // User Elena / Aarav maps to C1001
-        if (u.includes("elena") || u.includes("aarav") || decoded.id === 5 || decoded.id === 7 || decoded.id === 1) {
-          return "C1001";
+      if (decoded && decoded.id) {
+        const [userRows] = await sequelize.query(
+          `SELECT customer_id FROM users WHERE id = :id`,
+          { replacements: { id: decoded.id } }
+        );
+        if (userRows.length > 0 && userRows[0].customer_id) {
+          return userRows[0].customer_id;
         }
       }
     } catch (e) {
-      // ignore token parse error and fallback
+      // ignore token parse error
     }
   }
 
-  return DEFAULT_CUSTOMER_ID;
+  // 3. Fallback: Query first customer from customers database table
+  const [firstCust] = await sequelize.query(
+    `SELECT customer_id FROM customers ORDER BY customer_id ASC LIMIT 1`
+  );
+  return firstCust.length > 0 ? firstCust[0].customer_id : "C1001";
 }
 
 /**
- * Fetch all dashboard banking data from PostgreSQL for the active customer
+ * Fetch all dashboard banking data from PostgreSQL tables for active customer
  */
 exports.getDashboardData = async (req, res) => {
   try {
-    const customerId = resolveCustomerId(req);
+    const customerId = await resolveCustomerId(req);
 
-    // 1. Customer profile
+    // 1. Customer profile strictly from customers table
     const [customers] = await sequelize.query(
       `SELECT customer_id, full_name, email, phone, city, preferred_language, is_active 
        FROM customers WHERE customer_id = :customerId`,
       { replacements: { customerId } }
     );
-    const customer = customers[0] || {
-      customer_id: customerId,
-      full_name: customerId === 'C1002' ? 'Meera Iyer' : customerId === 'C1003' ? 'Kabir Khan' : 'Elena Rostova',
-      email: customerId === 'C1002' ? 'meera.iyer@example.test' : customerId === 'C1003' ? 'kabir.khan@example.test' : 'elena.rostova@wealth.client',
-      city: customerId === 'C1002' ? 'Pune' : customerId === 'C1003' ? 'Hyderabad' : 'Jaipur'
-    };
 
-    // 2. Accounts (savings, current, etc.)
+    if (customers.length === 0) {
+      return res.status(404).json({
+        success: false,
+        message: `Customer ${customerId} not found in database.`
+      });
+    }
+
+    const customer = customers[0];
+
+    // 2. Accounts directly from accounts table
     const [accounts] = await sequelize.query(
       `SELECT account_id, customer_id, account_number, account_type, currency, 
               available_balance, ledger_balance, status, opened_on 
@@ -79,7 +87,7 @@ exports.getDashboardData = async (req, res) => {
       { replacements: { customerId } }
     );
 
-    // 3. Credit Cards
+    // 3. Credit Cards directly from credit_cards table
     const [creditCards] = await sequelize.query(
       `SELECT card_id, customer_id, account_id, masked_card_number, card_network, 
               credit_limit, outstanding_amount, minimum_due, statement_due_date, status, reward_points 
@@ -87,7 +95,7 @@ exports.getDashboardData = async (req, res) => {
       { replacements: { customerId } }
     );
 
-    // 4. Debit Cards
+    // 4. Debit Cards directly from debit_cards table
     const [debitCards] = await sequelize.query(
       `SELECT card_id, customer_id, account_id, masked_card_number, card_network, 
               daily_atm_limit, daily_purchase_limit, status, issued_on, expires_on 
@@ -95,21 +103,21 @@ exports.getDashboardData = async (req, res) => {
       { replacements: { customerId } }
     );
 
-    // 5. Bills
+    // 5. Bills directly from bills table
     const [bills] = await sequelize.query(
       `SELECT bill_id, customer_id, biller_name, bill_type, amount_due, due_date, status, autopay_enabled, account_id 
        FROM bills WHERE customer_id = :customerId ORDER BY due_date ASC`,
       { replacements: { customerId } }
     );
 
-    // 6. Scheduled Payments
+    // 6. Scheduled Payments directly from scheduled_payments table
     const [scheduledPayments] = await sequelize.query(
       `SELECT payment_id, customer_id, account_id, payee_name, amount, scheduled_date, payment_method, status, reference_number 
        FROM scheduled_payments WHERE customer_id = :customerId ORDER BY scheduled_date ASC`,
       { replacements: { customerId } }
     );
 
-    // 7. Loans & EMIs
+    // 7. Loans & EMIs directly from loans and loan_emis tables
     const [loans] = await sequelize.query(
       `SELECT l.loan_id, l.customer_id, l.loan_type, l.principal_amount, l.outstanding_balance, 
               l.annual_interest_pct, l.emi_amount, l.next_emi_date, l.status,
@@ -120,7 +128,7 @@ exports.getDashboardData = async (req, res) => {
       { replacements: { customerId } }
     );
 
-    // 8. Transactions (up to 50 latest for this specific customer)
+    // 8. Transactions directly from transactions table
     const [transactions] = await sequelize.query(
       `SELECT transaction_id, account_id, customer_id, transaction_ts, merchant, description, 
               amount, direction, category, payment_method, transaction_type, status, reference_number, upi_id, card_id 
@@ -128,18 +136,18 @@ exports.getDashboardData = async (req, res) => {
       { replacements: { customerId } }
     );
 
-    // 9. Available Customers in Neon PostgreSQL for live switching
+    // 9. All available customers directly from customers and accounts tables
     const [allCustomers] = await sequelize.query(
-      `SELECT c.customer_id, c.full_name, c.city,
+      `SELECT c.customer_id, c.full_name, c.email, c.city,
               COALESCE(SUM(a.available_balance), 0) as total_balance,
               COUNT(DISTINCT a.account_id) as accounts_count
        FROM customers c
        LEFT JOIN accounts a ON c.customer_id = a.customer_id
-       GROUP BY c.customer_id, c.full_name, c.city
+       GROUP BY c.customer_id, c.full_name, c.email, c.city
        ORDER BY c.customer_id ASC`
     );
 
-    // Calculations
+    // Calculations based strictly on database values
     const totalAvailableBalance = accounts.reduce((acc, a) => acc + parseFloat(a.available_balance || 0), 0);
     const totalLedgerBalance = accounts.reduce((acc, a) => acc + parseFloat(a.ledger_balance || 0), 0);
     const creditOutstanding = creditCards.reduce((acc, c) => acc + parseFloat(c.outstanding_amount || 0), 0);
@@ -169,9 +177,9 @@ exports.getDashboardData = async (req, res) => {
           customerId: ac.customer_id,
           name: ac.full_name,
           city: ac.city,
+          email: ac.email,
           totalBalance: parseFloat(ac.total_balance),
-          accountsCount: parseInt(ac.accounts_count, 10),
-          mappedUser: ac.customer_id === 'C1001' ? 'Elena Rostova / Aarav Patel' : ac.customer_id === 'C1002' ? 'Shrey / Sanjna' : 'Neon Client 6573'
+          accountsCount: parseInt(ac.accounts_count, 10)
         })),
         summary: {
           totalAvailableBalance: Math.round(totalAvailableBalance * 100) / 100,
@@ -237,7 +245,7 @@ exports.adjustBalance = async (req, res) => {
       });
     }
 
-    // 1. Fetch current account
+    // 1. Fetch current account directly from accounts table
     const [accounts] = await sequelize.query(
       `SELECT * FROM accounts WHERE account_id = :accountId FOR UPDATE`,
       { replacements: { accountId }, transaction }
@@ -247,7 +255,7 @@ exports.adjustBalance = async (req, res) => {
       await transaction.rollback();
       return res.status(404).json({
         success: false,
-        message: `Account with ID ${accountId} not found.`
+        message: `Account with ID ${accountId} not found in database.`
       });
     }
 
@@ -268,7 +276,7 @@ exports.adjustBalance = async (req, res) => {
     const newAvailable = type === 'add' ? currentAvailable + numAmount : currentAvailable - numAmount;
     const newLedger = type === 'add' ? currentLedger + numAmount : currentLedger - numAmount;
 
-    // 4. Update account table
+    // 4. Update accounts table in database
     await sequelize.query(
       `UPDATE accounts 
        SET available_balance = :newAvailable, ledger_balance = :newLedger 
@@ -283,7 +291,7 @@ exports.adjustBalance = async (req, res) => {
       }
     );
 
-    // 5. Generate ISO 20022 compliant transaction record matching constraints
+    // 5. Generate ISO 20022 compliant transaction record in transactions table
     const nextTxnId = 'TXN' + (Date.now().toString().slice(-5) + Math.floor(Math.random() * 100));
     const refNumber = 'REF' + Math.floor(10000000 + Math.random() * 90000000);
     const direction = type === 'add' ? 'credit' : 'debit';
@@ -352,11 +360,11 @@ exports.adjustBalance = async (req, res) => {
 exports.sweepSurplus = async (req, res) => {
   const transaction = await sequelize.transaction();
   try {
-    const customerId = resolveCustomerId(req);
+    const customerId = await resolveCustomerId(req);
     const { amount = 50000, sourceAccountId } = req.body;
     const numAmount = parseFloat(amount);
 
-    // If sourceAccountId not provided, pick first account for this customer
+    // If sourceAccountId not provided, pick first account for this customer directly from database
     let accountToUse = sourceAccountId;
     if (!accountToUse) {
       const [userAccs] = await sequelize.query(
@@ -377,7 +385,7 @@ exports.sweepSurplus = async (req, res) => {
 
     if (accounts.length === 0) {
       await transaction.rollback();
-      return res.status(404).json({ success: false, message: "Source account not found." });
+      return res.status(404).json({ success: false, message: "Source account not found in database." });
     }
 
     const currentAccount = accounts[0];
@@ -452,8 +460,7 @@ exports.sweepSurplus = async (req, res) => {
 };
 
 /**
- * Toggle Debit Card Freeze / Active status in Neon DB
- * Allowed status in debit_cards: 'active', 'blocked', 'inactive'
+ * Toggle Debit Card Freeze / Active status in Neon DB debit_cards table
  */
 exports.toggleCardFreeze = async (req, res) => {
   const transaction = await sequelize.transaction();
@@ -467,12 +474,11 @@ exports.toggleCardFreeze = async (req, res) => {
 
     if (cards.length === 0) {
       await transaction.rollback();
-      return res.status(404).json({ success: false, message: `Card ${cardId} not found.` });
+      return res.status(404).json({ success: false, message: `Card ${cardId} not found in database.` });
     }
 
     const card = cards[0];
     const oldStatus = card.status;
-    // Map frozen to 'blocked', active to 'active'
     const newStatus = (oldStatus === 'active') ? 'blocked' : 'active';
 
     await sequelize.query(

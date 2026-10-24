@@ -34,16 +34,12 @@ import {
 export default function DashboardPage() {
   const { user } = useAuth();
 
-  // Active Customer ID in Neon PostgreSQL (auto-mapped or switchable)
+  // Active Customer ID in Neon PostgreSQL (retrieved from user's customer_id or defaulted from DB)
   const [selectedCustomerId, setSelectedCustomerId] = useState(() => {
-    // If logged in user is Shrey or Sanjna -> C1002; if Neon -> C1003; else C1001
-    const uname = (user?.username || '').toLowerCase();
-    if (uname.includes('shrey') || uname.includes('sanjna')) return 'C1002';
-    if (uname.includes('neon') || uname === 'hello') return 'C1003';
-    return 'C1001';
+    return user?.customer_id || 'C1001';
   });
 
-  // Banking data state loaded from Neon PostgreSQL
+  // Banking data state loaded from Neon PostgreSQL tables
   const [bankingData, setBankingData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -68,24 +64,29 @@ export default function DashboardPage() {
   const [copilotMessages, setCopilotMessages] = useState([
     {
       sender: 'assistant',
-      text: 'Good day! I am your Autonomous Banking Copilot connected to Neon PostgreSQL. All ledger transactions and card limits comply with ISO 20022 standards.'
+      text: 'Good day! I am your Autonomous Banking Copilot connected directly to your Neon PostgreSQL database tables. All ledger transactions and card limits comply with ISO 20022 standards.'
     }
   ]);
 
-  // Load real banking data for the selected customer ID
+  // Load real banking data for the selected customer ID from PostgreSQL
   const fetchDashboardData = async (targetCid = selectedCustomerId, isSilent = false) => {
     if (!isSilent) setRefreshing(true);
     try {
       const token = user?.token || user?.accessToken;
       const headers = token ? { Authorization: `Bearer ${token}` } : {};
-      const url = `/api/v1/dashboard-data?customerId=${targetCid}`;
+      const url = targetCid
+        ? `/api/v1/dashboard-data?customerId=${targetCid}`
+        : `/api/v1/dashboard-data`;
       const res = await fetch(url, { headers });
 
       if (res.ok) {
         const json = await res.json();
         if (json.success && json.data) {
           setBankingData(json.data);
-          // Set default selected account
+          if (json.data.activeCustomerId && json.data.activeCustomerId !== selectedCustomerId) {
+            setSelectedCustomerId(json.data.activeCustomerId);
+          }
+          // Set default selected account from database accounts
           if (json.data.accounts?.length > 0) {
             setSelectedAccountId(json.data.accounts[0].account_id);
           }
@@ -103,13 +104,13 @@ export default function DashboardPage() {
     fetchDashboardData(selectedCustomerId, true);
   }, [selectedCustomerId]);
 
-  // Handle customer switcher change
+  // Handle customer switcher change directly from database customers list
   const handleSwitchCustomer = (newCid) => {
     setSelectedCustomerId(newCid);
     fetchDashboardData(newCid, false);
     setNotification({
       type: 'success',
-      message: `Switched view to Customer ${newCid}. Ledger and balances updated in real time.`
+      message: `Switched view to Customer ${newCid} in database. All balances and ledger records updated.`
     });
   };
 
@@ -122,7 +123,7 @@ export default function DashboardPage() {
     });
   };
 
-  // Derive primary card info
+  // Derive primary card info directly from database rows
   const primaryDebitCard = bankingData?.debitCards?.[0] || null;
   const isCardFrozen = primaryDebitCard?.status === 'blocked';
   const primaryCreditCard = bankingData?.creditCards?.[0] || null;
@@ -137,7 +138,7 @@ export default function DashboardPage() {
     safeSurplus: 0
   };
 
-  // Toggle Debit Card Freeze in Neon PostgreSQL
+  // Toggle Debit Card Freeze in Neon PostgreSQL debit_cards table
   const handleToggleCardFreeze = async () => {
     if (!primaryDebitCard) return;
     try {
@@ -248,7 +249,7 @@ export default function DashboardPage() {
     }
   };
 
-  // Filtered transactions list
+  // Filtered transactions list directly from database rows
   const filteredTransactions = useMemo(() => {
     const list = bankingData?.transactions || [];
     return list.filter((tx) => {
@@ -334,7 +335,7 @@ export default function DashboardPage() {
         ...prev,
         {
           sender: 'assistant',
-          text: `Command "${text}" analyzed against ISO 20022 rules for Customer ${selectedCustomerId}. You can ask me to "deposit funds", "transfer money", "freeze card", "sweep surplus", or "check balance".`
+          text: `Command "${text}" analyzed against ISO 20022 database rules for Customer ${selectedCustomerId}. You can ask me to "deposit funds", "transfer money", "freeze card", "sweep surplus", or "check balance".`
         }
       ]);
     }
@@ -359,40 +360,39 @@ export default function DashboardPage() {
               </span>
             </div>
             <p className="text-xs text-slate-500 dark:text-slate-400 font-medium mt-0.5">
-              Active Client: <strong className="text-indigo-600 dark:text-indigo-400">{bankingData?.customer?.full_name || 'Elena Rostova'}</strong> &bull; Customer ID: <span className="font-mono font-bold text-indigo-500">{selectedCustomerId}</span> &bull; CRN: {user?.crn || '98234105'} &bull; City: {bankingData?.customer?.city || 'Jaipur'}
+              Active Client: <strong className="text-indigo-600 dark:text-indigo-400">{bankingData?.customer?.full_name || 'Loading customer...'}</strong> &bull; Customer ID: <span className="font-mono font-bold text-indigo-500">{bankingData?.customer?.customer_id || selectedCustomerId}</span> &bull; City: {bankingData?.customer?.city || 'Jaipur'} &bull; Email: {bankingData?.customer?.email || ''}
             </p>
           </div>
 
-          {/* User/Customer Live Switcher Pills */}
-          <div className="flex items-center gap-2 flex-wrap bg-white dark:bg-slate-900 p-1.5 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-sm">
-            <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider px-2 flex items-center gap-1">
-              <Users className="w-3.5 h-3.5 text-indigo-500" /> Switch Client:
-            </span>
-            {[
-              { id: 'C1001', label: 'Elena / Aarav (C1001)', tag: '₹1.43L' },
-              { id: 'C1002', label: 'Shrey / Meera (C1002)', tag: '₹68.4K' },
-              { id: 'C1003', label: 'Neon / Kabir (C1003)', tag: '₹41.2K' }
-            ].map((cust) => (
-              <button
-                key={cust.id}
-                onClick={() => handleSwitchCustomer(cust.id)}
-                className={`px-3 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5 cursor-pointer ${
-                  selectedCustomerId === cust.id
-                    ? 'bg-indigo-600 text-white shadow-sm'
-                    : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'
-                }`}
-              >
-                <span>{cust.label}</span>
-                <span className={`text-[10px] px-1.5 py-0.2 rounded font-extrabold ${
-                  selectedCustomerId === cust.id
-                    ? 'bg-indigo-500 text-white'
-                    : 'bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300'
-                }`}>
-                  {cust.tag}
-                </span>
-              </button>
-            ))}
-          </div>
+          {/* User/Customer Live Switcher: 100% Derived from Database Customers Table */}
+          {bankingData?.availableCustomers && bankingData.availableCustomers.length > 0 && (
+            <div className="flex items-center gap-2 flex-wrap bg-white dark:bg-slate-900 p-1.5 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-sm">
+              <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider px-2 flex items-center gap-1">
+                <Users className="w-3.5 h-3.5 text-indigo-500" /> Database Clients:
+              </span>
+              {bankingData.availableCustomers.map((cust) => (
+                <button
+                  key={cust.customerId}
+                  onClick={() => handleSwitchCustomer(cust.customerId)}
+                  className={`px-3 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5 cursor-pointer ${
+                    selectedCustomerId === cust.customerId
+                      ? 'bg-indigo-600 text-white shadow-sm'
+                      : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'
+                  }`}
+                  title={`${cust.name} (${cust.city}) - Total Balance: ${formatINR(cust.totalBalance)}`}
+                >
+                  <span>{cust.name} ({cust.customerId})</span>
+                  <span className={`text-[10px] px-1.5 py-0.2 rounded font-extrabold ${
+                    selectedCustomerId === cust.customerId
+                      ? 'bg-indigo-500 text-white'
+                      : 'bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300'
+                  }`}>
+                    {formatINR(cust.totalBalance)}
+                  </span>
+                </button>
+              ))}
+            </div>
+          )}
         </div>
 
         {/* Quick Action Control Bar */}
@@ -432,9 +432,9 @@ export default function DashboardPage() {
             <button
               onClick={() => fetchDashboardData(selectedCustomerId)}
               className="px-3 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700/60 rounded-xl text-xs font-semibold text-slate-700 dark:text-slate-300 transition shadow-sm flex items-center gap-1.5 cursor-pointer"
-              title="Refresh ledger from database"
+              title="Refresh ledger from database tables"
             >
-              <RefreshCw className={`w-3.5 h-3.5 ${refreshing ? 'animate-spin text-indigo-600' : ''}`} /> Sync Ledger
+              <RefreshCw className={`w-3.5 h-3.5 ${refreshing ? 'animate-spin text-indigo-600' : ''}`} /> Sync DB Tables
             </button>
 
             <button
@@ -472,13 +472,13 @@ export default function DashboardPage() {
           </div>
         )}
 
-        {/* 1. Account Metrics in ₹ (Real PostgreSQL Data for Selected User) */}
+        {/* 1. Account Metrics in ₹ (Directly from Neon PostgreSQL Tables) */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
           {/* Card 1: Liquid Checking & Savings */}
           <div className="p-6 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-sm hover:shadow-md transition relative group">
             <div className="flex justify-between items-center mb-3">
               <span className="text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-400">
-                Liquid Checking & Savings
+                Liquid Accounts & Balances
               </span>
               <div className="p-2 bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 rounded-xl">
                 <Wallet className="w-4 h-4" />
@@ -496,12 +496,12 @@ export default function DashboardPage() {
               ))}
             </div>
             <div className="mt-3 pt-2.5 border-t border-slate-100 dark:border-slate-800 text-[10px] text-emerald-600 dark:text-emerald-400 font-semibold flex items-center justify-between">
-              <span>Ledger: {formatINR(summary.totalLedgerBalance)}</span>
+              <span>Ledger Balance: {formatINR(summary.totalLedgerBalance)}</span>
               <span className="flex items-center gap-0.5"><ArrowUpRight className="w-3 h-3" /> ISO 20022 Verified</span>
             </div>
           </div>
 
-          {/* Card 2: Sapphire Reserve Credit Card */}
+          {/* Card 2: Credit Card Directly from credit_cards table */}
           <div className="p-6 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-sm hover:shadow-md transition">
             <div className="flex justify-between items-center mb-3">
               <span className="text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-400">
@@ -530,7 +530,7 @@ export default function DashboardPage() {
             </div>
           </div>
 
-          {/* Card 3: Safe Surplus */}
+          {/* Card 3: Safe Surplus Calculated from Table Values */}
           <div className="p-6 bg-gradient-to-tr from-indigo-900 via-indigo-800 to-slate-900 text-white rounded-2xl shadow-md flex flex-col justify-between">
             <div>
               <div className="flex justify-between items-center mb-3">
@@ -545,7 +545,7 @@ export default function DashboardPage() {
                 {formatINR(summary.safeSurplus)}
               </div>
               <p className="text-[11px] text-indigo-200/90 font-medium leading-relaxed">
-                Calculated for {bankingData?.customer?.full_name}: Liquid balance minus {formatINR(summary.upcomingOutflows)} obligations. 100% sweepable.
+                Calculated strictly from database tables for {bankingData?.customer?.full_name}: Liquid balance minus {formatINR(summary.upcomingOutflows)} upcoming commitments.
               </p>
             </div>
             <div className="mt-4 pt-2.5 border-t border-indigo-700/50 flex items-center justify-between text-[10px] text-indigo-200 font-semibold">
@@ -569,7 +569,7 @@ export default function DashboardPage() {
                 <span className="px-2 py-0.5 rounded bg-indigo-100 dark:bg-indigo-950 text-indigo-700 dark:text-indigo-300 font-extrabold text-[10px] uppercase">
                   Autonomous Copilot
                 </span>
-                <span className="text-xs text-slate-400">&bull; ISO 20022 Rule {selectedCustomerId}</span>
+                <span className="text-xs text-slate-400">&bull; ISO 20022 Rule {bankingData?.customer?.customer_id}</span>
               </div>
               <h3 className="text-base font-bold text-slate-900 dark:text-white mb-2">
                 Optimize Safe Surplus: Sweep {formatINR(Math.min(summary.safeSurplus, 50000))} into 7.45% Sovereign Vault
@@ -597,7 +597,7 @@ export default function DashboardPage() {
             </div>
           </div>
 
-          {/* Debit Card Guard with Live Database Status */}
+          {/* Debit Card Guard Directly from debit_cards Table */}
           <div className="p-6 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-sm flex flex-col justify-between">
             <div>
               <div className="flex items-center justify-between mb-4">
@@ -665,15 +665,15 @@ export default function DashboardPage() {
           </div>
         </div>
 
-        {/* 3. Upcoming Obligations for Selected User */}
+        {/* 3. Upcoming Obligations from bills, scheduled_payments, loans Tables */}
         <div className="p-6 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-sm mb-8">
           <div className="flex justify-between items-center mb-4">
             <div>
               <h3 className="text-sm font-bold text-slate-900 dark:text-white">
-                Upcoming Obligations & Scheduled Payments — {bankingData?.customer?.full_name}
+                Upcoming Obligations & Scheduled Outflows &bull; {bankingData?.customer?.full_name}
               </h3>
               <p className="text-[11px] text-slate-500">
-                Outflows accounted when calculating Safe Surplus for Customer {selectedCustomerId}
+                Direct records from PostgreSQL bills, scheduled_payments, and loans tables
               </p>
             </div>
             <span className="px-2.5 py-1 bg-indigo-50 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-300 font-bold text-xs rounded-xl">
@@ -682,7 +682,7 @@ export default function DashboardPage() {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            {/* Bills */}
+            {/* Bills from bills table */}
             {(bankingData?.bills || []).map((bill) => (
               <div key={bill.bill_id} className="p-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/40 flex flex-col justify-between">
                 <div>
@@ -703,7 +703,7 @@ export default function DashboardPage() {
               </div>
             ))}
 
-            {/* Scheduled Payments */}
+            {/* Scheduled Payments from scheduled_payments table */}
             {(bankingData?.scheduledPayments || []).map((sp) => (
               <div key={sp.payment_id} className="p-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/40 flex flex-col justify-between">
                 <div>
@@ -724,7 +724,7 @@ export default function DashboardPage() {
               </div>
             ))}
 
-            {/* Loan EMI */}
+            {/* Loan EMI from loans table */}
             {(bankingData?.loans || []).map((loan) => (
               <div key={loan.loan_id} className="p-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/40 flex flex-col justify-between">
                 <div>
@@ -747,7 +747,7 @@ export default function DashboardPage() {
           </div>
         </div>
 
-        {/* 4. Live Neon PostgreSQL Transactions Table for Selected User */}
+        {/* 4. Live Neon PostgreSQL Transactions Table Directly from transactions table */}
         <div className="p-6 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-sm">
           {/* Header & Filter Controls */}
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
@@ -758,7 +758,7 @@ export default function DashboardPage() {
                 </h3>
                 <span className="text-xs font-bold text-indigo-600 dark:text-indigo-400">({filteredTransactions.length} records)</span>
               </div>
-              <p className="text-xs text-slate-500">Filtered specifically for Customer ID {selectedCustomerId}</p>
+              <p className="text-xs text-slate-500">Live records from transactions table for Customer ID {bankingData?.customer?.customer_id}</p>
             </div>
 
             {/* Search and Filters */}
@@ -828,7 +828,7 @@ export default function DashboardPage() {
           <div className="flex flex-col divide-y divide-slate-100 dark:divide-slate-800">
             {filteredTransactions.length === 0 ? (
               <div className="py-12 text-center text-xs text-slate-400">
-                No transactions found for Customer {selectedCustomerId} with this filter.
+                No transactions found for this customer with the selected filter.
               </div>
             ) : (
               filteredTransactions.map((tx) => (
@@ -897,7 +897,7 @@ export default function DashboardPage() {
                     {modalMode === 'add' ? 'Deposit / Add Funds' : 'Transfer / Subtract Funds'}
                   </h3>
                   <p className="text-[11px] text-slate-500">
-                    Operating on Customer {selectedCustomerId} ({bankingData?.customer?.full_name})
+                    Customer {bankingData?.customer?.customer_id} &bull; {bankingData?.customer?.full_name}
                   </p>
                 </div>
               </div>
@@ -992,6 +992,7 @@ export default function DashboardPage() {
                     <option value="Food">Food & Dining</option>
                     <option value="Utilities">Utilities</option>
                     <option value="Shopping">Shopping</option>
+                    <option value="Transport">Transport</option>
                     <option value="Investment">Investment</option>
                   </select>
                 </div>
