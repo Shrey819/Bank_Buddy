@@ -7,9 +7,12 @@ module.exports = function(app) {
     next();
   });
 
-  //user registration
-  app.post("/api/v1/signup", [verifyUser.checkExistingUsername], [verifyUser.checkExistingEmail], userServices.signup);
+  // User registration
+  app.post("/api/v1/signup", [verifyUser.checkExistingUsername, verifyUser.checkExistingEmail], userServices.signup);
 
-  //user login
+  // User login (CRN, Username or Card Number)
   app.post("/api/v1/signin", userServices.signin);
+
+  // 2-Factor OTP Verification (PRD Step-Up MFA)
+  app.post("/api/v1/verify-otp", userServices.verifyOtp);
 };

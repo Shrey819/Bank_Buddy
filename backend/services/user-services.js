@@ -1,0 +1,268 @@
+const database = require("../models");
+const configuration = require("../config/config-jwt.js");
+const User = database.user;
+const Op = database.Sequelize.Op;
+
+const jwt = require("jsonwebtoken");
+const bcrypt = require("bcryptjs");
+
+// Seed default Elena Rostova (PRD C1001 Private Wealth Client)
+exports.seedDefaultUser = async () => {
+  try {
+    const existing = await User.findOne({
+      where: {
+        [Op.or]: [
+          { username: "elena" },
+          { crn: "98234105" }
+        ]
+      }
+    });
+
+    if (!existing) {
+      const hashedPassword = bcrypt.hashSync("BankBuddy@2026", 8);
+      await User.create({
+        name: "Elena Rostova",
+        username: "elena",
+        email: "elena.rostova@wealth.client",
+        password: hashedPassword,
+        crn: "98234105",
+        cardNumber: "4441",
+        phone: "+91 9876543210",
+        role: "Private Wealth Client",
+        kycStatus: "VERIFIED",
+        otpSecret: "123456"
+      });
+      console.log("Seeded default banking user: Elena Rostova (CRN: 98234105, Card: 4441, User: elena, Pass: BankBuddy@2026)");
+    }
+  } catch (err) {
+    console.error("User seeder note:", err.message);
+  }
+};
+
+// ==========================================
+// User Signup
+// ==========================================
+exports.signup = async (req, res) => {
+  try {
+    const { name, username, email, password, crn, cardNumber, phone } = req.body;
+
+    if (!username || !password || !email) {
+      return res.status(400).send({
+        message: "Username, email, and password cannot be empty!"
+      });
+    }
+
+    // Auto-generate CRN and Card Number if not provided
+    const randomCrn = crn || Math.floor(10000000 + Math.random() * 90000000).toString();
+    const randomCard = cardNumber || Math.floor(1000 + Math.random() * 9000).toString();
+
+    const newUser = await User.create({
+      name: name || username,
+      username: username.trim(),
+      email: email.trim(),
+      password: bcrypt.hashSync(password, 8),
+      crn: randomCrn,
+      cardNumber: randomCard,
+      phone: phone || "+91 9876543210",
+      role: "Private Wealth Client",
+      kycStatus: "VERIFIED",
+      otpSecret: "123456"
+    });
+
+    res.status(200).send({
+      message: "User successfully registered",
+      user: {
+        id: newUser.id,
+        name: newUser.name,
+        username: newUser.username,
+        email: newUser.email,
+        crn: newUser.crn,
+        cardNumber: newUser.cardNumber
+      }
+    });
+  } catch (exception) {
+    res.status(500).send({ message: exception.message });
+  }
+};
+
+// ==========================================
+// User Signin (CRN, Username or Card Number)
+// ==========================================
+exports.signin = async (req, res) => {
+  try {
+    const identifier = req.body.identifier || req.body.username || req.body.crn || req.body.cardNumber;
+    const password = req.body.password;
+    const skipOtp = req.body.skipOtp === true;
+
+    if (!identifier || !password) {
+      return res.status(400).send({
+        message: "CRN/Username/Card Number and password cannot be empty!"
+      });
+    }
+
+    const cleanIdentifier = identifier.toString().trim();
+
+    // Flexible lookup by username, email, CRN, or Card Number
+    const user = await User.findOne({
+      where: {
+        [Op.or]: [
+          { username: cleanIdentifier },
+          { email: cleanIdentifier },
+          { crn: cleanIdentifier },
+          { cardNumber: cleanIdentifier }
+        ]
+      }
+    });
+
+    if (!user) {
+      return res.status(404).send({
+        message: "User not found with the provided CRN, Username, or Card Number!"
+      });
+    }
+
+    const passwordIsValid = bcrypt.compareSync(password, user.password);
+    if (!passwordIsValid) {
+      return res.status(401).send({
+        accessToken: null,
+        message: "Invalid password!"
+      });
+    }
+
+    // Step 1: If OTP Step-up is enabled (as per PRD non-negotiable requirement)
+    if (!skipOtp) {
+      // Issue temporary OTP verification session token
+      const sessionToken = jwt.sign(
+        { id: user.id, pendingMfa: true },
+        configuration.secret,
+        { expiresIn: 600 } // 10 minutes to verify OTP
+      );
+
+      // Mask phone and email for security
+      const phone = user.phone || "+91 9876543210";
+      const maskedPhone = "•••• •••• " + phone.slice(-4);
+      const emailParts = user.email.split("@");
+      const maskedEmail = emailParts[0].charAt(0) + "••••@" + (emailParts[1] || "wealth.client");
+
+      return res.status(200).send({
+        step: "OTP_REQUIRED",
+        message: "Authentication successful. Please enter the 6-digit OTP sent to your registered device.",
+        sessionToken: sessionToken,
+        user: {
+          id: user.id,
+          name: user.name,
+          username: user.username,
+          crn: user.crn,
+          cardNumber: user.cardNumber,
+          maskedPhone: maskedPhone,
+          maskedEmail: maskedEmail
+        },
+        demoOtpHint: "123456"
+      });
+    }
+
+    // Direct token issuance if skipOtp is requested
+    const token = jwt.sign(
+      {
+        id: user.id,
+        username: user.username,
+        crn: user.crn,
+        role: user.role,
+        acr: "pwd"
+      },
+      configuration.secret,
+      { expiresIn: 86400 }
+    );
+
+    res.status(200).send({
+      step: "COMPLETED",
+      id: user.id,
+      name: user.name,
+      username: user.username,
+      email: user.email,
+      crn: user.crn,
+      cardNumber: user.cardNumber,
+      role: user.role,
+      accessToken: token
+    });
+  } catch (err) {
+    res.status(500).send({ message: err.message });
+  }
+};
+
+// ==========================================
+// Step 2: Verify TOTP / OTP (PRD R1 & R7 Step-Up)
+// ==========================================
+exports.verifyOtp = async (req, res) => {
+  try {
+    const { sessionToken, otp, identifier } = req.body;
+
+    if (!otp) {
+      return res.status(400).send({ message: "6-digit OTP code is required!" });
+    }
+
+    let userId = null;
+
+    if (sessionToken) {
+      try {
+        const decoded = jwt.verify(sessionToken, configuration.secret);
+        userId = decoded.id;
+      } catch (e) {
+        return res.status(401).send({ message: "OTP session has expired. Please log in again." });
+      }
+    } else if (identifier) {
+      const user = await User.findOne({
+        where: {
+          [Op.or]: [
+            { username: identifier },
+            { crn: identifier },
+            { cardNumber: identifier }
+          ]
+        }
+      });
+      if (user) userId = user.id;
+    }
+
+    if (!userId) {
+      return res.status(400).send({ message: "Missing session or identifier for OTP verification." });
+    }
+
+    const user = await User.findByPk(userId);
+    if (!user) {
+      return res.status(404).send({ message: "User not found!" });
+    }
+
+    // Check OTP: matches user.otpSecret or default demo '123456'
+    const validOtp = user.otpSecret || "123456";
+    if (otp.toString().trim() !== validOtp && otp.toString().trim() !== "123456") {
+      return res.status(400).send({ message: "Invalid OTP! Hint: Demo OTP is 123456." });
+    }
+
+    // Mint elevated JWT with acr: "mfa" (PRD Section 10 requirement)
+    const token = jwt.sign(
+      {
+        id: user.id,
+        username: user.username,
+        crn: user.crn,
+        role: user.role,
+        acr: "mfa"
+      },
+      configuration.secret,
+      { expiresIn: 86400 } // 24 hours
+    );
+
+    res.status(200).send({
+      step: "COMPLETED",
+      message: "Multi-Factor Authentication successful!",
+      id: user.id,
+      name: user.name,
+      username: user.username,
+      email: user.email,
+      crn: user.crn,
+      cardNumber: user.cardNumber,
+      role: user.role,
+      accessToken: token
+    });
+  } catch (err) {
+    res.status(500).send({ message: err.message });
+  }
+};

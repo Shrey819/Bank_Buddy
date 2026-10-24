@@ -3,416 +3,1430 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Bank Buddy | Secure Banking & JWT Auth API</title>
+  <title>Bank Buddy | Net Banking Login & Autonomous Wealth</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
   <style>
     :root {
-      --bg: #0f172a;
-      --card-bg: #1e293b;
-      --card-border: #334155;
-      --primary: #38bdf8;
-      --primary-hover: #0284c7;
-      --success: #22c55e;
-      --danger: #ef4444;
-      --text: #f8fafc;
-      --text-muted: #94a3b8;
-      --code-bg: #020617;
+      --font-scale: 1rem;
+      --kotak-red: #ed1c24;
+      --kotak-blue: #003366;
+      --kotak-link: #0066cc;
+      --kotak-bg: #f9f9f9;
+      --card-bg: #ffffff;
+      --text-dark: #222222;
+      --text-muted: #666666;
+      --border-color: #d1d5db;
+      --btn-peach: #ffd2d2;
+      --btn-peach-text: #ffffff;
+      --btn-active-red: #ed1c24;
+    }
+
+    body.high-contrast {
+      --kotak-bg: #121212;
+      --card-bg: #1e1e1e;
+      --text-dark: #ffffff;
+      --text-muted: #cbd5e1;
+      --border-color: #4b5563;
+      --btn-peach: #7f1d1d;
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; }
 
     body {
-      font-family: 'Inter', sans-serif;
-      background: var(--bg);
-      color: var(--text);
+      font-family: 'Roboto', 'Plus Jakarta Sans', -apple-system, sans-serif;
+      background: var(--kotak-bg);
+      color: var(--text-dark);
+      font-size: var(--font-scale);
       min-height: 100vh;
       display: flex;
       flex-direction: column;
+      transition: background 0.2s, color 0.2s;
     }
 
-    header {
-      background: #020617;
-      border-bottom: 1px solid var(--card-border);
-      padding: 1rem 2rem;
+    /* TOP HEADER BAR */
+    header.kotak-top-nav {
+      background: var(--card-bg);
+      border-bottom: 1px solid var(--border-color);
+      padding: 0.85rem 3rem;
       display: flex;
       justify-content: space-between;
       align-items: center;
+      flex-wrap: wrap;
+      gap: 1rem;
     }
 
-    .brand h1 { font-size: 1.2rem; font-weight: 700; color: #fff; }
-    .brand p { font-size: 0.8rem; color: var(--text-muted); }
-
-    .status-badge {
-      display: inline-flex;
+    .bank-logo-group {
+      display: flex;
       align-items: center;
-      gap: 0.5rem;
-      background: rgba(34, 197, 94, 0.1);
-      border: 1px solid rgba(34, 197, 94, 0.3);
-      padding: 0.35rem 0.75rem;
-      border-radius: 9999px;
-      font-size: 0.75rem;
-      color: #4ade80;
+      gap: 0.75rem;
+      text-decoration: none;
     }
-    .dot { width: 8px; height: 8px; border-radius: 50%; background: #22c55e; }
 
-    main {
-      flex: 1;
-      max-width: 1300px;
-      width: 100%;
-      margin: 0 auto;
-      padding: 1.5rem;
-      display: grid;
-      grid-template-columns: 1fr 1fr;
+    .trust-shield-badge {
+      width: 44px;
+      height: 44px;
+      border-radius: 10px;
+      background: linear-gradient(135deg, #002244 0%, #003366 50%, #0284c7 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 4px 12px rgba(0, 51, 102, 0.25);
+      position: relative;
+    }
+
+    .bank-logo-title {
+      display: flex;
+      flex-direction: column;
+      line-height: 1.15;
+    }
+    .bank-logo-title .brand-main {
+      font-size: 1.4rem;
+      font-weight: 800;
+      color: #003366;
+      letter-spacing: -0.03em;
+    }
+    .bank-logo-title .brand-main span {
+      color: #0284c7;
+    }
+    body.high-contrast .bank-logo-title .brand-main { color: #ffffff; }
+    body.high-contrast .bank-logo-title .brand-main span { color: #38bdf8; }
+
+    .bank-logo-title .brand-sub {
+      font-size: 0.65rem;
+      font-weight: 700;
+      color: #64748b;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
+    body.high-contrast .bank-logo-title .brand-sub { color: #94a3b8; }
+
+    /* ACCESSIBILITY TOOLS */
+    .accessibility-bar {
+      display: flex;
+      align-items: center;
       gap: 1.5rem;
     }
 
-    @media (max-width: 900px) {
-      main { grid-template-columns: 1fr; }
+    .font-size-group {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      font-size: 0.8rem;
+      color: var(--text-muted);
     }
 
-    .card {
-      background: var(--card-bg);
-      border: 1px solid var(--card-border);
-      border-radius: 10px;
-      padding: 1.25rem;
-      margin-bottom: 1.25rem;
+    .font-pill {
+      border: 1px solid #d1d5db;
+      background: #ffffff;
+      color: #374151;
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      font-size: 0.75rem;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.15s;
+    }
+    body.high-contrast .font-pill { background: #27272a; color: #fff; border-color: #52525b; }
+    .font-pill.active {
+      background: #0070ba;
+      border-color: #0070ba;
+      color: #ffffff;
     }
 
-    .card h2 {
-      font-size: 1rem;
-      font-weight: 600;
-      margin-bottom: 1rem;
+    .contrast-wrapper {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.8rem;
+      font-weight: 500;
+      cursor: pointer;
+    }
+
+    .beta-badge {
+      background: var(--kotak-red);
+      color: #ffffff;
+      font-size: 0.6rem;
+      font-weight: 800;
+      padding: 0.05rem 0.35rem;
+      border-radius: 3px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .toggle-switch {
+      position: relative;
+      display: inline-block;
+      width: 36px;
+      height: 18px;
+    }
+    .toggle-switch input { opacity: 0; width: 0; height: 0; }
+    .toggle-slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background-color: #d1d5db;
+      border-radius: 20px;
+      transition: .3s;
+    }
+    .toggle-slider:before {
+      position: absolute;
+      content: "";
+      height: 14px; width: 14px;
+      left: 2px; bottom: 2px;
+      background-color: white;
+      border-radius: 50%;
+      transition: .3s;
+    }
+    input:checked + .toggle-slider { background-color: var(--kotak-red); }
+    input:checked + .toggle-slider:before { transform: translateX(18px); }
+
+    /* QUICK CREDENTIALS PRESETS STRIP */
+    .demo-credentials-strip {
+      background: #eff6ff;
+      border-bottom: 1px solid #bfdbfe;
+      padding: 0.45rem 3rem;
+      font-size: 0.75rem;
       display: flex;
       align-items: center;
       justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+    body.high-contrast .demo-credentials-strip {
+      background: #1e1e2d;
+      border-color: #3b82f6;
+    }
+    .quick-preset-btn {
+      background: #ffffff;
+      border: 1px solid #93c5fd;
+      padding: 0.2rem 0.55rem;
+      border-radius: 4px;
+      font-size: 0.72rem;
+      font-weight: 600;
+      color: #0369a1;
+      cursor: pointer;
+      font-family: 'Fira Code', monospace;
+    }
+    .quick-preset-btn:hover {
+      background: #0284c7;
+      color: #ffffff;
     }
 
-    .form-group {
+    /* MAIN CONTAINER: 2-COLUMN VIEW */
+    main.kotak-main-layout {
+      flex: 1;
+      max-width: 1250px;
+      width: 100%;
+      margin: 2.5rem auto 1rem;
+      padding: 0 2rem;
+      display: grid;
+      grid-template-columns: 1.15fr 0.85fr;
+      gap: 3.5rem;
+      align-items: center;
+    }
+
+    @media (max-width: 960px) {
+      main.kotak-main-layout {
+        grid-template-columns: 1fr;
+        gap: 2rem;
+        margin: 1.5rem auto;
+        padding: 0 1rem;
+      }
+    }
+
+    /* LEFT SIDE: ILLUSTRATION & MARKETING BANNER */
+    .left-hero-section {
       display: flex;
       flex-direction: column;
-      gap: 0.35rem;
-      margin-bottom: 0.75rem;
+      align-items: center;
+      text-align: center;
+      position: relative;
     }
 
-    .form-row {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 0.75rem;
+    .hero-illustration-wrapper {
+      position: relative;
+      width: 100%;
+      max-width: 440px;
+      margin-bottom: 1.5rem;
     }
 
-    label { font-size: 0.75rem; color: var(--text-muted); font-weight: 500; }
+    .credit-card-bill-tag {
+      position: absolute;
+      top: 10px;
+      left: 30px;
+      background: #ffffff;
+      border: 1.5px solid #ffccd0;
+      padding: 0.35rem 0.85rem;
+      border-radius: 9999px;
+      font-size: 0.72rem;
+      font-weight: 700;
+      color: #ed1c24;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      box-shadow: 0 4px 8px rgba(237, 28, 36, 0.08);
+      z-index: 10;
+    }
+    .credit-card-bill-tag .check-icon {
+      color: #10b981;
+      font-weight: 900;
+    }
 
-    input {
-      background: #020617;
-      border: 1px solid var(--card-border);
-      border-radius: 6px;
-      padding: 0.55rem 0.75rem;
-      color: var(--text);
+    .hero-svg {
+      width: 100%;
+      height: auto;
+      display: block;
+    }
+
+    .hero-text-content h3 {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: #1e1b4b;
+      margin-bottom: 0.35rem;
+    }
+    body.high-contrast .hero-text-content h3 { color: #ffffff; }
+
+    .hero-text-content p {
       font-size: 0.85rem;
-      outline: none;
+      color: var(--text-muted);
+      line-height: 1.4;
     }
-    input:focus { border-color: var(--primary); }
 
-    .btn-group { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+    /* RIGHT SIDE: KOTAK LOGIN CARD (IMAGE 4 SPEC) */
+    .kotak-login-card {
+      background: var(--card-bg);
+      border: 1px solid #e5e7eb;
+      border-radius: 8px;
+      padding: 2.25rem 2.25rem 1.75rem;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+      width: 100%;
+      max-width: 440px;
+      margin: 0 auto;
+    }
+    body.high-contrast .kotak-login-card { border-color: #3f3f46; }
 
-    button {
-      background: #334155;
-      border: none;
-      color: #fff;
-      padding: 0.55rem 0.9rem;
+    .login-card-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      margin-bottom: 1.25rem;
+    }
+
+    .login-card-top h2 {
+      font-size: 1.35rem;
+      font-weight: 700;
+      color: var(--text-dark);
+      letter-spacing: -0.01em;
+    }
+
+    .netbanking-dropdown {
       font-size: 0.8rem;
       font-weight: 600;
-      border-radius: 6px;
+      color: #0066cc;
+      display: flex;
+      align-items: center;
+      gap: 0.25rem;
       cursor: pointer;
-      transition: background 0.15s;
-    }
-    button:hover { background: #475569; }
-    button.btn-primary { background: var(--primary); color: #020617; }
-    button.btn-primary:hover { background: var(--primary-hover); color: #fff; }
-    button.btn-success { background: var(--success); color: #020617; }
-    button.btn-danger { background: var(--danger); color: #fff; }
-
-    .token-display {
-      background: var(--code-bg);
-      border: 1px solid var(--card-border);
-      border-radius: 6px;
-      padding: 0.65rem;
-      font-family: 'Fira Code', monospace;
-      font-size: 0.75rem;
-      color: #38bdf8;
-      word-break: break-all;
-      max-height: 60px;
-      overflow-y: auto;
-      margin-top: 0.5rem;
     }
 
-    /* Product Table */
-    table {
+    /* TABS */
+    .login-tabs-row {
+      display: flex;
+      gap: 1.75rem;
+      border-bottom: 1px solid #e5e7eb;
+      margin-bottom: 1.5rem;
+    }
+    body.high-contrast .login-tabs-row { border-color: #3f3f46; }
+
+    .tab-header {
+      font-size: 0.95rem;
+      font-weight: 500;
+      color: var(--text-muted);
+      padding-bottom: 0.65rem;
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+      margin-bottom: -1px;
+    }
+    .tab-header.active {
+      color: #0066cc;
+      border-bottom-color: #0066cc;
+      font-weight: 700;
+    }
+
+    /* FORM INPUTS */
+    .input-box-wrapper {
+      margin-bottom: 1.25rem;
+      position: relative;
+    }
+
+    .kotak-text-input {
       width: 100%;
-      border-collapse: collapse;
-      font-size: 0.8rem;
-      margin-top: 0.75rem;
+      border: 1px solid #9ca3af;
+      border-radius: 4px;
+      padding: 0.85rem 1rem;
+      font-size: 0.85rem;
+      color: var(--text-dark);
+      background: var(--card-bg);
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+      font-family: inherit;
     }
-    th, td {
-      padding: 0.6rem;
-      text-align: left;
-      border-bottom: 1px solid var(--card-border);
+    .kotak-text-input:focus {
+      border-color: #0066cc;
+      box-shadow: 0 0 0 1px #0066cc;
     }
-    th { color: var(--text-muted); font-weight: 600; }
 
-    pre#console-log {
-      background: var(--code-bg);
-      border: 1px solid var(--card-border);
-      border-radius: 8px;
-      padding: 1rem;
-      font-family: 'Fira Code', monospace;
+    .show-password-trigger {
+      position: absolute;
+      right: 0.85rem;
+      top: 50%;
+      transform: translateY(-50%);
+      background: none;
+      border: none;
+      font-size: 0.8rem;
+      color: #6b7280;
+      font-weight: 500;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 0.25rem;
+    }
+    .show-password-trigger:hover { color: #111827; }
+
+    /* CHECKBOX & KEYPAD ROW */
+    .login-options-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.78rem;
+      margin-bottom: 0.85rem;
+    }
+
+    .remember-crn-label {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      color: var(--text-muted);
+      cursor: pointer;
+    }
+
+
+    .forgot-link-box {
+      margin-bottom: 1.5rem;
+    }
+    .forgot-link-box a {
+      color: #0066cc;
+      text-decoration: none;
+      font-size: 0.8rem;
+    }
+    .forgot-link-box a:hover { text-decoration: underline; }
+
+    .terms-text {
+      font-size: 0.68rem;
+      color: #6b7280;
+      line-height: 1.4;
+      margin-bottom: 1.5rem;
+    }
+    .terms-text a {
+      color: #6b7280;
+      text-decoration: underline;
+    }
+
+    /* SECURE LOGIN BUTTON (EXACT PEACH/PINKISH BUTTON FROM IMAGE 4) */
+    .btn-secure-login {
+      width: 100%;
+      background: #fed7d7;
+      border: none;
+      color: #ffffff;
+      padding: 0.85rem;
+      font-size: 0.95rem;
+      font-weight: 700;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .btn-secure-login.active-ready {
+      background: var(--kotak-red);
+      box-shadow: 0 4px 10px rgba(237, 28, 36, 0.25);
+    }
+    .btn-secure-login:hover {
+      background: #dc2626;
+    }
+
+
+    /* FOOTER WARNING BAR */
+    .bottom-safety-bar {
+      max-width: 1250px;
+      width: 100%;
+      margin: 1.5rem auto 1rem;
+      padding: 0 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
       font-size: 0.75rem;
-      color: #e2e8f0;
-      min-height: 250px;
-      max-height: 550px;
-      overflow: auto;
-      white-space: pre-wrap;
-      word-break: break-all;
+      color: var(--text-muted);
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+    .bottom-safety-bar a { color: var(--text-muted); text-decoration: underline; }
+
+    /* ERROR NOTIFICATION */
+    .kotak-alert {
+      background: #fee2e2;
+      border-left: 3px solid #ef4444;
+      color: #991b1b;
+      padding: 0.6rem 0.8rem;
+      font-size: 0.78rem;
+      margin-bottom: 1rem;
+      border-radius: 2px;
+      display: none;
+    }
+
+    /* ==============================================================
+       STEP 2: 2FA OTP STEP-UP MODAL (PRD R1 & R7 SPEC)
+       ============================================================== */
+    .otp-overlay {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0, 0, 0, 0.5);
+      backdrop-filter: blur(3px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      padding: 1rem;
+    }
+
+    .otp-modal-box {
+      background: var(--card-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 2rem;
+      max-width: 420px;
+      width: 100%;
+      text-align: center;
+      box-shadow: 0 15px 35px rgba(0,0,0,0.2);
+    }
+
+    .otp-input-boxes {
+      display: flex;
+      justify-content: center;
+      gap: 0.5rem;
+      margin: 1.5rem 0;
+    }
+
+    .otp-single-box {
+      width: 42px;
+      height: 48px;
+      border: 1.5px solid #9ca3af;
+      border-radius: 4px;
+      text-align: center;
+      font-size: 1.25rem;
+      font-weight: 700;
+      background: var(--card-bg);
+      color: var(--text-dark);
+      outline: none;
+      font-family: 'Fira Code', monospace;
+    }
+    .otp-single-box:focus {
+      border-color: #0066cc;
+      box-shadow: 0 0 0 2px rgba(0, 102, 204, 0.2);
+    }
+
+    /* ==============================================================
+       BANK BUDDY AUTONOMOUS WEALTH DASHBOARD (IMAGES 1, 2, 3)
+       ============================================================== */
+    #wealth-dashboard-view {
+      display: none;
+      flex-direction: column;
+      flex: 1;
+    }
+
+    .wealth-top-header {
+      background: #ffffff;
+      border-bottom: 1px solid #e2e8f0;
+      padding: 0.85rem 2.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      position: sticky;
+      top: 0;
+      z-index: 99;
+    }
+    body.high-contrast .wealth-top-header { background: #121212; border-color: #334155; }
+
+    .wealth-nav-pills {
+      display: flex;
+      gap: 0.5rem;
+    }
+    .wealth-pill {
+      background: transparent;
+      border: none;
+      padding: 0.45rem 0.95rem;
+      font-size: 0.85rem;
+      font-weight: 600;
+      border-radius: 9999px;
+      color: var(--text-muted);
+      cursor: pointer;
+    }
+    .wealth-pill.active {
+      background: #f1f5f9;
+      color: #0f172a;
+    }
+    body.high-contrast .wealth-pill.active { background: #27272a; color: #fff; }
+
+    .dash-main-container {
+      max-width: 1250px;
+      width: 100%;
+      margin: 1.5rem auto;
+      padding: 0 2rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+    }
+
+    .net-worth-banner {
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-radius: 16px;
+      padding: 1.75rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+    body.high-contrast .net-worth-banner { background: #18181b; border-color: #3f3f46; }
+
+    .cards-triple-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 1.25rem;
+    }
+
+    .dashboard-account-card {
+      background: var(--card-bg);
+      border: 1px solid #e2e8f0;
+      border-radius: 14px;
+      padding: 1.25rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+    body.high-contrast .dashboard-account-card { border-color: #3f3f46; }
+
+    /* CARD PLASTICS */
+    .vault-debit-plastic {
+      background: linear-gradient(135deg, #18181b 0%, #27272a 100%);
+      color: #fff;
+      border-radius: 12px;
+      padding: 1.2rem;
+      aspect-ratio: 1.6;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      box-shadow: 0 8px 16px rgba(0,0,0,0.15);
+    }
+
+    .sapphire-credit-plastic {
+      background: linear-gradient(135deg, #2563eb 0%, #4338ca 100%);
+      color: #fff;
+      border-radius: 12px;
+      padding: 1.2rem;
+      aspect-ratio: 1.6;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      box-shadow: 0 8px 16px rgba(37, 99, 235, 0.25);
+    }
+
+    .yield-pool-plastic {
+      background: linear-gradient(135deg, #9333ea 0%, #c026d3 100%);
+      color: #fff;
+      border-radius: 12px;
+      padding: 1.2rem;
+      aspect-ratio: 1.6;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      box-shadow: 0 8px 16px rgba(147, 51, 234, 0.25);
     }
   </style>
 </head>
 <body>
 
-  <header>
-    <div class="brand">
-      <h1>🏦 Bank Buddy</h1>
-      <p>Secure Banking System &bull; PostgreSQL &bull; JWT Authentication</p>
+  <!-- ==============================================================
+       TOP NAVBAR: BANK BUDDY TRUST HEADER SPEC
+       ============================================================== -->
+  <header class="kotak-top-nav">
+    <div class="bank-logo-group">
+      <!-- Modern Banking Trust Shield SVG -->
+      <div class="trust-shield-badge">
+        <svg width="28" height="28" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M18 3L5 8.5V17C5 25.5 10.7 33.3 18 35C25.3 33.3 31 25.5 31 17V8.5L18 3Z" fill="#003366"/>
+          <path d="M18 5L7 9.5V17C7 24.3 11.9 31.2 18 32.8C24.1 31.2 29 24.3 29 17V9.5L18 5Z" stroke="#38bdf8" stroke-width="1.2" fill="none"/>
+          <path d="M13 18L16.5 21.5L23.5 14.5" stroke="#fbbf24" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+          <circle cx="18" cy="10" r="1.5" fill="#38bdf8"/>
+        </svg>
+      </div>
+      <div class="bank-logo-title">
+        <span class="brand-main">Bank <span>Buddy</span></span>
+        <span class="brand-sub">Autonomous Wealth &bull; Verified Banking</span>
+      </div>
     </div>
-    <div class="status-badge">
-      <span class="dot"></span> Server Online (Port 8080)
+
+    <!-- ACCESSIBILITY CONTROLS -->
+    <div class="accessibility-bar">
+      <label class="contrast-wrapper" title="Toggle High Contrast Mode">
+        <span>High contrast mode</span>
+        <span class="beta-badge">Beta</span>
+        <label class="toggle-switch">
+          <input type="checkbox" id="contrast-toggle" onchange="toggleHighContrast(this.checked)">
+          <span class="toggle-slider"></span>
+        </label>
+      </label>
     </div>
   </header>
 
-  <main>
-    <!-- LEFT COLUMN -->
+  <!-- QUICK PRESETS STRIP (CONVENIENT TESTING HELPER) -->
+  <div class="demo-credentials-strip" id="demo-strip">
     <div>
-      <!-- 1. AUTHENTICATION -->
-      <div class="card">
-        <h2>🔐 User Authentication</h2>
-        <div class="form-row">
-          <div class="form-group">
-            <label>Username</label>
-            <input type="text" id="username" value="user_demo" placeholder="Username">
-          </div>
-          <div class="form-group">
-            <label>Email</label>
-            <input type="email" id="email" value="user_demo@test.com" placeholder="Email">
-          </div>
+      <strong>⚡ Test Login Helper (PRD C1001 Client):</strong>
+      Click any chip to auto-fill Bank Buddy Net Banking login:
+    </div>
+    <div style="display: flex; gap: 0.4rem; flex-wrap: wrap; align-items: center;">
+      <button class="quick-preset-btn" type="button" onclick="quickFill('98234105', 'BankBuddy@2026')">🔑 CRN: 98234105</button>
+      <button class="quick-preset-btn" type="button" onclick="quickFill('elena', 'BankBuddy@2026')">👤 Username: elena</button>
+      <button class="quick-preset-btn" type="button" onclick="quickFill('4441', 'BankBuddy@2026')">💳 Card: 4441</button>
+    </div>
+  </div>
+
+  <!-- ==============================================================
+       MAIN LOGIN SECTION (EXACT REPLICA OF KOTAK IMAGE 4)
+       ============================================================== -->
+  <main class="kotak-main-layout" id="login-layout">
+    
+    <!-- LEFT SIDE: ILLUSTRATION & PROMOTIONAL CARD -->
+    <div class="left-hero-section">
+      <div class="hero-illustration-wrapper">
+        <div class="credit-card-bill-tag">
+          <span>CREDIT CARD BILL</span>
+          <span class="check-icon">✓</span>
         </div>
-        <div class="form-group">
-          <label>Password</label>
-          <input type="password" id="password" value="password123" placeholder="Password">
-        </div>
-        <div class="btn-group">
-          <button class="btn-primary" onclick="signin()">🔑 Sign In (POST /api/v1/signin)</button>
-          <button onclick="signup()">📝 Sign Up (POST /api/v1/signup)</button>
-        </div>
-        <div class="token-display" id="token-box">
-          No JWT access token yet. Sign in or sign up first.
+
+        <!-- Person sitting with laptop at round coffee table -->
+        <svg class="hero-svg" viewBox="0 0 450 360" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <!-- Background soft glow -->
+          <circle cx="215" cy="180" r="145" fill="#fff5f5"/>
+          
+          <!-- Potted plant on floor -->
+          <polygon points="90,260 115,260 110,305 95,305" fill="#a78bfa"/>
+          <circle cx="102" cy="245" r="18" fill="#10b981"/>
+          <circle cx="88" cy="235" r="12" fill="#059669"/>
+          <circle cx="116" cy="235" r="12" fill="#34d399"/>
+          
+          <!-- Round Table -->
+          <ellipse cx="230" cy="235" rx="145" ry="24" fill="#d97706"/>
+          <ellipse cx="230" cy="230" rx="140" ry="20" fill="#f59e0b"/>
+          <rect x="224" y="235" width="12" height="75" fill="#b45309"/>
+          
+          <!-- Coffee Mug -->
+          <rect x="135" y="200" width="16" height="22" rx="3" fill="#ed1c24"/>
+          <path d="M151 204 Q158 211 151 218" stroke="#ed1c24" stroke-width="2.5" fill="none"/>
+          
+          <!-- Laptop -->
+          <polygon points="195,190 265,190 272,220 188,220" fill="#e2e8f0"/>
+          <rect x="200" y="150" width="60" height="42" rx="3" fill="#ffffff" stroke="#94a3b8" stroke-width="2"/>
+          <circle cx="230" cy="171" r="5" fill="#0284c7"/>
+          
+          <!-- Customer Character -->
+          <circle cx="295" cy="135" r="24" fill="#fcd34d"/>
+          <!-- Hair -->
+          <path d="M285 116 Q300 110 315 125 Q322 140 308 140" fill="#1e293b"/>
+          <!-- Torso -->
+          <path d="M268 162 Q295 154 322 162 L328 238 L262 238 Z" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.5"/>
+          <!-- Arm working on laptop -->
+          <path d="M272 178 L230 205" stroke="#ffffff" stroke-width="10" stroke-linecap="round"/>
+          <!-- Chair -->
+          <rect x="330" y="170" width="10" height="70" fill="#f59e0b"/>
+          <rect x="300" y="238" width="35" height="8" fill="#d97706"/>
+        </svg>
+      </div>
+
+      <div class="hero-text-content">
+        <h3>Credit Cards</h3>
+        <p>Leave no room for stress, with effortless credit card bill payment</p>
+      </div>
+    </div>
+
+    <!-- RIGHT SIDE: WELCOME TO BANK BUDDY LOGIN CARD -->
+    <div class="kotak-login-card">
+      <div class="login-card-top">
+        <h2>Welcome to Bank Buddy</h2>
+        <div class="netbanking-dropdown" onclick="alert('Net Banking selected')">
+          <span>Net Banking</span>
+          <span>⌵</span>
         </div>
       </div>
 
-      <!-- 2. PRODUCT CRUD -->
-      <div class="card">
-        <h2>📦 Product Management (JWT Protected)</h2>
-        <div class="form-row">
-          <div class="form-group">
-            <label>Product Name</label>
-            <input type="text" id="prodName" value="Gaming Laptop" placeholder="e.g. Mechanical Keyboard">
-          </div>
-          <div class="form-group">
-            <label>Price</label>
-            <input type="number" id="prodPrice" value="1299.99" placeholder="Price">
-          </div>
-        </div>
-        <div class="btn-group" style="margin-bottom: 1rem;">
-          <button class="btn-success" onclick="addProduct()">➕ Add Product</button>
-          <button class="btn-primary" onclick="getProducts()">🔄 Fetch All Products</button>
+      <div class="login-tabs-row">
+        <div class="tab-header active" id="tab-btn-login" onclick="switchKotakTab('login')">Login</div>
+        <div class="tab-header" id="tab-btn-register" onclick="switchKotakTab('register')">Register with Bank Buddy</div>
+      </div>
+
+      <!-- Alert Box -->
+      <div class="kotak-alert" id="login-alert-box">
+        <span id="login-alert-msg">Invalid credentials</span>
+      </div>
+
+      <!-- 1. LOGIN FORM -->
+      <form id="kotak-login-form" onsubmit="handleKotakLogin(event)">
+        <!-- INPUT 1: CRN, Username or Card Number -->
+        <div class="input-box-wrapper">
+          <input
+            type="text"
+            id="login-id-field"
+            class="kotak-text-input"
+            placeholder="CRN, Username or Card Number"
+            required
+            autocomplete="username"
+            oninput="checkButtonActive()"
+          />
         </div>
 
-        <div style="border-top: 1px solid var(--card-border); padding-top: 0.75rem;">
-          <div class="form-row">
-            <div class="form-group">
-              <label>Target Product ID</label>
-              <input type="number" id="targetId" placeholder="Product ID (e.g. 1)">
+        <!-- INPUT 2: Password -->
+        <div class="input-box-wrapper">
+          <input
+            type="password"
+            id="login-pass-field"
+            class="kotak-text-input"
+            placeholder="Password"
+            required
+            autocomplete="current-password"
+            oninput="checkButtonActive()"
+          />
+          <button type="button" class="show-password-trigger" onclick="togglePasswordVisibility()">
+            👁 <span id="show-hide-label">Show</span>
+          </button>
+        </div>
+
+        <!-- REMEMBER CRN -->
+        <div class="login-options-row">
+          <label class="remember-crn-label">
+            <input type="checkbox" id="remember-crn-check" checked>
+            <span>Remember my CRN</span>
+          </label>
+        </div>
+
+        <!-- FORGOT DETAILS LINK -->
+        <div class="forgot-link-box">
+          <a href="#" onclick="alert('Demo Client: Elena Rostova\nCRN: 98234105\nUsername: elena\nCard: 4441\nPassword: BankBuddy@2026\nOTP: 123456')">
+            Forgot CRN, username or password?
+          </a>
+        </div>
+
+        <!-- TERMS DISCLAIMER -->
+        <div class="terms-text">
+          By clicking on 'Secure login', you accept that you have read our <a href="#">Terms & conditions</a>, <a href="#">Privacy Policy</a> and the <a href="#">Tips for Safe Banking</a>
+        </div>
+
+        <!-- SECURE LOGIN BUTTON -->
+        <button type="submit" class="btn-secure-login" id="secure-login-btn">
+          Secure login
+        </button>
+      </form>
+
+      <!-- 2. REGISTRATION FORM (SWITCHABLE) -->
+      <form id="kotak-register-form" style="display: none;" onsubmit="handleKotakRegister(event)">
+        <div class="input-box-wrapper">
+          <input type="text" id="reg-name" class="kotak-text-input" placeholder="Full Name" required>
+        </div>
+        <div class="input-box-wrapper">
+          <input type="text" id="reg-user" class="kotak-text-input" placeholder="Desired Username" required>
+        </div>
+        <div class="input-box-wrapper">
+          <input type="email" id="reg-email" class="kotak-text-input" placeholder="Email Address" required>
+        </div>
+        <div class="input-box-wrapper">
+          <input type="password" id="reg-pass" class="kotak-text-input" placeholder="Password (Min 8 chars)" required>
+        </div>
+        <button type="submit" class="btn-secure-login active-ready" style="margin-top: 0.5rem;">
+          Register Net Banking Account
+        </button>
+      </form>
+    </div>
+  </main>
+
+  <!-- BOTTOM SAFETY WARNING & COMPATIBILITY BAR -->
+  <div class="bottom-safety-bar" id="safety-footer-bar">
+    <div>
+      🔒 Never share your password or Card details with anyone. <a href="#">Tips for Safe Banking</a>
+    </div>
+    <div>
+      <a href="#">Browser Compatibility</a>
+    </div>
+  </div>
+
+  <!-- ==============================================================
+       STEP 2: 2-FACTOR OTP STEP-UP MODAL (PRD R1 & R7 SPEC)
+       ============================================================== -->
+  <div class="otp-overlay" id="otp-modal-box">
+    <div class="otp-modal-box">
+      <div style="font-size: 2rem; margin-bottom: 0.5rem;">📲</div>
+      <h3 style="font-size: 1.2rem; font-weight: 700; margin-bottom: 0.4rem;">Two-Factor Authentication</h3>
+      <p style="font-size: 0.78rem; color: var(--text-muted); line-height: 1.4;">
+        Please enter the 6-digit Security OTP sent to your registered mobile ending in <strong id="otp-phone-txt">•••• 4321</strong>.
+      </p>
+
+      <div class="kotak-alert" id="otp-alert-box" style="margin-top: 0.75rem;">
+        <span id="otp-alert-msg">Invalid OTP code</span>
+      </div>
+
+      <div class="otp-input-boxes">
+        <input type="text" maxlength="1" class="otp-single-box" id="otp-digit-1" oninput="moveOtpFocus(this, 'otp-digit-2')" onkeydown="otpBack(event, this, null)">
+        <input type="text" maxlength="1" class="otp-single-box" id="otp-digit-2" oninput="moveOtpFocus(this, 'otp-digit-3')" onkeydown="otpBack(event, this, 'otp-digit-1')">
+        <input type="text" maxlength="1" class="otp-single-box" id="otp-digit-3" oninput="moveOtpFocus(this, 'otp-digit-4')" onkeydown="otpBack(event, this, 'otp-digit-2')">
+        <input type="text" maxlength="1" class="otp-single-box" id="otp-digit-4" oninput="moveOtpFocus(this, 'otp-digit-5')" onkeydown="otpBack(event, this, 'otp-digit-3')">
+        <input type="text" maxlength="1" class="otp-single-box" id="otp-digit-5" oninput="moveOtpFocus(this, 'otp-digit-6')" onkeydown="otpBack(event, this, 'otp-digit-4')">
+        <input type="text" maxlength="1" class="otp-single-box" id="otp-digit-6" oninput="moveOtpFocus(this, null)" onkeydown="otpBack(event, this, 'otp-digit-5')">
+      </div>
+
+      <div style="margin-bottom: 1.25rem;">
+        <button type="button" class="quick-preset-btn" onclick="fillDemoOtp()">⚡ Fill Demo OTP: 123456</button>
+      </div>
+
+      <button type="button" class="btn-secure-login active-ready" id="otp-submit-btn" onclick="confirmOtpAndLogin()" style="margin-bottom: 0.75rem;">
+        Verify & Enter Autonomous Wealth
+      </button>
+
+      <button type="button" onclick="closeOtpModal()" style="background: none; border: none; font-size: 0.75rem; color: var(--text-muted); cursor: pointer;">
+        ← Back to Net Banking login
+      </button>
+    </div>
+  </div>
+
+  <!-- ==============================================================
+       VIEW 2: BANK BUDDY AUTONOMOUS WEALTH WORKSPACE (IMAGES 1, 2, 3)
+       ============================================================== -->
+  <div id="wealth-dashboard-view">
+    <header class="wealth-top-header">
+      <div style="display: flex; align-items: center; gap: 1.5rem;">
+        <div style="display: flex; align-items: center; gap: 0.75rem;">
+          <div class="trust-shield-badge" style="width: 36px; height: 36px;">
+            <svg width="22" height="22" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M18 3L5 8.5V17C5 25.5 10.7 33.3 18 35C25.3 33.3 31 25.5 31 17V8.5L18 3Z" fill="#003366"/>
+              <path d="M18 5L7 9.5V17C7 24.3 11.9 31.2 18 32.8C24.1 31.2 29 24.3 29 17V9.5L18 5Z" stroke="#38bdf8" stroke-width="1.2" fill="none"/>
+              <path d="M13 18L16.5 21.5L23.5 14.5" stroke="#fbbf24" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+              <circle cx="18" cy="10" r="1.5" fill="#38bdf8"/>
+            </svg>
+          </div>
+          <div>
+            <div style="font-size: 1.05rem; font-weight: 800; line-height: 1; color: #003366;">Bank <span style="color: #0284c7;">Buddy</span></div>
+            <div style="font-size: 0.65rem; font-weight: 700; color: #64748b;">AUTONOMOUS WEALTH</div>
+          </div>
+        </div>
+
+        <nav class="wealth-nav-pills">
+          <button class="wealth-pill active" id="btn-tab-home" onclick="switchWealthTab('home')">🏠 Home</button>
+          <button class="wealth-pill" id="btn-tab-chat" onclick="switchWealthTab('chat')">💬 Chat History <span style="background: #e0e7ff; color: #4338ca; padding: 0.1rem 0.4rem; border-radius: 9999px; font-size: 0.7rem;">14</span></button>
+          <a href="desktop.html" class="wealth-pill" style="text-decoration: none; color: inherit;">🖥️ Full Desktop</a>
+          <a href="chat.html" class="wealth-pill" style="text-decoration: none; color: inherit;">🤖 AI Chat Swarm</a>
+          <button class="wealth-pill" onclick="alert('Connecting to Private Banker...')">Help / Support •</button>
+        </nav>
+      </div>
+
+      <div style="display: flex; align-items: center; gap: 1rem;">
+        <div style="display: flex; align-items: center; gap: 0.65rem;">
+          <div style="width: 36px; height: 36px; border-radius: 50%; background: linear-gradient(135deg, #c084fc, #6366f1); color: #fff; font-weight: 700; font-size: 0.85rem; display: flex; align-items: center; justify-content: center;" id="dash-avatar">ER</div>
+          <div style="line-height: 1.2;">
+            <div style="font-size: 0.85rem; font-weight: 700;" id="dash-client-name">Elena Rostova</div>
+            <div style="font-size: 0.7rem; color: #6366f1; font-weight: 600;">Private Wealth Client</div>
+          </div>
+          <button onclick="handleLogout()" style="background: #f1f5f9; border: 1px solid #cbd5e1; padding: 0.35rem 0.65rem; border-radius: 6px; font-size: 0.75rem; font-weight: 600; cursor: pointer; margin-left: 0.5rem;">
+            Logout
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <!-- DASHBOARD CONTENT (TAB 1: HOME) -->
+    <div class="dash-main-container" id="dash-home-panel">
+      <!-- LIQUID NET WORTH HERO -->
+      <div class="net-worth-banner">
+        <div>
+          <div style="display: flex; align-items: center; gap: 0.5rem; font-size: 0.75rem; color: #059669; font-weight: 700;">
+            <span>🟢 Real-time ISO 20022 Network Active</span>
+            <span style="color: var(--text-muted); font-weight: 500;">Synced 12s ago</span>
+          </div>
+          <div style="font-size: 0.75rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-top: 0.5rem;">
+            Total Liquid Net Worth
+          </div>
+          <div style="font-size: 2.25rem; font-weight: 800; letter-spacing: -0.03em; margin: 0.25rem 0;">
+            $159,500.00
+            <span style="background: #ecfdf5; color: #059669; font-size: 0.75rem; font-weight: 700; padding: 0.2rem 0.5rem; border-radius: 9999px; border: 1px solid #a7f3d0; vertical-align: middle; margin-left: 0.5rem;">↑ +4.2% MoM</span>
+          </div>
+          <div style="font-size: 0.8rem; color: var(--text-muted);">
+            Autonomous treasury sweeps active: Yielding an aggregate +$842.10 monthly return across vault accounts and liquidity pools.
+          </div>
+        </div>
+
+        <div style="display: flex; gap: 0.75rem;">
+          <button style="background: #0f172a; color: #fff; border: none; padding: 0.65rem 1.25rem; font-size: 0.85rem; font-weight: 700; border-radius: 8px; cursor: pointer;" onclick="alert('Initiating ISO 20022 Transfer Protocol')">
+            + Transfer Funds
+          </button>
+          <button style="background: #ffffff; border: 1px solid #cbd5e1; color: #334155; padding: 0.65rem 1rem; font-size: 0.85rem; font-weight: 600; border-radius: 8px; cursor: pointer;" onclick="alert('Generating Certified Statement')">
+            📄 Generate Statement
+          </button>
+        </div>
+      </div>
+
+      <!-- 3 ACTIVE ACCOUNTS & PAYMENT CARDS (IMAGE 1 SPEC) -->
+      <div>
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem;">
+          <div>
+            <h3 style="font-size: 1.05rem; font-weight: 800;">Active Accounts & Payment Cards</h3>
+            <p style="font-size: 0.75rem; color: var(--text-muted);">Autonomous hardware freeze switches, settlement routing, and EMV profiles.</p>
+          </div>
+          <a href="#" style="font-size: 0.8rem; font-weight: 700; color: #2563eb; text-decoration: none;">Card Security Center →</a>
+        </div>
+
+        <div class="cards-triple-grid">
+          <!-- CARD 1: CHECKING VAULT -->
+          <div class="dashboard-account-card">
+            <div style="display: flex; justify-content: space-between; font-size: 0.7rem; font-weight: 700;">
+              <span>CHECKING • VAULT</span>
+              <span style="color: #10b981;">● Active</span>
             </div>
-            <div class="form-group" style="justify-content: flex-end;">
-              <label>&nbsp;</label>
-              <div class="btn-group">
-                <button onclick="getProductById()">🔍 Find ID</button>
-                <button onclick="updateProduct()">✏️ Update</button>
-                <button class="btn-danger" onclick="deleteProduct()">🗑️ Delete</button>
+            <div class="vault-debit-plastic">
+              <div style="font-size: 0.7rem; letter-spacing: 0.1em; color: #94a3b8;">BANK BUDDY VAULT DEBIT</div>
+              <div style="font-size: 1.1rem; letter-spacing: 0.2em; font-family: 'Fira Code', monospace;">•••• •••• •••• 4441</div>
+              <div style="display: flex; justify-content: space-between; font-size: 0.7rem;">
+                <span>EXP 08/29</span>
+                <span style="font-weight: 800;">VISA</span>
+              </div>
+            </div>
+            <div>
+              <div style="font-size: 0.75rem; color: var(--text-muted);">Available Liquid Balance</div>
+              <div style="font-size: 1.35rem; font-weight: 800;">$125,000.00</div>
+              <div style="font-size: 0.7rem; color: var(--text-muted);">Daily limit: $25,000.00 • ISO 20022 Settled</div>
+            </div>
+          </div>
+
+          <!-- CARD 2: SAPPHIRE RESERVE CREDIT -->
+          <div class="dashboard-account-card">
+            <div style="display: flex; justify-content: space-between; font-size: 0.7rem; font-weight: 700;">
+              <span>WORLD ELITE • CREDIT</span>
+              <span style="color: #10b981;">● Active</span>
+            </div>
+            <div class="sapphire-credit-plastic">
+              <div style="font-size: 0.7rem; letter-spacing: 0.1em; color: #bfdbfe;">SAPPHIRE RESERVE CREDIT</div>
+              <div style="font-size: 1.1rem; letter-spacing: 0.2em; font-family: 'Fira Code', monospace;">•••• •••• •••• 2343</div>
+              <div style="display: flex; justify-content: space-between; font-size: 0.7rem;">
+                <span>EXP 11/30</span>
+                <span style="font-weight: 800;">MasterCard</span>
+              </div>
+            </div>
+            <div>
+              <div style="display: flex; justify-content: space-between;">
+                <span style="font-size: 0.75rem; color: var(--text-muted);">Available Credit</span>
+                <span style="font-size: 0.75rem; color: #dc2626; font-weight: 700;">Due Nov 18</span>
+              </div>
+              <div style="font-size: 1.35rem; font-weight: 800;">$34,500.00</div>
+              <div style="font-size: 0.7rem; color: var(--text-muted);">Statement balance: $9,500.00 • Auto-pay ON</div>
+            </div>
+          </div>
+
+          <!-- CARD 3: YIELD SWEEP AUTO-EARN -->
+          <div class="dashboard-account-card">
+            <div style="display: flex; justify-content: space-between; font-size: 0.7rem; font-weight: 700;">
+              <span>YIELD SWEEP • AUTO-EARN</span>
+              <span style="color: #9333ea; font-weight: 800;">7.20% APY</span>
+            </div>
+            <div class="yield-pool-plastic">
+              <div style="font-size: 0.7rem; letter-spacing: 0.1em; color: #f5d0fe;">TREASURY YIELD POOL</div>
+              <div style="font-size: 0.9rem; font-weight: 600;">📈 Daily interest compound</div>
+              <div style="display: flex; justify-content: space-between; font-size: 0.7rem;">
+                <span>FDIC / SIPC Insured</span>
+                <span style="font-family: 'Fira Code', monospace;">ID: #9902-TR</span>
+              </div>
+            </div>
+            <div>
+              <div style="font-size: 0.75rem; color: var(--text-muted);">Total Swept Treasury Balance</div>
+              <div style="font-size: 1.35rem; font-weight: 800;">$28,200.00</div>
+              <div style="font-size: 0.7rem; color: #10b981; font-weight: 600;">+$169.20 earned this calendar cycle</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- DASHBOARD CONTENT (TAB 2: CHAT WORKSPACE - IMAGES 2 & 3) -->
+    <div class="dash-main-container" id="dash-chat-panel" style="display: none;">
+      <div style="background: var(--card-bg); border: 1px solid #e2e8f0; border-radius: 14px; padding: 1.5rem;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; flex-wrap: wrap; gap: 0.5rem;">
+          <div>
+            <h3 style="font-size: 1.1rem; font-weight: 800;">Daily Financial Orchestration & Expense Breakdown</h3>
+            <p style="font-size: 0.75rem; color: var(--text-muted);">Dynamic Swarm Router: Autonomous Multi-Agent Execution (ISO-20022 Deterministic Verified)</p>
+          </div>
+        </div>
+
+        <div style="display: flex; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 1.5rem;">
+          <button style="background: #eff6ff; border: 1px solid #bfdbfe; color: #1d4ed8; font-size: 0.75rem; font-weight: 700; padding: 0.3rem 0.7rem; border-radius: 9999px;">🏦 Account •</button>
+          <button style="background: #f8fafc; border: 1px solid #e2e8f0; color: #475569; font-size: 0.75rem; font-weight: 600; padding: 0.3rem 0.7rem; border-radius: 9999px;">💸 Payments</button>
+          <button style="background: #f8fafc; border: 1px solid #e2e8f0; color: #475569; font-size: 0.75rem; font-weight: 600; padding: 0.3rem 0.7rem; border-radius: 9999px;">🏷️ Loans</button>
+          <button style="background: #2563eb; color: #fff; border: none; font-size: 0.75rem; font-weight: 700; padding: 0.3rem 0.7rem; border-radius: 9999px;">💳 Credit Card •</button>
+          <button style="background: #f8fafc; border: 1px solid #e2e8f0; color: #475569; font-size: 0.75rem; font-weight: 600; padding: 0.3rem 0.7rem; border-radius: 9999px;">🛡️ Fraud Detection</button>
+          <button style="background: #f8fafc; border: 1px solid #e2e8f0; color: #475569; font-size: 0.75rem; font-weight: 600; padding: 0.3rem 0.7rem; border-radius: 9999px;">📈 Investment •</button>
+        </div>
+
+        <!-- CONVERSATION CARDS -->
+        <div style="display: flex; flex-direction: column; gap: 1.25rem;">
+          <div style="align-self: flex-end; max-width: 80%; background: #0f172a; color: #ffffff; padding: 0.85rem 1.25rem; border-radius: 14px 14px 2px 14px; font-size: 0.85rem;">
+            Please freeze my Sapphire Reserve credit card right now for safety, and check if my Amazon UPI payment went through.
+          </div>
+
+          <div style="align-self: flex-start; max-width: 90%; background: #ffffff; border: 1px solid #e2e8f0; border-radius: 14px; padding: 1.25rem; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.03);">
+            <div style="display: flex; align-items: center; gap: 0.5rem; font-size: 0.7rem; color: #4338ca; font-weight: 700; margin-bottom: 0.75rem;">
+              <span>🤖 Handled by: Credit Card Agent + Payments Agent + Fraud Sentry</span>
+              <span>• Latency: 98ms</span>
+              <span>• 2FA Authenticated</span>
+            </div>
+            <p style="font-size: 0.85rem; margin-bottom: 1rem;">
+              I have securely executed the <strong>instant freeze protocol</strong> on your Sapphire Reserve card and reconciled your recent Amazon retail clearing record.
+            </p>
+
+            <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 1rem; margin-bottom: 1rem;">
+              <div style="display: flex; justify-content: space-between; align-items: center;">
+                <span style="font-weight: 700; font-size: 0.85rem;">Sapphire Reserve Credit Control</span>
+                <span style="background: #fef2f2; color: #b91c1c; border: 1px solid #fecaca; padding: 0.15rem 0.5rem; border-radius: 9999px; font-size: 0.7rem; font-weight: 800;">● FROZEN / LOCKED</span>
+              </div>
+              <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 0.25rem;">Physical & Virtual Tokens • Ending in •••• 2343</div>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem;">
+              <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 0.75rem;">
+                <div style="font-size: 0.7rem; color: #059669; font-weight: 700;">✓ UPI Settlement Verification</div>
+                <div style="font-size: 0.85rem; font-weight: 800; margin: 0.25rem 0;">Amazon Retail Services Inc.</div>
+                <div style="font-size: 1.1rem; font-weight: 800;">$2,499.00</div>
+                <div style="font-size: 0.65rem; color: var(--text-muted);">ISO-20022 Cleared • RRN: #UPI-9842104820</div>
+              </div>
+
+              <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 0.75rem;">
+                <div style="font-size: 0.7rem; color: #4338ca; font-weight: 700;">🛡️ Fraud Sentry Scan (Score: 0.02)</div>
+                <div style="font-size: 0.85rem; font-weight: 800; margin: 0.25rem 0; color: #059669;">Benign Merchant Signature</div>
+                <div style="font-size: 0.7rem; color: var(--text-muted);">Zero anomalous velocity flags detected.</div>
               </div>
             </div>
           </div>
         </div>
-
-        <!-- Products Table -->
-        <table id="products-table">
-          <thead>
-            <tr>
-              <th>ID</th>
-              <th>Name</th>
-              <th>Price</th>
-              <th>Created At</th>
-              <th>Action</th>
-            </tr>
-          </thead>
-          <tbody id="products-tbody">
-            <tr>
-              <td colspan="5" style="text-align: center; color: var(--text-muted);">
-                Click "Fetch All Products" to load data from PostgreSQL.
-              </td>
-            </tr>
-          </tbody>
-        </table>
       </div>
     </div>
-
-    <!-- RIGHT COLUMN -->
-    <div>
-      <div class="card" style="position: sticky; top: 1.5rem;">
-        <h2>
-          <span>📡 API Request & Response Log</span>
-          <button style="padding: 0.25rem 0.5rem; font-size: 0.7rem;" onclick="clearLog()">Clear</button>
-        </h2>
-        <pre id="console-log">// API responses will appear here...</pre>
-      </div>
-    </div>
-  </main>
+  </div>
 
   <script>
-    let token = '';
+    // State
+    let authState = {
+      sessionToken: null,
+      accessToken: null,
+      user: null
+    };
 
-    function log(method, url, status, data) {
-      const box = document.getElementById('console-log');
-      const formatted = typeof data === 'object' ? JSON.stringify(data, null, 2) : data;
-      box.textContent = 
-`[${new Date().toLocaleTimeString()}] ${method} ${url}
-Status: ${status}
-Response:
-${formatted}`;
-    }
+    // Accessibility handlers
 
-    function clearLog() {
-      document.getElementById('console-log').textContent = '// Console cleared.';
-    }
-
-    async function apiCall(method, url, body = null, requireAuth = true) {
-      const headers = { 'Content-Type': 'application/json' };
-      if (requireAuth && token) {
-        headers['Authorization'] = `Bearer ${token}`;
+    function toggleHighContrast(isHigh) {
+      if (isHigh) {
+        document.body.classList.add('high-contrast');
+      } else {
+        document.body.classList.remove('high-contrast');
       }
+    }
 
-      const options = { method, headers };
-      if (body) options.body = JSON.stringify(body);
+    // Quick Fill Helper
+    function quickFill(id, pass) {
+      document.getElementById('login-id-field').value = id;
+      document.getElementById('login-pass-field').value = pass;
+      checkButtonActive();
+      hideKotakAlert();
+    }
+
+    // Toggle Password Visibility
+    function togglePasswordVisibility() {
+      const input = document.getElementById('login-pass-field');
+      const label = document.getElementById('show-hide-label');
+      if (input.type === 'password') {
+        input.type = 'text';
+        label.textContent = 'Hide';
+      } else {
+        input.type = 'password';
+        label.textContent = 'Show';
+      }
+    }
+
+    // Dynamic button color activation (Kotak peach to active red)
+    function checkButtonActive() {
+      const idVal = document.getElementById('login-id-field').value.trim();
+      const passVal = document.getElementById('login-pass-field').value;
+      const btn = document.getElementById('secure-login-btn');
+      if (idVal.length > 0 && passVal.length > 0) {
+        btn.classList.add('active-ready');
+      } else {
+        btn.classList.remove('active-ready');
+      }
+    }
+
+    // Switch between Login and Register tabs
+    function switchKotakTab(tab) {
+      const tabLogin = document.getElementById('tab-btn-login');
+      const tabReg = document.getElementById('tab-btn-register');
+      const formLogin = document.getElementById('kotak-login-form');
+      const formReg = document.getElementById('kotak-register-form');
+
+      if (tab === 'login') {
+        tabLogin.classList.add('active');
+        tabReg.classList.remove('active');
+        formLogin.style.display = 'block';
+        formReg.style.display = 'none';
+      } else {
+        tabLogin.classList.remove('active');
+        tabReg.classList.add('active');
+        formLogin.style.display = 'none';
+        formReg.style.display = 'block';
+      }
+      hideKotakAlert();
+    }
+
+
+    function showKotakAlert(msg) {
+      const box = document.getElementById('login-alert-box');
+      const label = document.getElementById('login-alert-msg');
+      label.textContent = msg;
+      box.style.display = 'block';
+    }
+
+    function hideKotakAlert() {
+      document.getElementById('login-alert-box').style.display = 'none';
+    }
+
+    // Step 1: Submit Login Form (CRN, Username, or Card Number)
+    async function handleKotakLogin(e) {
+      e.preventDefault();
+      const identifier = document.getElementById('login-id-field').value.trim();
+      const password = document.getElementById('login-pass-field').value;
+      const btn = document.getElementById('secure-login-btn');
+
+      if (!identifier || !password) return;
+
+      btn.disabled = true;
+      btn.textContent = 'Verifying with Net Banking Gateway...';
+      hideKotakAlert();
 
       try {
-        const res = await fetch(url, options);
+        // Try real backend API
         let data;
         try {
+          const res = await fetch('/api/v1/signin', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ identifier, password })
+          });
           data = await res.json();
-        } catch (e) {
-          data = await res.text();
+          if (!res.ok) throw new Error(data.message || 'Invalid credentials');
+        } catch (netErr) {
+          // Graceful client fallback for standalone demo testing
+          if (
+            (identifier === '98234105' || identifier.toLowerCase() === 'elena' || identifier === '4441') &&
+            (password === 'BankBuddy@2026' || password === 'password123')
+          ) {
+            data = {
+              step: 'OTP_REQUIRED',
+              sessionToken: 'demo-session-token-' + Date.now(),
+              user: {
+                id: 1,
+                name: 'Elena Rostova',
+                username: 'elena',
+                crn: '98234105',
+                maskedPhone: '•••• •••• 4321'
+              }
+            };
+          } else {
+            throw new Error(netErr.message || 'Invalid credentials! Try CRN: 98234105 or User: elena');
+          }
         }
-        log(method, url, res.status, data);
-        return { ok: res.ok, status: res.status, data };
+
+        if (data.step === 'OTP_REQUIRED') {
+          authState.sessionToken = data.sessionToken;
+          authState.user = data.user;
+          document.getElementById('otp-phone-txt').textContent = (data.user && data.user.maskedPhone) || '•••• 4321';
+          openOtpModal();
+        } else if (data.accessToken) {
+          enterDashboard(data);
+        }
       } catch (err) {
-        log(method, url, 'Network Error', { error: err.message });
+        showKotakAlert(err.message);
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'Secure login';
       }
     }
 
-    async function signup() {
-      const username = document.getElementById('username').value;
-      const email = document.getElementById('email').value;
-      const password = document.getElementById('password').value;
+    // Step 2: OTP Modal
+    function openOtpModal() {
+      document.getElementById('otp-modal-box').style.display = 'flex';
+      document.getElementById('otp-alert-box').style.display = 'none';
+      for (let i = 1; i <= 6; i++) {
+        document.getElementById(`otp-digit-${i}`).value = '';
+      }
+      setTimeout(() => document.getElementById('otp-digit-1').focus(), 150);
+    }
 
-      const res = await apiCall('POST', '/api/v1/signup', { username, email, password }, false);
-      if (res && res.ok) {
-        alert('Signup successful! Now click Sign In.');
+    function closeOtpModal() {
+      document.getElementById('otp-modal-box').style.display = 'none';
+    }
+
+    function moveOtpFocus(current, nextId) {
+      if (current.value.length === 1 && nextId) {
+        document.getElementById(nextId).focus();
       }
     }
 
-    async function signin() {
-      const username = document.getElementById('username').value;
-      const password = document.getElementById('password').value;
-
-      const res = await apiCall('POST', '/api/v1/signin', { username, password }, false);
-      if (res && res.data && res.data.accessToken) {
-        token = res.data.accessToken;
-        document.getElementById('token-box').textContent = token;
-        getProducts();
+    function otpBack(event, current, prevId) {
+      if (event.key === 'Backspace' && current.value === '' && prevId) {
+        document.getElementById(prevId).focus();
       }
     }
 
-    async function addProduct() {
-      const name = document.getElementById('prodName').value;
-      const price = parseFloat(document.getElementById('prodPrice').value);
-
-      const res = await apiCall('POST', '/api/auth/addproduct', { name, price });
-      if (res && res.ok) {
-        getProducts();
+    function fillDemoOtp() {
+      const demo = '123456';
+      for (let i = 0; i < 6; i++) {
+        document.getElementById(`otp-digit-${i+1}`).value = demo[i];
       }
     }
 
-    async function getProducts() {
-      const res = await apiCall('GET', '/api/auth/getproducts');
-      const tbody = document.getElementById('products-tbody');
-      if (res && res.data && Array.isArray(res.data)) {
-        if (res.data.length === 0) {
-          tbody.innerHTML = '<tr><td colspan="5" style="text-align: center;">No products found in database.</td></tr>';
-          return;
+    async function confirmOtpAndLogin() {
+      let otp = '';
+      for (let i = 1; i <= 6; i++) {
+        otp += document.getElementById(`otp-digit-${i}`).value;
+      }
+
+      if (otp.length !== 6) {
+        const alertBox = document.getElementById('otp-alert-box');
+        document.getElementById('otp-alert-msg').textContent = 'Please enter all 6 digits of the OTP.';
+        alertBox.style.display = 'block';
+        return;
+      }
+
+      const btn = document.getElementById('otp-submit-btn');
+      btn.disabled = true;
+      btn.textContent = 'Authenticating ISO 20022 Token...';
+
+      try {
+        let data;
+        try {
+          const res = await fetch('/api/v1/verify-otp', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              sessionToken: authState.sessionToken,
+              otp: otp
+            })
+          });
+          data = await res.json();
+          if (!res.ok) throw new Error(data.message || 'OTP verification failed');
+        } catch (netErr) {
+          if (otp === '123456') {
+            data = {
+              accessToken: 'mock-jwt-token-mfa-elevated',
+              name: (authState.user && authState.user.name) || 'Elena Rostova'
+            };
+          } else {
+            throw new Error('Invalid OTP! Demo OTP is 123456');
+          }
         }
-        tbody.innerHTML = res.data.map(p => `
-          <tr>
-            <td>${p.id}</td>
-            <td><strong>${p.name}</strong></td>
-            <td>$${p.price}</td>
-            <td style="font-size: 0.7rem; color: var(--text-muted);">${new Date(p.createdAt).toLocaleDateString()}</td>
-            <td>
-              <button style="padding: 0.2rem 0.5rem; font-size: 0.7rem;" onclick="selectProduct(${p.id}, '${p.name.replace(/'/g, "\\'")}', ${p.price})">Select</button>
-            </td>
-          </tr>
-        `).join('');
+
+        enterDashboard(data);
+      } catch (err) {
+        const alertBox = document.getElementById('otp-alert-box');
+        document.getElementById('otp-alert-msg').textContent = err.message;
+        alertBox.style.display = 'block';
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'Verify & Enter Autonomous Wealth';
       }
     }
 
-    function selectProduct(id, name, price) {
-      document.getElementById('targetId').value = id;
-      document.getElementById('prodName').value = name;
-      document.getElementById('prodPrice').value = price;
+    function enterDashboard(data) {
+      authState.accessToken = data.accessToken;
+      closeOtpModal();
+
+      document.getElementById('login-layout').style.display = 'none';
+      document.getElementById('demo-strip').style.display = 'none';
+      document.getElementById('safety-footer-bar').style.display = 'none';
+      document.getElementById('wealth-dashboard-view').style.display = 'flex';
+
+      if (data.name) {
+        document.getElementById('dash-client-name').textContent = data.name;
+        const initials = data.name.split(' ').map(n => n[0]).join('').substring(0, 2);
+        document.getElementById('dash-avatar').textContent = initials;
+      }
     }
 
-    async function getProductById() {
-      const id = parseInt(document.getElementById('targetId').value);
-      if (!id) return alert('Enter target product ID');
-      await apiCall('POST', '/api/auth/getproductbyid', { id });
+    function switchWealthTab(tab) {
+      const homePanel = document.getElementById('dash-home-panel');
+      const chatPanel = document.getElementById('dash-chat-panel');
+      const btnHome = document.getElementById('btn-tab-home');
+      const btnChat = document.getElementById('btn-tab-chat');
+
+      if (tab === 'home') {
+        homePanel.style.display = 'flex';
+        chatPanel.style.display = 'none';
+        btnHome.classList.add('active');
+        btnChat.classList.remove('active');
+      } else {
+        homePanel.style.display = 'none';
+        chatPanel.style.display = 'block';
+        btnHome.classList.remove('active');
+        btnChat.classList.add('active');
+      }
     }
 
-    async function updateProduct() {
-      const id = parseInt(document.getElementById('targetId').value);
-      const name = document.getElementById('prodName').value;
-      const price = parseFloat(document.getElementById('prodPrice').value);
-      if (!id) return alert('Enter target product ID');
-
-      const res = await apiCall('POST', '/api/auth/update', { id, name, price });
-      if (res && res.ok) getProducts();
+    function handleLogout() {
+      authState = { sessionToken: null, accessToken: null, user: null };
+      document.getElementById('wealth-dashboard-view').style.display = 'none';
+      document.getElementById('login-layout').style.display = 'grid';
+      document.getElementById('demo-strip').style.display = 'flex';
+      document.getElementById('safety-footer-bar').style.display = 'flex';
     }
 
-    async function deleteProduct() {
-      const id = parseInt(document.getElementById('targetId').value);
-      if (!id) return alert('Enter target product ID');
-      if (!confirm(`Delete product ${id}?`)) return;
+    // Register Form Handler
+    async function handleKotakRegister(e) {
+      e.preventDefault();
+      const name = document.getElementById('reg-name').value;
+      const username = document.getElementById('reg-user').value;
+      const email = document.getElementById('reg-email').value;
+      const password = document.getElementById('reg-pass').value;
 
-      const res = await apiCall('POST', '/api/auth/delete', { id });
-      if (res && res.ok) getProducts();
+      try {
+        const res = await fetch('/api/v1/signup', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name, username, email, password })
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.message || 'Registration failed');
+
+        alert(`Bank Buddy Net Banking Registration Successful!\nYour Generated CRN: ${data.user.crn}\nCard: ${data.user.cardNumber}\nUsername: ${data.user.username}`);
+        switchKotakTab('login');
+        quickFill(data.user.crn, password);
+      } catch (err) {
+        showKotakAlert(err.message);
+      }
     }
   </script>
 </body>
