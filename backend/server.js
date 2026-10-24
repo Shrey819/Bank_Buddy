@@ -35,6 +35,15 @@ app.use(express.urlencoded({
 const frontendPath = path.join(__dirname, "..", "frontend");
 if (fs.existsSync(frontendPath)) {
   app.use(express.static(frontendPath));
+
+  // Direct route aliases for desktop and chat pages
+  app.get("/desktop", (req, res) => {
+    res.sendFile(path.join(frontendPath, "desktop.html"));
+  });
+
+  app.get("/chat", (req, res) => {
+    res.sendFile(path.join(frontendPath, "chat.html"));
+  });
 }
 
 // Default API route for JSON clients
