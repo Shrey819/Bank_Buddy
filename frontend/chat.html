@@ -153,116 +153,16 @@
 
       <!-- Main Conversational Feed -->
       <div class="flex flex-col gap-6 w-full flex-1 mb-6" id="chat-thread">
-        
-        <!-- TURN 1: USER MESSAGE -->
-        <div class="flex items-start justify-end gap-3 pl-8">
-          <div class="flex flex-col items-end gap-1 max-w-xl">
-            <div class="px-4 py-3 rounded-2xl rounded-tr-sm bg-on-surface text-surface-container-lowest text-sm leading-relaxed shadow-sm">
-              Good morning Bank Buddy. Can you analyze my safe-to-spend surplus for this month and check my debit card status?
-            </div>
-            <span class="text-[10px] text-on-surface-variant pr-1">10:14 AM</span>
+        <!-- Clean Empty State (Removed default hardcoded chat) -->
+        <div id="empty-chat-state" class="flex flex-col items-center justify-center py-20 text-center text-on-surface-variant my-auto">
+          <div class="w-14 h-14 rounded-2xl bg-primary/10 text-primary flex items-center justify-center mb-3 shadow-sm">
+            <span class="material-symbols-outlined text-[30px]">smart_toy</span>
           </div>
-          <div class="w-8 h-8 rounded-full bg-primary/10 text-primary font-bold text-xs flex items-center justify-center shrink-0 border border-primary/20">
-            ER
-          </div>
+          <h2 class="text-base font-bold text-on-surface">Bank Buddy AI Banking Assistant</h2>
+          <p class="text-xs text-on-surface-variant max-w-sm mt-1">
+            Zero-hallucination deterministic banking. Ask balances, transactions, card controls, or click a suggestion below to begin.
+          </p>
         </div>
-
-        <!-- TURN 1: ASSISTANT MULTI-AGENT RESPONSE -->
-        <div class="flex items-start gap-3 pr-8">
-          <div class="w-8 h-8 rounded-xl bg-primary text-on-primary flex items-center justify-center shrink-0 shadow-sm">
-            <span class="material-symbols-outlined text-[18px]">smart_toy</span>
-          </div>
-          <div class="flex flex-col gap-2 max-w-2xl w-full">
-            <div class="bg-surface-container-lowest p-5 rounded-2xl border border-surface-container-high/60 shadow-sm flex flex-col gap-3">
-              <p class="text-sm text-on-surface leading-relaxed">
-                Good morning, <strong>Elena</strong>! Here is your verified liquid ledger summary:
-              </p>
-
-              <!-- Account Summary Matrix -->
-              <div class="grid grid-cols-3 gap-2.5 text-center">
-                <div class="p-3 rounded-xl bg-surface-container-low border border-surface-container-high">
-                  <div class="text-[10px] text-on-surface-variant uppercase font-semibold">Liquid Checking</div>
-                  <div class="text-base font-bold text-on-surface mt-0.5">$99,500.00</div>
-                </div>
-                <div class="p-3 rounded-xl bg-surface-container-low border border-surface-container-high">
-                  <div class="text-[10px] text-on-surface-variant uppercase font-semibold">Sapphire Due</div>
-                  <div class="text-base font-bold text-error mt-0.5">-$9,500.00</div>
-                </div>
-                <div class="p-3 rounded-xl bg-primary/10 border border-primary/20">
-                  <div class="text-[10px] text-primary uppercase font-bold">Safe Surplus</div>
-                  <div class="text-base font-extrabold text-primary mt-0.5">$90,000.00</div>
-                </div>
-              </div>
-
-              <div class="p-3 rounded-xl bg-surface-container-low border border-surface-container-high flex items-center justify-between text-xs">
-                <div class="flex items-center gap-2">
-                  <span class="material-symbols-outlined text-[18px] text-primary">contactless</span>
-                  <span>Vault Debit (*4441) Contactless NFC</span>
-                </div>
-                <span class="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 font-bold text-[10px]">ACTIVE</span>
-              </div>
-            </div>
-            <span class="text-[10px] text-on-surface-variant pl-1">Handled by Bank Buddy Core &bull; 94ms</span>
-          </div>
-        </div>
-
-        <!-- TURN 2: USER MESSAGE -->
-        <div class="flex items-start justify-end gap-3 pl-8">
-          <div class="flex flex-col items-end gap-1 max-w-xl">
-            <div class="px-4 py-3 rounded-2xl rounded-tr-sm bg-on-surface text-surface-container-lowest text-sm leading-relaxed shadow-sm">
-              Please freeze my Vault Debit card (*4441) now for security.
-            </div>
-            <span class="text-[10px] text-on-surface-variant pr-1">10:15 AM</span>
-          </div>
-          <div class="w-8 h-8 rounded-full bg-primary/10 text-primary font-bold text-xs flex items-center justify-center shrink-0 border border-primary/20">
-            ER
-          </div>
-        </div>
-
-        <!-- TURN 2: ASSISTANT INTERACTIVE CARD FREEZE SWITCH -->
-        <div class="flex items-start gap-3 pr-8">
-          <div class="w-8 h-8 rounded-xl bg-secondary text-on-secondary flex items-center justify-center shrink-0 shadow-sm">
-            <span class="material-symbols-outlined text-[18px]">credit_card</span>
-          </div>
-          <div class="flex flex-col gap-2 max-w-2xl w-full">
-            <div class="bg-surface-container-lowest p-5 rounded-2xl border border-surface-container-high/60 shadow-sm flex flex-col gap-3">
-              <div class="flex items-center justify-between pb-3 border-b border-surface-container-high/60">
-                <div class="flex items-center gap-2.5">
-                  <div class="w-10 h-7 rounded-md bg-slate-900 text-white flex items-center justify-center text-[10px] font-mono font-bold tracking-wider">
-                    4441
-                  </div>
-                  <div>
-                    <div class="text-xs font-bold text-on-surface">Bank Buddy Vault Debit</div>
-                    <div class="text-[10px] text-on-surface-variant">Elena Rostova</div>
-                  </div>
-                </div>
-                <!-- Card Status Badge target for JS: card-status-badge -->
-                <span id="card-status-badge" class="px-2.5 py-1 rounded-full bg-error/10 text-error text-[11px] font-bold flex items-center gap-1">
-                  <span class="w-2 h-2 rounded-full bg-error"></span> FROZEN / LOCKED
-                </span>
-              </div>
-
-              <!-- Interactive Toggle Switch -->
-              <div class="flex items-center justify-between p-3.5 rounded-xl bg-surface-container-low border border-surface-container-high">
-                <div class="flex flex-col">
-                  <span class="text-xs font-bold text-on-surface">Card Freeze Switch</span>
-                  <!-- Card State Text target for JS: card-state-text -->
-                  <span id="card-state-text" class="text-[11px] text-error font-medium">Card Active State: OFF (Locked for transactions)</span>
-                </div>
-                <!-- Toggle Button target for JS: card-toggle-btn & card-toggle-thumb -->
-                <button id="card-toggle-btn" class="w-12 h-7 rounded-full bg-surface-container-high transition-colors relative flex items-center px-1 focus:outline-none" type="button" aria-label="Toggle card freeze status">
-                  <div id="card-toggle-thumb" class="w-5 h-5 rounded-full bg-outline-variant shadow-sm transition-transform translate-x-0"></div>
-                </button>
-              </div>
-
-              <div class="text-xs text-on-surface-variant leading-relaxed">
-                Debit card *4441 is locked. Transactions will be rejected with code <code class="bg-slate-100 px-1 py-0.5 rounded text-[11px] font-mono">BB-LOCKED</code>. Click the switch above anytime to toggle.
-              </div>
-            </div>
-            <span class="text-[10px] text-on-surface-variant pl-1">Executed by Card Guard Agent &bull; 42ms</span>
-          </div>
-        </div>
-
       </div>
 
       <!-- Quick Action Prompt Suggestion Pills -->
@@ -305,104 +205,184 @@
   <!-- Interactive Logic -->
   <script>
     (function() {
-      // 1. Card Freeze Switch Toggle
-      const cardToggleBtn = document.getElementById('card-toggle-btn');
-      const cardToggleThumb = document.getElementById('card-toggle-thumb');
-      const cardStatusBadge = document.getElementById('card-status-badge');
-      const cardStateText = document.getElementById('card-state-text');
-      let isLocked = true;
+      // Helper to attach card toggle listener
+      function attachToggleListener(btnId, thumbId, badgeId, textId) {
+        const btn = document.getElementById(btnId);
+        const thumb = document.getElementById(thumbId);
+        const badge = document.getElementById(badgeId);
+        const text = document.getElementById(textId);
+        let isLocked = true;
 
-      if (cardToggleBtn) {
-        cardToggleBtn.addEventListener('click', function() {
-          isLocked = !isLocked;
-          if (isLocked) {
-            cardToggleBtn.classList.remove('bg-primary');
-            cardToggleBtn.classList.add('bg-surface-container-high');
-            cardToggleThumb.classList.remove('translate-x-5', 'bg-white');
-            cardToggleThumb.classList.add('translate-x-0', 'bg-outline-variant');
-            cardStatusBadge.className = 'px-2.5 py-1 rounded-full bg-error/10 text-error text-[11px] font-bold flex items-center gap-1';
-            cardStatusBadge.innerHTML = '<span class="w-2 h-2 rounded-full bg-error"></span> FROZEN / LOCKED';
-            cardStateText.className = 'text-[11px] text-error font-medium';
-            cardStateText.innerText = 'Card Active State: OFF (Locked for transactions)';
-          } else {
-            cardToggleBtn.classList.remove('bg-surface-container-high');
-            cardToggleBtn.classList.add('bg-primary');
-            cardToggleThumb.classList.remove('translate-x-0', 'bg-outline-variant');
-            cardToggleThumb.classList.add('translate-x-5', 'bg-white');
-            cardStatusBadge.className = 'px-2.5 py-1 rounded-full bg-primary/10 text-primary text-[11px] font-bold flex items-center gap-1';
-            cardStatusBadge.innerHTML = '<span class="w-2 h-2 rounded-full bg-primary animate-pulse"></span> ACTIVE & UNRESTRICTED';
-            cardStateText.className = 'text-[11px] text-primary font-medium';
-            cardStateText.innerText = 'Card Active State: ON (Instant authorization enabled)';
-          }
-        });
+        if (btn) {
+          btn.addEventListener('click', function() {
+            isLocked = !isLocked;
+            if (isLocked) {
+              btn.classList.remove('bg-primary');
+              btn.classList.add('bg-surface-container-high');
+              thumb.classList.remove('translate-x-5', 'bg-white');
+              thumb.classList.add('translate-x-0', 'bg-outline-variant');
+              badge.className = 'px-2.5 py-1 rounded-full bg-error/10 text-error text-[11px] font-bold flex items-center gap-1';
+              badge.innerHTML = '<span class="w-2 h-2 rounded-full bg-error"></span> FROZEN / LOCKED';
+              text.className = 'text-[11px] text-error font-medium';
+              text.innerText = 'Card Active State: OFF (Locked for transactions)';
+            } else {
+              btn.classList.remove('bg-surface-container-high');
+              btn.classList.add('bg-primary');
+              thumb.classList.remove('translate-x-0', 'bg-outline-variant');
+              thumb.classList.add('translate-x-5', 'bg-white');
+              badge.className = 'px-2.5 py-1 rounded-full bg-primary/10 text-primary text-[11px] font-bold flex items-center gap-1';
+              badge.innerHTML = '<span class="w-2 h-2 rounded-full bg-primary animate-pulse"></span> ACTIVE & UNRESTRICTED';
+              text.className = 'text-[11px] text-primary font-medium';
+              text.innerText = 'Card Active State: ON (Instant authorization enabled)';
+            }
+          });
+        }
       }
 
-      // 2. Prompt Chips auto-fill
       const chatInput = document.getElementById('chat-input');
-      const promptChips = document.querySelectorAll('.prompt-chip');
-      promptChips.forEach(chip => {
-        chip.addEventListener('click', () => {
-          const text = chip.innerText.replace(/^[^\w]+/, '').trim();
-          if (chatInput) {
-            chatInput.value = text;
-            chatInput.focus();
-          }
-        });
-      });
-
-      // 3. Send query simulation
       const sendBtn = document.getElementById('send-btn');
       const chatThread = document.getElementById('chat-thread');
+      let toggleCount = 0;
 
-      function handleSend() {
-        if (!chatInput || !chatInput.value.trim() || !chatThread) return;
-        const userText = chatInput.value.trim();
-        chatInput.value = '';
+      function handleSend(customText) {
+        const text = (customText || (chatInput ? chatInput.value : '')).trim();
+        if (!text || !chatThread) return;
+        if (chatInput) chatInput.value = '';
 
-        // Append user turn
+        // Hide empty state placeholder
+        const emptyState = document.getElementById('empty-chat-state');
+        if (emptyState) emptyState.style.display = 'none';
+
+        // 1. Append User Turn
         const userTurn = document.createElement('div');
         userTurn.className = 'flex items-start justify-end gap-3 pl-8';
         userTurn.innerHTML = `
           <div class="flex flex-col items-end gap-1 max-w-xl">
             <div class="px-4 py-3 rounded-2xl rounded-tr-sm bg-on-surface text-surface-container-lowest text-sm leading-relaxed shadow-sm">
-              ${userText}
+              ${text}
             </div>
             <span class="text-[10px] text-on-surface-variant pr-1">Just now</span>
           </div>
-          <div class="w-8 h-8 rounded-full bg-primary/10 text-primary font-bold text-xs flex items-center justify-center shrink-0">
+          <div class="w-8 h-8 rounded-full bg-primary/10 text-primary font-bold text-xs flex items-center justify-center shrink-0 border border-primary/20">
             ER
           </div>
         `;
         chatThread.appendChild(userTurn);
         window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
 
-        // Simulate Assistant Response
+        // 2. Simulate AI Assistant Response
         setTimeout(() => {
           const aiTurn = document.createElement('div');
           aiTurn.className = 'flex items-start gap-3 pr-8';
-          aiTurn.innerHTML = `
-            <div class="w-8 h-8 rounded-xl bg-primary text-on-primary flex items-center justify-center shrink-0 shadow-sm">
-              <span class="material-symbols-outlined text-[18px]">smart_toy</span>
-            </div>
-            <div class="flex flex-col gap-2 max-w-2xl w-full">
-              <div class="bg-surface-container-lowest p-5 rounded-2xl border border-surface-container-high/60 shadow-sm flex flex-col gap-2.5">
-                <p class="text-sm text-on-surface leading-relaxed">
-                  I have analyzed your request: "<em>${userText}</em>". Account balances and security policies have been verified against active ledger thresholds.
-                </p>
-                <div class="p-2.5 rounded-xl bg-surface-container-low flex items-center justify-between text-xs">
-                  <span class="text-on-surface-variant">Deterministic Check</span>
-                  <span class="text-primary font-bold">100% Verified Safe</span>
-                </div>
+          const lower = text.toLowerCase();
+
+          if (lower.includes('freeze') || lower.includes('lock') || lower.includes('card')) {
+            toggleCount++;
+            const btnId = 'card-toggle-btn-' + toggleCount;
+            const thumbId = 'card-toggle-thumb-' + toggleCount;
+            const badgeId = 'card-status-badge-' + toggleCount;
+            const textId = 'card-state-text-' + toggleCount;
+
+            aiTurn.innerHTML = `
+              <div class="w-8 h-8 rounded-xl bg-secondary text-on-secondary flex items-center justify-center shrink-0 shadow-sm">
+                <span class="material-symbols-outlined text-[18px]">credit_card</span>
               </div>
-              <span class="text-[10px] text-on-surface-variant pl-1">Bank Buddy Core &bull; 110ms</span>
-            </div>
-          `;
-          chatThread.appendChild(aiTurn);
+              <div class="flex flex-col gap-2 max-w-2xl w-full">
+                <div class="bg-surface-container-lowest p-5 rounded-2xl border border-surface-container-high/60 shadow-sm flex flex-col gap-3">
+                  <div class="flex items-center justify-between pb-3 border-b border-surface-container-high/60">
+                    <div class="flex items-center gap-2.5">
+                      <div class="w-10 h-7 rounded-md bg-slate-900 text-white flex items-center justify-center text-[10px] font-mono font-bold tracking-wider">
+                        4441
+                      </div>
+                      <div>
+                        <div class="text-xs font-bold text-on-surface">Bank Buddy Vault Debit</div>
+                        <div class="text-[10px] text-on-surface-variant">Cardholder: Elena Rostova</div>
+                      </div>
+                    </div>
+                    <span id="${badgeId}" class="px-2.5 py-1 rounded-full bg-error/10 text-error text-[11px] font-bold flex items-center gap-1">
+                      <span class="w-2 h-2 rounded-full bg-error"></span> FROZEN / LOCKED
+                    </span>
+                  </div>
+                  <div class="flex items-center justify-between p-3.5 rounded-xl bg-surface-container-low border border-surface-container-high">
+                    <div class="flex flex-col">
+                      <span class="text-xs font-bold text-on-surface">Card Freeze Switch</span>
+                      <span id="${textId}" class="text-[11px] text-error font-medium">Card Active State: OFF (Locked for transactions)</span>
+                    </div>
+                    <button id="${btnId}" class="w-12 h-7 rounded-full bg-surface-container-high transition-colors relative flex items-center px-1 focus:outline-none" type="button" aria-label="Toggle card freeze status">
+                      <div id="${thumbId}" class="w-5 h-5 rounded-full bg-outline-variant shadow-sm transition-transform translate-x-0"></div>
+                    </button>
+                  </div>
+                  <div class="text-xs text-on-surface-variant leading-relaxed">
+                    Debit card *4441 is locked. Transactions will be rejected with code <code class="bg-slate-100 px-1 py-0.5 rounded text-[11px] font-mono">BB-LOCKED</code>. Click the switch above anytime to toggle.
+                  </div>
+                </div>
+                <span class="text-[10px] text-on-surface-variant pl-1">Executed by Card Guard Agent &bull; 42ms</span>
+              </div>
+            `;
+            chatThread.appendChild(aiTurn);
+            attachToggleListener(btnId, thumbId, badgeId, textId);
+          } else if (lower.includes('balance') || lower.includes('surplus') || lower.includes('emi') || lower.includes('amount')) {
+            aiTurn.innerHTML = `
+              <div class="w-8 h-8 rounded-xl bg-primary text-on-primary flex items-center justify-center shrink-0 shadow-sm">
+                <span class="material-symbols-outlined text-[18px]">smart_toy</span>
+              </div>
+              <div class="flex flex-col gap-2 max-w-2xl w-full">
+                <div class="bg-surface-container-lowest p-5 rounded-2xl border border-surface-container-high/60 shadow-sm flex flex-col gap-3">
+                  <p class="text-sm text-on-surface leading-relaxed">
+                    Here is your verified liquid ledger breakdown, <strong>Elena</strong>:
+                  </p>
+                  <div class="grid grid-cols-3 gap-2.5 text-center">
+                    <div class="p-3 rounded-xl bg-surface-container-low border border-surface-container-high">
+                      <div class="text-[10px] text-on-surface-variant uppercase font-semibold">Checking</div>
+                      <div class="text-base font-bold text-on-surface mt-0.5">$99,500.00</div>
+                    </div>
+                    <div class="p-3 rounded-xl bg-surface-container-low border border-surface-container-high">
+                      <div class="text-[10px] text-on-surface-variant uppercase font-semibold">Sapphire Due</div>
+                      <div class="text-base font-bold text-error mt-0.5">-$9,500.00</div>
+                    </div>
+                    <div class="p-3 rounded-xl bg-primary/10 border border-primary/20">
+                      <div class="text-[10px] text-primary uppercase font-bold">Safe Surplus</div>
+                      <div class="text-base font-extrabold text-primary mt-0.5">$90,000.00</div>
+                    </div>
+                  </div>
+                </div>
+                <span class="text-[10px] text-on-surface-variant pl-1">Bank Buddy Core &bull; 85ms</span>
+              </div>
+            `;
+            chatThread.appendChild(aiTurn);
+          } else {
+            aiTurn.innerHTML = `
+              <div class="w-8 h-8 rounded-xl bg-primary text-on-primary flex items-center justify-center shrink-0 shadow-sm">
+                <span class="material-symbols-outlined text-[18px]">smart_toy</span>
+              </div>
+              <div class="flex flex-col gap-2 max-w-2xl w-full">
+                <div class="bg-surface-container-lowest p-5 rounded-2xl border border-surface-container-high/60 shadow-sm flex flex-col gap-2.5">
+                  <p class="text-sm text-on-surface leading-relaxed">
+                    I have processed your request: "<em>${text}</em>". Account telemetry and ISO-20022 security policies confirmed 100% compliant.
+                  </p>
+                  <div class="p-2.5 rounded-xl bg-surface-container-low flex items-center justify-between text-xs">
+                    <span class="text-on-surface-variant">Deterministic Safety Check</span>
+                    <span class="text-primary font-bold">100% Verified Safe</span>
+                  </div>
+                </div>
+                <span class="text-[10px] text-on-surface-variant pl-1">Bank Buddy Core &bull; 110ms</span>
+              </div>
+            `;
+            chatThread.appendChild(aiTurn);
+          }
           window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
-        }, 600);
+        }, 500);
       }
 
-      if (sendBtn) sendBtn.addEventListener('click', handleSend);
+      // Prompt Chips click to send
+      document.querySelectorAll('.prompt-chip').forEach(chip => {
+        chip.addEventListener('click', () => {
+          const text = chip.innerText.replace(/^[^\w]+/, '').trim();
+          handleSend(text);
+        });
+      });
+
+      if (sendBtn) sendBtn.addEventListener('click', () => handleSend());
       if (chatInput) {
         chatInput.addEventListener('keydown', (e) => {
           if (e.key === 'Enter') handleSend();

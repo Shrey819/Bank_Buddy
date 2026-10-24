@@ -30,7 +30,7 @@ A secure, modular, token-based authentication backend system with PostgreSQL and
 
 ```text
 Bank_Buddy/
-├── backend/
+├── backend_gateway_node/
 │   ├── config/
 │   │   ├── config-db.js        # PostgreSQL & Sequelize connection configuration
 │   │   └── config-jwt.js       # JWT Secret key configuration
