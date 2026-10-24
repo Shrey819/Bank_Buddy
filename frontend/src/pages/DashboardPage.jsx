@@ -25,11 +25,23 @@ import {
   AlertCircle,
   Building2,
   Receipt,
-  PiggyBank
+  PiggyBank,
+  Users,
+  ChevronDown,
+  UserCheck
 } from 'lucide-react';
 
 export default function DashboardPage() {
   const { user } = useAuth();
+
+  // Active Customer ID in Neon PostgreSQL (auto-mapped or switchable)
+  const [selectedCustomerId, setSelectedCustomerId] = useState(() => {
+    // If logged in user is Shrey or Sanjna -> C1002; if Neon -> C1003; else C1001
+    const uname = (user?.username || '').toLowerCase();
+    if (uname.includes('shrey') || uname.includes('sanjna')) return 'C1002';
+    if (uname.includes('neon') || uname === 'hello') return 'C1003';
+    return 'C1001';
+  });
 
   // Banking data state loaded from Neon PostgreSQL
   const [bankingData, setBankingData] = useState(null);
@@ -60,16 +72,21 @@ export default function DashboardPage() {
     }
   ]);
 
-  // Load real banking data
-  const fetchDashboardData = async (isSilent = false) => {
+  // Load real banking data for the selected customer ID
+  const fetchDashboardData = async (targetCid = selectedCustomerId, isSilent = false) => {
     if (!isSilent) setRefreshing(true);
     try {
-      const res = await fetch('/api/v1/dashboard-data');
+      const token = user?.token || user?.accessToken;
+      const headers = token ? { Authorization: `Bearer ${token}` } : {};
+      const url = `/api/v1/dashboard-data?customerId=${targetCid}`;
+      const res = await fetch(url, { headers });
+
       if (res.ok) {
         const json = await res.json();
         if (json.success && json.data) {
           setBankingData(json.data);
-          if (!selectedAccountId && json.data.accounts?.length > 0) {
+          // Set default selected account
+          if (json.data.accounts?.length > 0) {
             setSelectedAccountId(json.data.accounts[0].account_id);
           }
         }
@@ -83,8 +100,18 @@ export default function DashboardPage() {
   };
 
   useEffect(() => {
-    fetchDashboardData(true);
-  }, []);
+    fetchDashboardData(selectedCustomerId, true);
+  }, [selectedCustomerId]);
+
+  // Handle customer switcher change
+  const handleSwitchCustomer = (newCid) => {
+    setSelectedCustomerId(newCid);
+    fetchDashboardData(newCid, false);
+    setNotification({
+      type: 'success',
+      message: `Switched view to Customer ${newCid}. Ledger and balances updated in real time.`
+    });
+  };
 
   // Format currency in Indian Rupees
   const formatINR = (val) => {
@@ -101,13 +128,13 @@ export default function DashboardPage() {
   const primaryCreditCard = bankingData?.creditCards?.[0] || null;
   const accounts = bankingData?.accounts || [];
   const summary = bankingData?.summary || {
-    totalAvailableBalance: 143500,
-    totalLedgerBalance: 146000,
-    creditOutstanding: 18450,
-    creditLimit: 100000,
-    creditAvailable: 81550,
-    upcomingOutflows: 39097,
-    safeSurplus: 85953
+    totalAvailableBalance: 0,
+    totalLedgerBalance: 0,
+    creditOutstanding: 0,
+    creditLimit: 0,
+    creditAvailable: 0,
+    upcomingOutflows: 0,
+    safeSurplus: 0
   };
 
   // Toggle Debit Card Freeze in Neon PostgreSQL
@@ -125,7 +152,7 @@ export default function DashboardPage() {
           type: 'success',
           message: data.message
         });
-        await fetchDashboardData(true);
+        await fetchDashboardData(selectedCustomerId, true);
       } else {
         setNotification({
           type: 'error',
@@ -147,11 +174,12 @@ export default function DashboardPage() {
 
     setSubmittingAction(true);
     try {
+      const activeAccId = selectedAccountId || accounts[0]?.account_id;
       const res = await fetch('/api/v1/accounts/adjust-balance', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          accountId: selectedAccountId || accounts[0]?.account_id,
+          accountId: activeAccId,
           amount: parseFloat(actionAmount),
           type: modalMode, // 'add' or 'subtract'
           merchant: actionMerchant.trim() || (modalMode === 'add' ? 'Instant Account Credit' : 'Direct Funds Settlement'),
@@ -171,7 +199,7 @@ export default function DashboardPage() {
         setActionAmount('');
         setActionMerchant('');
         setActionDescription('');
-        await fetchDashboardData(true);
+        await fetchDashboardData(selectedCustomerId, true);
       } else {
         setNotification({
           type: 'error',
@@ -189,12 +217,17 @@ export default function DashboardPage() {
   const handleSweepSurplus = async () => {
     try {
       const sweepAmount = Math.min(summary.safeSurplus, 50000);
+      if (sweepAmount <= 0) {
+        setNotification({ type: 'error', message: 'No sweepable surplus available for this account.' });
+        return;
+      }
       const res = await fetch('/api/v1/sweep-surplus', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           amount: sweepAmount,
-          sourceAccountId: accounts[0]?.account_id || 'A1001'
+          sourceAccountId: accounts[0]?.account_id,
+          customerId: selectedCustomerId
         })
       });
       const data = await res.json();
@@ -203,7 +236,7 @@ export default function DashboardPage() {
           type: 'success',
           message: data.message
         });
-        await fetchDashboardData(true);
+        await fetchDashboardData(selectedCustomerId, true);
       } else {
         setNotification({
           type: 'error',
@@ -267,7 +300,7 @@ export default function DashboardPage() {
         ...prev,
         {
           sender: 'assistant',
-          text: `ISO 20022 Wire executed: ₹50,000 swept into Sovereign High-Yield Bond Vault (7.45% APY). Ledger updated.`
+          text: `ISO 20022 Wire executed: ₹${Math.min(summary.safeSurplus, 50000).toLocaleString('en-IN')} swept into Sovereign High-Yield Bond Vault (7.45% APY). Ledger updated.`
         }
       ]);
     } else if (lower.includes('surplus') || lower.includes('balance') || lower.includes('metric')) {
@@ -275,7 +308,7 @@ export default function DashboardPage() {
         ...prev,
         {
           sender: 'assistant',
-          text: `Neon DB Ledger Verified: Total Liquid Balance: ${formatINR(summary.totalAvailableBalance)} | Credit Due: -${formatINR(summary.creditOutstanding)} | Upcoming Outflows: ${formatINR(summary.upcomingOutflows)} | Safe Sweepable Surplus is ${formatINR(summary.safeSurplus)}.`
+          text: `Neon DB Ledger Verified for Customer ${selectedCustomerId}: Total Liquid Balance: ${formatINR(summary.totalAvailableBalance)} | Credit Due: -${formatINR(summary.creditOutstanding)} | Upcoming Outflows: ${formatINR(summary.upcomingOutflows)} | Safe Sweepable Surplus is ${formatINR(summary.safeSurplus)}.`
         }
       ]);
     } else if (lower.includes('add') || lower.includes('deposit')) {
@@ -284,7 +317,7 @@ export default function DashboardPage() {
         ...prev,
         {
           sender: 'assistant',
-          text: `Opened the Add / Deposit Funds modal. Enter the amount to credit your account.`
+          text: `Opened the Add / Deposit Funds modal for account ${accounts[0]?.account_id}. Enter the amount to credit.`
         }
       ]);
     } else if (lower.includes('send') || lower.includes('transfer') || lower.includes('subtract') || lower.includes('pay')) {
@@ -301,7 +334,7 @@ export default function DashboardPage() {
         ...prev,
         {
           sender: 'assistant',
-          text: `Command "${text}" analyzed against ISO 20022 rules. You can ask me to "deposit funds", "transfer money", "freeze card", "sweep surplus", or "check balance".`
+          text: `Command "${text}" analyzed against ISO 20022 rules for Customer ${selectedCustomerId}. You can ask me to "deposit funds", "transfer money", "freeze card", "sweep surplus", or "check balance".`
         }
       ]);
     }
@@ -314,33 +347,66 @@ export default function DashboardPage() {
 
       {/* Main Content Area */}
       <main className="flex-1 ml-64 p-8 max-w-7xl">
-        {/* Top Header */}
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+        {/* Top Header & Customer Switcher Bar */}
+        <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 mb-6">
           <div>
             <div className="flex items-center gap-2">
               <h1 className="text-2xl font-black tracking-tight text-slate-900 dark:text-white">
                 Executive Wealth Portal
               </h1>
               <span className="px-2 py-0.5 rounded text-[10px] font-extrabold bg-emerald-100 dark:bg-emerald-950/70 text-emerald-700 dark:text-emerald-300 uppercase tracking-wider">
-                Live Neon DB
+                Neon DB Live
               </span>
             </div>
             <p className="text-xs text-slate-500 dark:text-slate-400 font-medium mt-0.5">
-              Welcome back, <strong className="text-indigo-600 dark:text-indigo-400">{user?.name || bankingData?.customer?.full_name || 'Elena Rostova'}</strong> &bull; Customer ID: {bankingData?.customer?.customer_id || 'C1001'} &bull; CRN: {user?.crn || '98234105'}
+              Active Client: <strong className="text-indigo-600 dark:text-indigo-400">{bankingData?.customer?.full_name || 'Elena Rostova'}</strong> &bull; Customer ID: <span className="font-mono font-bold text-indigo-500">{selectedCustomerId}</span> &bull; CRN: {user?.crn || '98234105'} &bull; City: {bankingData?.customer?.city || 'Jaipur'}
             </p>
           </div>
 
-          {/* Quick Action Buttons: Add (+), Subtract (-), Sweep, Copilot */}
-          <div className="flex items-center gap-2 flex-wrap">
+          {/* User/Customer Live Switcher Pills */}
+          <div className="flex items-center gap-2 flex-wrap bg-white dark:bg-slate-900 p-1.5 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-sm">
+            <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider px-2 flex items-center gap-1">
+              <Users className="w-3.5 h-3.5 text-indigo-500" /> Switch Client:
+            </span>
+            {[
+              { id: 'C1001', label: 'Elena / Aarav (C1001)', tag: '₹1.43L' },
+              { id: 'C1002', label: 'Shrey / Meera (C1002)', tag: '₹68.4K' },
+              { id: 'C1003', label: 'Neon / Kabir (C1003)', tag: '₹41.2K' }
+            ].map((cust) => (
+              <button
+                key={cust.id}
+                onClick={() => handleSwitchCustomer(cust.id)}
+                className={`px-3 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5 cursor-pointer ${
+                  selectedCustomerId === cust.id
+                    ? 'bg-indigo-600 text-white shadow-sm'
+                    : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'
+                }`}
+              >
+                <span>{cust.label}</span>
+                <span className={`text-[10px] px-1.5 py-0.2 rounded font-extrabold ${
+                  selectedCustomerId === cust.id
+                    ? 'bg-indigo-500 text-white'
+                    : 'bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300'
+                }`}>
+                  {cust.tag}
+                </span>
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Quick Action Control Bar */}
+        <div className="flex items-center justify-between gap-3 mb-6 flex-wrap">
+          <div className="flex items-center gap-2">
             <button
               onClick={() => {
                 setModalMode('add');
                 setActionAmount('');
               }}
-              className="px-3.5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold transition shadow-sm flex items-center gap-1.5 cursor-pointer"
+              className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold transition shadow-sm flex items-center gap-1.5 cursor-pointer"
               title="Deposit or Add funds into account"
             >
-              <Plus className="w-3.5 h-3.5 stroke-[3]" /> Add / Deposit
+              <Plus className="w-4 h-4 stroke-[3]" /> Add / Deposit Funds
             </button>
 
             <button
@@ -348,25 +414,27 @@ export default function DashboardPage() {
                 setModalMode('subtract');
                 setActionAmount('');
               }}
-              className="px-3.5 py-2 bg-slate-800 hover:bg-slate-900 dark:bg-slate-700 dark:hover:bg-slate-600 text-white rounded-xl text-xs font-bold transition shadow-sm flex items-center gap-1.5 cursor-pointer"
+              className="px-4 py-2 bg-slate-800 hover:bg-slate-900 dark:bg-slate-700 dark:hover:bg-slate-600 text-white rounded-xl text-xs font-bold transition shadow-sm flex items-center gap-1.5 cursor-pointer"
               title="Transfer, Pay, or Subtract funds"
             >
-              <Minus className="w-3.5 h-3.5 stroke-[3]" /> Transfer / Subtract
+              <Minus className="w-4 h-4 stroke-[3]" /> Transfer / Subtract Funds
             </button>
 
             <button
               onClick={handleSweepSurplus}
-              className="px-3.5 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold transition shadow-sm flex items-center gap-1.5 cursor-pointer"
+              className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold transition shadow-sm flex items-center gap-1.5 cursor-pointer"
             >
-              <Sparkles className="w-3.5 h-3.5" /> Sweep Surplus
+              <Sparkles className="w-3.5 h-3.5" /> Sweep Safe Surplus
             </button>
+          </div>
 
+          <div className="flex items-center gap-2">
             <button
-              onClick={() => fetchDashboardData()}
-              className="p-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700/60 rounded-xl text-slate-600 dark:text-slate-300 transition shadow-sm cursor-pointer"
+              onClick={() => fetchDashboardData(selectedCustomerId)}
+              className="px-3 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700/60 rounded-xl text-xs font-semibold text-slate-700 dark:text-slate-300 transition shadow-sm flex items-center gap-1.5 cursor-pointer"
               title="Refresh ledger from database"
             >
-              <RefreshCw className={`w-3.5 h-3.5 ${refreshing ? 'animate-spin text-indigo-600' : ''}`} />
+              <RefreshCw className={`w-3.5 h-3.5 ${refreshing ? 'animate-spin text-indigo-600' : ''}`} /> Sync Ledger
             </button>
 
             <button
@@ -397,14 +465,14 @@ export default function DashboardPage() {
             </div>
             <button
               onClick={() => setNotification(null)}
-              className="text-xs font-bold hover:underline opacity-80 hover:opacity-100"
+              className="text-xs font-bold hover:underline opacity-80 hover:opacity-100 cursor-pointer"
             >
               Dismiss
             </button>
           </div>
         )}
 
-        {/* 1. Account Metrics in ₹ (Real PostgreSQL Neon Data) */}
+        {/* 1. Account Metrics in ₹ (Real PostgreSQL Data for Selected User) */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
           {/* Card 1: Liquid Checking & Savings */}
           <div className="p-6 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-sm hover:shadow-md transition relative group">
@@ -458,7 +526,7 @@ export default function DashboardPage() {
             </div>
             <div className="mt-3 pt-2.5 border-t border-slate-100 dark:border-slate-800 text-[10px] text-slate-500 font-semibold flex items-center justify-between">
               <span>Due: {primaryCreditCard?.statement_due_date ? new Date(primaryCreditCard.statement_due_date).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }) : '29 Oct 2026'}</span>
-              <span>Min Due: {formatINR(primaryCreditCard?.minimum_due || 2500)}</span>
+              <span>Min Due: {formatINR(primaryCreditCard?.minimum_due || 0)}</span>
             </div>
           </div>
 
@@ -477,11 +545,11 @@ export default function DashboardPage() {
                 {formatINR(summary.safeSurplus)}
               </div>
               <p className="text-[11px] text-indigo-200/90 font-medium leading-relaxed">
-                Total liquid balance minus {formatINR(summary.upcomingOutflows)} upcoming commitments and card dues. 100% sweepable to sovereign vault.
+                Calculated for {bankingData?.customer?.full_name}: Liquid balance minus {formatINR(summary.upcomingOutflows)} obligations. 100% sweepable.
               </p>
             </div>
             <div className="mt-4 pt-2.5 border-t border-indigo-700/50 flex items-center justify-between text-[10px] text-indigo-200 font-semibold">
-              <span>Outflows: {formatINR(summary.upcomingOutflows)}</span>
+              <span>Projected Outflows: {formatINR(summary.upcomingOutflows)}</span>
               <button
                 onClick={handleSweepSurplus}
                 className="underline hover:text-white cursor-pointer font-bold"
@@ -501,13 +569,13 @@ export default function DashboardPage() {
                 <span className="px-2 py-0.5 rounded bg-indigo-100 dark:bg-indigo-950 text-indigo-700 dark:text-indigo-300 font-extrabold text-[10px] uppercase">
                   Autonomous Copilot
                 </span>
-                <span className="text-xs text-slate-400">&bull; ISO 20022 Rule C1001</span>
+                <span className="text-xs text-slate-400">&bull; ISO 20022 Rule {selectedCustomerId}</span>
               </div>
               <h3 className="text-base font-bold text-slate-900 dark:text-white mb-2">
                 Optimize Safe Surplus: Sweep {formatINR(Math.min(summary.safeSurplus, 50000))} into 7.45% Sovereign Vault
               </h3>
               <p className="text-xs text-slate-600 dark:text-slate-400 mb-5 leading-relaxed">
-                Your liquid checking & savings of {formatINR(summary.totalAvailableBalance)} safely covers your 30-day projected commitments ({formatINR(summary.upcomingOutflows)}). Sweeping excess surplus earns ₹3,725 estimated annual interest with zero penalty on instant withdrawals.
+                {bankingData?.customer?.full_name}'s liquid balance of {formatINR(summary.totalAvailableBalance)} safely covers 30-day projected commitments ({formatINR(summary.upcomingOutflows)}). Sweeping excess earns 7.45% APY compounding yield with zero withdrawal penalties.
               </p>
             </div>
             <div className="flex items-center gap-3">
@@ -597,15 +665,15 @@ export default function DashboardPage() {
           </div>
         </div>
 
-        {/* 3. Upcoming Obligations (Bills, Scheduled Payments & Loan EMIs) */}
+        {/* 3. Upcoming Obligations for Selected User */}
         <div className="p-6 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-sm mb-8">
           <div className="flex justify-between items-center mb-4">
             <div>
               <h3 className="text-sm font-bold text-slate-900 dark:text-white">
-                Upcoming Obligations & Scheduled Payments
+                Upcoming Obligations & Scheduled Payments — {bankingData?.customer?.full_name}
               </h3>
               <p className="text-[11px] text-slate-500">
-                Scheduled payments and utility billings deducted when calculating Safe Surplus
+                Outflows accounted when calculating Safe Surplus for Customer {selectedCustomerId}
               </p>
             </div>
             <span className="px-2.5 py-1 bg-indigo-50 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-300 font-bold text-xs rounded-xl">
@@ -679,18 +747,18 @@ export default function DashboardPage() {
           </div>
         </div>
 
-        {/* 4. Live Neon PostgreSQL Transactions Table */}
+        {/* 4. Live Neon PostgreSQL Transactions Table for Selected User */}
         <div className="p-6 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-sm">
           {/* Header & Filter Controls */}
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
             <div>
               <div className="flex items-center gap-2">
                 <h3 className="text-base font-bold text-slate-900 dark:text-white">
-                  Real-Time ISO 20022 Ledger
+                  Real-Time ISO 20022 Ledger &bull; {bankingData?.customer?.full_name}
                 </h3>
-                <span className="text-xs text-slate-400">({filteredTransactions.length} records)</span>
+                <span className="text-xs font-bold text-indigo-600 dark:text-indigo-400">({filteredTransactions.length} records)</span>
               </div>
-              <p className="text-xs text-slate-500">Live records synced with Neon PostgreSQL database</p>
+              <p className="text-xs text-slate-500">Filtered specifically for Customer ID {selectedCustomerId}</p>
             </div>
 
             {/* Search and Filters */}
@@ -738,6 +806,8 @@ export default function DashboardPage() {
               { id: 'Food', label: 'Food & Dining' },
               { id: 'Utilities', label: 'Utilities' },
               { id: 'Transfer', label: 'Transfers' },
+              { id: 'Shopping', label: 'Shopping' },
+              { id: 'Transport', label: 'Transport & Fuel' },
               { id: 'Investment', label: 'Investment & Vault' }
             ].map((f) => (
               <button
@@ -758,7 +828,7 @@ export default function DashboardPage() {
           <div className="flex flex-col divide-y divide-slate-100 dark:divide-slate-800">
             {filteredTransactions.length === 0 ? (
               <div className="py-12 text-center text-xs text-slate-400">
-                No transactions found matching your criteria.
+                No transactions found for Customer {selectedCustomerId} with this filter.
               </div>
             ) : (
               filteredTransactions.map((tx) => (
@@ -827,13 +897,13 @@ export default function DashboardPage() {
                     {modalMode === 'add' ? 'Deposit / Add Funds' : 'Transfer / Subtract Funds'}
                   </h3>
                   <p className="text-[11px] text-slate-500">
-                    Instant ISO 20022 Neon Database Transaction
+                    Operating on Customer {selectedCustomerId} ({bankingData?.customer?.full_name})
                   </p>
                 </div>
               </div>
               <button
                 onClick={() => setModalMode(null)}
-                className="p-1 rounded-lg text-slate-400 hover:text-slate-600 dark:hover:text-white"
+                className="p-1 rounded-lg text-slate-400 hover:text-slate-600 dark:hover:text-white cursor-pointer"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -884,7 +954,7 @@ export default function DashboardPage() {
                       key={preset}
                       type="button"
                       onClick={() => setActionAmount(preset.toString())}
-                      className="px-2.5 py-1 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 text-[10px] font-bold rounded-lg transition"
+                      className="px-2.5 py-1 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 text-[10px] font-bold rounded-lg transition cursor-pointer"
                     >
                       +₹{preset.toLocaleString('en-IN')}
                     </button>
@@ -943,14 +1013,14 @@ export default function DashboardPage() {
                 <button
                   type="button"
                   onClick={() => setModalMode(null)}
-                  className="flex-1 py-2.5 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 rounded-xl text-xs font-bold hover:bg-slate-200 dark:hover:bg-slate-700 transition"
+                  className="flex-1 py-2.5 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 rounded-xl text-xs font-bold hover:bg-slate-200 dark:hover:bg-slate-700 transition cursor-pointer"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={submittingAction}
-                  className={`flex-1 py-2.5 text-white rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 shadow-sm ${
+                  className={`flex-1 py-2.5 text-white rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 shadow-sm cursor-pointer ${
                     modalMode === 'add'
                       ? 'bg-emerald-600 hover:bg-emerald-700'
                       : 'bg-indigo-600 hover:bg-indigo-700'
