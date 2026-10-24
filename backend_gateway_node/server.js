@@ -3,6 +3,15 @@ const express = require("express");
 const cors = require("cors");
 const path = require("path");
 const fs = require("fs");
+// Global error handlers to keep server alive on transient Neon DB / WebSocket idle disconnects
+process.on("unhandledRejection", (reason, promise) => {
+  console.warn("Unhandled Rejection handled:", reason?.message || reason);
+});
+
+process.on("uncaughtException", (error) => {
+  console.warn("Uncaught Exception handled:", error?.message || error);
+});
+
 const app = express();
 
 const db = require("./models");
