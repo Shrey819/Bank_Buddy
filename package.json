@@ -5,7 +5,9 @@
   "scripts": {
     "start": "node backend_gateway_node/server.js",
     "test": "cd backend_gateway_node && npm test",
-    "db:seed": "cd backend_gateway_node && npm run db:seed"
+    "db:seed": "cd backend_gateway_node && npm run db:seed",
+    "start:ai": "cd ai_core && uvicorn main:app --host 127.0.0.1 --port 8000 --reload",
+    "dev:all": "concurrently \"npm run start\" \"npm run start:ai\""
   },
   "keywords": [
     "bank-buddy",
@@ -15,5 +17,8 @@
     "frontend"
   ],
   "author": "Shrey819",
-  "license": "ISC"
+  "license": "ISC",
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  }
 }
