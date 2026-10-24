@@ -354,7 +354,7 @@
           </div>
         </div>
         <div class="flex items-center gap-2">
-          <button type="button" onclick="document.getElementById('chat-thread').innerHTML=''" class="text-xs text-on-surface-variant hover:text-on-surface px-3 py-1.5 rounded-lg hover:bg-surface-container transition" title="Clear chat messages">
+          <button type="button" onclick="window.clearChatHistory()" class="text-xs text-on-surface-variant hover:text-on-surface px-3 py-1.5 rounded-lg hover:bg-surface-container transition" title="Clear chat messages">
             Clear
           </button>
         </div>
@@ -519,6 +519,47 @@
       const chatThread = document.getElementById('chat-thread');
       let toggleCount = 0;
 
+      // Persistence helper: load and save legacy chat
+      const LEGACY_CHAT_KEY = 'bankBuddy_legacy_chat_history';
+
+      function saveLegacyChatHistory() {
+        if (!chatThread) return;
+        try {
+          localStorage.setItem(LEGACY_CHAT_KEY, chatThread.innerHTML);
+        } catch(e) {
+          console.warn('Could not save chat history to localStorage:', e);
+        }
+      }
+
+      function restoreLegacyChatHistory() {
+        if (!chatThread) return;
+        const saved = localStorage.getItem(LEGACY_CHAT_KEY);
+        if (saved && saved.trim() !== '') {
+          chatThread.innerHTML = saved;
+          const emptyState = document.getElementById('empty-chat-state');
+          if (emptyState) emptyState.style.display = 'none';
+        }
+      }
+
+      // Restore on load
+      restoreLegacyChatHistory();
+
+      window.clearChatHistory = function() {
+        if (!chatThread) return;
+        localStorage.removeItem(LEGACY_CHAT_KEY);
+        chatThread.innerHTML = `
+          <div id="empty-chat-state" class="flex flex-col items-center justify-center py-20 text-center text-on-surface-variant my-auto">
+            <div class="w-14 h-14 rounded-2xl bg-primary/10 text-primary flex items-center justify-center mb-3 shadow-sm">
+              <span class="material-symbols-outlined text-[30px]">smart_toy</span>
+            </div>
+            <h2 class="text-base font-bold text-on-surface">Bank Buddy AI Banking Assistant</h2>
+            <p class="text-xs text-on-surface-variant max-w-sm mt-1">
+              Zero-hallucination deterministic banking. Ask balances, transactions, card controls, or click a suggestion below to begin.
+            </p>
+          </div>
+        `;
+      };
+
       async function handleSend(customText) {
         const text = (customText || (chatInput ? chatInput.value : '')).trim();
         if (!text || !chatThread) return;
@@ -543,6 +584,7 @@
           </div>
         `;
         chatThread.appendChild(userTurn);
+        saveLegacyChatHistory();
         window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
 
         // Show typing indicator
@@ -625,6 +667,7 @@
             </div>
           `;
           chatThread.appendChild(aiTurn);
+          saveLegacyChatHistory();
         } catch (err) {
           const indicator = document.getElementById('chat-typing-indicator');
           if (indicator) indicator.remove();
@@ -642,6 +685,7 @@
             </div>
           `;
           chatThread.appendChild(errTurn);
+          saveLegacyChatHistory();
         }
 
         window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
