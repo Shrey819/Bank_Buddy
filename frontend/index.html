@@ -1,1433 +1,1061 @@
+
 <!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Bank Buddy | Net Banking Login & Autonomous Wealth</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
-  <style>
-    :root {
-      --font-scale: 1rem;
-      --kotak-red: #ed1c24;
-      --kotak-blue: #003366;
-      --kotak-link: #0066cc;
-      --kotak-bg: #f9f9f9;
-      --card-bg: #ffffff;
-      --text-dark: #222222;
-      --text-muted: #666666;
-      --border-color: #d1d5db;
-      --btn-peach: #ffd2d2;
-      --btn-peach-text: #ffffff;
-      --btn-active-red: #ed1c24;
-    }
 
-    body.high-contrast {
-      --kotak-bg: #121212;
-      --card-bg: #1e1e1e;
-      --text-dark: #ffffff;
-      --text-muted: #cbd5e1;
-      --border-color: #4b5563;
-      --btn-peach: #7f1d1d;
-    }
-
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-
-    body {
-      font-family: 'Roboto', 'Plus Jakarta Sans', -apple-system, sans-serif;
-      background: var(--kotak-bg);
-      color: var(--text-dark);
-      font-size: var(--font-scale);
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-      transition: background 0.2s, color 0.2s;
-    }
-
-    /* TOP HEADER BAR */
-    header.kotak-top-nav {
-      background: var(--card-bg);
-      border-bottom: 1px solid var(--border-color);
-      padding: 0.85rem 3rem;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      flex-wrap: wrap;
-      gap: 1rem;
-    }
-
-    .bank-logo-group {
-      display: flex;
-      align-items: center;
-      gap: 0.75rem;
-      text-decoration: none;
-    }
-
-    .trust-shield-badge {
-      width: 44px;
-      height: 44px;
-      border-radius: 10px;
-      background: linear-gradient(135deg, #002244 0%, #003366 50%, #0284c7 100%);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      box-shadow: 0 4px 12px rgba(0, 51, 102, 0.25);
-      position: relative;
-    }
-
-    .bank-logo-title {
-      display: flex;
-      flex-direction: column;
-      line-height: 1.15;
-    }
-    .bank-logo-title .brand-main {
-      font-size: 1.4rem;
-      font-weight: 800;
-      color: #003366;
-      letter-spacing: -0.03em;
-    }
-    .bank-logo-title .brand-main span {
-      color: #0284c7;
-    }
-    body.high-contrast .bank-logo-title .brand-main { color: #ffffff; }
-    body.high-contrast .bank-logo-title .brand-main span { color: #38bdf8; }
-
-    .bank-logo-title .brand-sub {
-      font-size: 0.65rem;
-      font-weight: 700;
-      color: #64748b;
-      letter-spacing: 0.06em;
-      text-transform: uppercase;
-    }
-    body.high-contrast .bank-logo-title .brand-sub { color: #94a3b8; }
-
-    /* ACCESSIBILITY TOOLS */
-    .accessibility-bar {
-      display: flex;
-      align-items: center;
-      gap: 1.5rem;
-    }
-
-    .font-size-group {
-      display: flex;
-      align-items: center;
-      gap: 0.4rem;
-      font-size: 0.8rem;
-      color: var(--text-muted);
-    }
-
-    .font-pill {
-      border: 1px solid #d1d5db;
-      background: #ffffff;
-      color: #374151;
-      width: 28px;
-      height: 28px;
-      border-radius: 50%;
-      font-size: 0.75rem;
-      font-weight: 700;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      transition: all 0.15s;
-    }
-    body.high-contrast .font-pill { background: #27272a; color: #fff; border-color: #52525b; }
-    .font-pill.active {
-      background: #0070ba;
-      border-color: #0070ba;
-      color: #ffffff;
-    }
-
-    .contrast-wrapper {
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-      font-size: 0.8rem;
-      font-weight: 500;
-      cursor: pointer;
-    }
-
-    .beta-badge {
-      background: var(--kotak-red);
-      color: #ffffff;
-      font-size: 0.6rem;
-      font-weight: 800;
-      padding: 0.05rem 0.35rem;
-      border-radius: 3px;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-    }
-
-    .toggle-switch {
-      position: relative;
-      display: inline-block;
-      width: 36px;
-      height: 18px;
-    }
-    .toggle-switch input { opacity: 0; width: 0; height: 0; }
-    .toggle-slider {
-      position: absolute;
-      cursor: pointer;
-      top: 0; left: 0; right: 0; bottom: 0;
-      background-color: #d1d5db;
-      border-radius: 20px;
-      transition: .3s;
-    }
-    .toggle-slider:before {
-      position: absolute;
-      content: "";
-      height: 14px; width: 14px;
-      left: 2px; bottom: 2px;
-      background-color: white;
-      border-radius: 50%;
-      transition: .3s;
-    }
-    input:checked + .toggle-slider { background-color: var(--kotak-red); }
-    input:checked + .toggle-slider:before { transform: translateX(18px); }
-
-    /* QUICK CREDENTIALS PRESETS STRIP */
-    .demo-credentials-strip {
-      background: #eff6ff;
-      border-bottom: 1px solid #bfdbfe;
-      padding: 0.45rem 3rem;
-      font-size: 0.75rem;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      flex-wrap: wrap;
-      gap: 0.5rem;
-    }
-    body.high-contrast .demo-credentials-strip {
-      background: #1e1e2d;
-      border-color: #3b82f6;
-    }
-    .quick-preset-btn {
-      background: #ffffff;
-      border: 1px solid #93c5fd;
-      padding: 0.2rem 0.55rem;
-      border-radius: 4px;
-      font-size: 0.72rem;
-      font-weight: 600;
-      color: #0369a1;
-      cursor: pointer;
-      font-family: 'Fira Code', monospace;
-    }
-    .quick-preset-btn:hover {
-      background: #0284c7;
-      color: #ffffff;
-    }
-
-    /* MAIN CONTAINER: 2-COLUMN VIEW */
-    main.kotak-main-layout {
-      flex: 1;
-      max-width: 1250px;
-      width: 100%;
-      margin: 2.5rem auto 1rem;
-      padding: 0 2rem;
-      display: grid;
-      grid-template-columns: 1.15fr 0.85fr;
-      gap: 3.5rem;
-      align-items: center;
-    }
-
-    @media (max-width: 960px) {
-      main.kotak-main-layout {
-        grid-template-columns: 1fr;
-        gap: 2rem;
-        margin: 1.5rem auto;
-        padding: 0 1rem;
-      }
-    }
-
-    /* LEFT SIDE: ILLUSTRATION & MARKETING BANNER */
-    .left-hero-section {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      text-align: center;
-      position: relative;
-    }
-
-    .hero-illustration-wrapper {
-      position: relative;
-      width: 100%;
-      max-width: 440px;
-      margin-bottom: 1.5rem;
-    }
-
-    .credit-card-bill-tag {
-      position: absolute;
-      top: 10px;
-      left: 30px;
-      background: #ffffff;
-      border: 1.5px solid #ffccd0;
-      padding: 0.35rem 0.85rem;
-      border-radius: 9999px;
-      font-size: 0.72rem;
-      font-weight: 700;
-      color: #ed1c24;
-      display: inline-flex;
-      align-items: center;
-      gap: 0.4rem;
-      box-shadow: 0 4px 8px rgba(237, 28, 36, 0.08);
-      z-index: 10;
-    }
-    .credit-card-bill-tag .check-icon {
-      color: #10b981;
-      font-weight: 900;
-    }
-
-    .hero-svg {
-      width: 100%;
-      height: auto;
-      display: block;
-    }
-
-    .hero-text-content h3 {
-      font-size: 1.25rem;
-      font-weight: 700;
-      color: #1e1b4b;
-      margin-bottom: 0.35rem;
-    }
-    body.high-contrast .hero-text-content h3 { color: #ffffff; }
-
-    .hero-text-content p {
-      font-size: 0.85rem;
-      color: var(--text-muted);
-      line-height: 1.4;
-    }
-
-    /* RIGHT SIDE: KOTAK LOGIN CARD (IMAGE 4 SPEC) */
-    .kotak-login-card {
-      background: var(--card-bg);
-      border: 1px solid #e5e7eb;
-      border-radius: 8px;
-      padding: 2.25rem 2.25rem 1.75rem;
-      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
-      width: 100%;
-      max-width: 440px;
-      margin: 0 auto;
-    }
-    body.high-contrast .kotak-login-card { border-color: #3f3f46; }
-
-    .login-card-top {
-      display: flex;
-      justify-content: space-between;
-      align-items: baseline;
-      margin-bottom: 1.25rem;
-    }
-
-    .login-card-top h2 {
-      font-size: 1.35rem;
-      font-weight: 700;
-      color: var(--text-dark);
-      letter-spacing: -0.01em;
-    }
-
-    .netbanking-dropdown {
-      font-size: 0.8rem;
-      font-weight: 600;
-      color: #0066cc;
-      display: flex;
-      align-items: center;
-      gap: 0.25rem;
-      cursor: pointer;
-    }
-
-    /* TABS */
-    .login-tabs-row {
-      display: flex;
-      gap: 1.75rem;
-      border-bottom: 1px solid #e5e7eb;
-      margin-bottom: 1.5rem;
-    }
-    body.high-contrast .login-tabs-row { border-color: #3f3f46; }
-
-    .tab-header {
-      font-size: 0.95rem;
-      font-weight: 500;
-      color: var(--text-muted);
-      padding-bottom: 0.65rem;
-      cursor: pointer;
-      border-bottom: 2px solid transparent;
-      margin-bottom: -1px;
-    }
-    .tab-header.active {
-      color: #0066cc;
-      border-bottom-color: #0066cc;
-      font-weight: 700;
-    }
-
-    /* FORM INPUTS */
-    .input-box-wrapper {
-      margin-bottom: 1.25rem;
-      position: relative;
-    }
-
-    .kotak-text-input {
-      width: 100%;
-      border: 1px solid #9ca3af;
-      border-radius: 4px;
-      padding: 0.85rem 1rem;
-      font-size: 0.85rem;
-      color: var(--text-dark);
-      background: var(--card-bg);
-      outline: none;
-      transition: border-color 0.2s, box-shadow 0.2s;
-      font-family: inherit;
-    }
-    .kotak-text-input:focus {
-      border-color: #0066cc;
-      box-shadow: 0 0 0 1px #0066cc;
-    }
-
-    .show-password-trigger {
-      position: absolute;
-      right: 0.85rem;
-      top: 50%;
-      transform: translateY(-50%);
-      background: none;
-      border: none;
-      font-size: 0.8rem;
-      color: #6b7280;
-      font-weight: 500;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      gap: 0.25rem;
-    }
-    .show-password-trigger:hover { color: #111827; }
-
-    /* CHECKBOX & KEYPAD ROW */
-    .login-options-row {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      font-size: 0.78rem;
-      margin-bottom: 0.85rem;
-    }
-
-    .remember-crn-label {
-      display: flex;
-      align-items: center;
-      gap: 0.4rem;
-      color: var(--text-muted);
-      cursor: pointer;
-    }
-
-
-    .forgot-link-box {
-      margin-bottom: 1.5rem;
-    }
-    .forgot-link-box a {
-      color: #0066cc;
-      text-decoration: none;
-      font-size: 0.8rem;
-    }
-    .forgot-link-box a:hover { text-decoration: underline; }
-
-    .terms-text {
-      font-size: 0.68rem;
-      color: #6b7280;
-      line-height: 1.4;
-      margin-bottom: 1.5rem;
-    }
-    .terms-text a {
-      color: #6b7280;
-      text-decoration: underline;
-    }
-
-    /* SECURE LOGIN BUTTON (EXACT PEACH/PINKISH BUTTON FROM IMAGE 4) */
-    .btn-secure-login {
-      width: 100%;
-      background: #fed7d7;
-      border: none;
-      color: #ffffff;
-      padding: 0.85rem;
-      font-size: 0.95rem;
-      font-weight: 700;
-      border-radius: 4px;
-      cursor: pointer;
-      transition: all 0.2s;
-    }
-    .btn-secure-login.active-ready {
-      background: var(--kotak-red);
-      box-shadow: 0 4px 10px rgba(237, 28, 36, 0.25);
-    }
-    .btn-secure-login:hover {
-      background: #dc2626;
-    }
-
-
-    /* FOOTER WARNING BAR */
-    .bottom-safety-bar {
-      max-width: 1250px;
-      width: 100%;
-      margin: 1.5rem auto 1rem;
-      padding: 0 2rem;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      font-size: 0.75rem;
-      color: var(--text-muted);
-      flex-wrap: wrap;
-      gap: 0.5rem;
-    }
-    .bottom-safety-bar a { color: var(--text-muted); text-decoration: underline; }
-
-    /* ERROR NOTIFICATION */
-    .kotak-alert {
-      background: #fee2e2;
-      border-left: 3px solid #ef4444;
-      color: #991b1b;
-      padding: 0.6rem 0.8rem;
-      font-size: 0.78rem;
-      margin-bottom: 1rem;
-      border-radius: 2px;
-      display: none;
-    }
-
-    /* ==============================================================
-       STEP 2: 2FA OTP STEP-UP MODAL (PRD R1 & R7 SPEC)
-       ============================================================== */
-    .otp-overlay {
-      position: fixed;
-      top: 0; left: 0; right: 0; bottom: 0;
-      background: rgba(0, 0, 0, 0.5);
-      backdrop-filter: blur(3px);
-      display: none;
-      align-items: center;
-      justify-content: center;
-      z-index: 1000;
-      padding: 1rem;
-    }
-
-    .otp-modal-box {
-      background: var(--card-bg);
-      border: 1px solid var(--border-color);
-      border-radius: 8px;
-      padding: 2rem;
-      max-width: 420px;
-      width: 100%;
-      text-align: center;
-      box-shadow: 0 15px 35px rgba(0,0,0,0.2);
-    }
-
-    .otp-input-boxes {
-      display: flex;
-      justify-content: center;
-      gap: 0.5rem;
-      margin: 1.5rem 0;
-    }
-
-    .otp-single-box {
-      width: 42px;
-      height: 48px;
-      border: 1.5px solid #9ca3af;
-      border-radius: 4px;
-      text-align: center;
-      font-size: 1.25rem;
-      font-weight: 700;
-      background: var(--card-bg);
-      color: var(--text-dark);
-      outline: none;
-      font-family: 'Fira Code', monospace;
-    }
-    .otp-single-box:focus {
-      border-color: #0066cc;
-      box-shadow: 0 0 0 2px rgba(0, 102, 204, 0.2);
-    }
-
-    /* ==============================================================
-       BANK BUDDY AUTONOMOUS WEALTH DASHBOARD (IMAGES 1, 2, 3)
-       ============================================================== */
-    #wealth-dashboard-view {
-      display: none;
-      flex-direction: column;
-      flex: 1;
-    }
-
-    .wealth-top-header {
-      background: #ffffff;
-      border-bottom: 1px solid #e2e8f0;
-      padding: 0.85rem 2.5rem;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 1rem;
-      position: sticky;
-      top: 0;
-      z-index: 99;
-    }
-    body.high-contrast .wealth-top-header { background: #121212; border-color: #334155; }
-
-    .wealth-nav-pills {
-      display: flex;
-      gap: 0.5rem;
-    }
-    .wealth-pill {
-      background: transparent;
-      border: none;
-      padding: 0.45rem 0.95rem;
-      font-size: 0.85rem;
-      font-weight: 600;
-      border-radius: 9999px;
-      color: var(--text-muted);
-      cursor: pointer;
-    }
-    .wealth-pill.active {
-      background: #f1f5f9;
-      color: #0f172a;
-    }
-    body.high-contrast .wealth-pill.active { background: #27272a; color: #fff; }
-
-    .dash-main-container {
-      max-width: 1250px;
-      width: 100%;
-      margin: 1.5rem auto;
-      padding: 0 2rem;
-      display: flex;
-      flex-direction: column;
-      gap: 1.5rem;
-    }
-
-    .net-worth-banner {
-      background: #ffffff;
-      border: 1px solid #e2e8f0;
-      border-radius: 16px;
-      padding: 1.75rem 2rem;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      flex-wrap: wrap;
-      gap: 1rem;
-    }
-    body.high-contrast .net-worth-banner { background: #18181b; border-color: #3f3f46; }
-
-    .cards-triple-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-      gap: 1.25rem;
-    }
-
-    .dashboard-account-card {
-      background: var(--card-bg);
-      border: 1px solid #e2e8f0;
-      border-radius: 14px;
-      padding: 1.25rem;
-      display: flex;
-      flex-direction: column;
-      gap: 1rem;
-    }
-    body.high-contrast .dashboard-account-card { border-color: #3f3f46; }
-
-    /* CARD PLASTICS */
-    .vault-debit-plastic {
-      background: linear-gradient(135deg, #18181b 0%, #27272a 100%);
-      color: #fff;
-      border-radius: 12px;
-      padding: 1.2rem;
-      aspect-ratio: 1.6;
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-      box-shadow: 0 8px 16px rgba(0,0,0,0.15);
-    }
-
-    .sapphire-credit-plastic {
-      background: linear-gradient(135deg, #2563eb 0%, #4338ca 100%);
-      color: #fff;
-      border-radius: 12px;
-      padding: 1.2rem;
-      aspect-ratio: 1.6;
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-      box-shadow: 0 8px 16px rgba(37, 99, 235, 0.25);
-    }
-
-    .yield-pool-plastic {
-      background: linear-gradient(135deg, #9333ea 0%, #c026d3 100%);
-      color: #fff;
-      border-radius: 12px;
-      padding: 1.2rem;
-      aspect-ratio: 1.6;
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-      box-shadow: 0 8px 16px rgba(147, 51, 234, 0.25);
-    }
-  </style>
-</head>
-<body>
-
-  <!-- ==============================================================
-       TOP NAVBAR: BANK BUDDY TRUST HEADER SPEC
-       ============================================================== -->
-  <header class="kotak-top-nav">
-    <div class="bank-logo-group">
-      <!-- Modern Banking Trust Shield SVG -->
-      <div class="trust-shield-badge">
-        <svg width="28" height="28" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <path d="M18 3L5 8.5V17C5 25.5 10.7 33.3 18 35C25.3 33.3 31 25.5 31 17V8.5L18 3Z" fill="#003366"/>
-          <path d="M18 5L7 9.5V17C7 24.3 11.9 31.2 18 32.8C24.1 31.2 29 24.3 29 17V9.5L18 5Z" stroke="#38bdf8" stroke-width="1.2" fill="none"/>
-          <path d="M13 18L16.5 21.5L23.5 14.5" stroke="#fbbf24" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
-          <circle cx="18" cy="10" r="1.5" fill="#38bdf8"/>
-        </svg>
-      </div>
-      <div class="bank-logo-title">
-        <span class="brand-main">Bank <span>Buddy</span></span>
-        <span class="brand-sub">Autonomous Wealth &bull; Verified Banking</span>
-      </div>
-    </div>
-
-    <!-- ACCESSIBILITY CONTROLS -->
-    <div class="accessibility-bar">
-      <label class="contrast-wrapper" title="Toggle High Contrast Mode">
-        <span>High contrast mode</span>
-        <span class="beta-badge">Beta</span>
-        <label class="toggle-switch">
-          <input type="checkbox" id="contrast-toggle" onchange="toggleHighContrast(this.checked)">
-          <span class="toggle-slider"></span>
-        </label>
-      </label>
-    </div>
-  </header>
-
-  <!-- QUICK PRESETS STRIP (CONVENIENT TESTING HELPER) -->
-  <div class="demo-credentials-strip" id="demo-strip">
-    <div>
-      <strong>⚡ Test Login Helper (PRD C1001 Client):</strong>
-      Click any chip to auto-fill Bank Buddy Net Banking login:
-    </div>
-    <div style="display: flex; gap: 0.4rem; flex-wrap: wrap; align-items: center;">
-      <button class="quick-preset-btn" type="button" onclick="quickFill('98234105', 'BankBuddy@2026')">🔑 CRN: 98234105</button>
-      <button class="quick-preset-btn" type="button" onclick="quickFill('elena', 'BankBuddy@2026')">👤 Username: elena</button>
-      <button class="quick-preset-btn" type="button" onclick="quickFill('4441', 'BankBuddy@2026')">💳 Card: 4441</button>
-    </div>
-  </div>
-
-  <!-- ==============================================================
-       MAIN LOGIN SECTION (EXACT REPLICA OF KOTAK IMAGE 4)
-       ============================================================== -->
-  <main class="kotak-main-layout" id="login-layout">
-    
-    <!-- LEFT SIDE: ILLUSTRATION & PROMOTIONAL CARD -->
-    <div class="left-hero-section">
-      <div class="hero-illustration-wrapper">
-        <div class="credit-card-bill-tag">
-          <span>CREDIT CARD BILL</span>
-          <span class="check-icon">✓</span>
-        </div>
-
-        <!-- Person sitting with laptop at round coffee table -->
-        <svg class="hero-svg" viewBox="0 0 450 360" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <!-- Background soft glow -->
-          <circle cx="215" cy="180" r="145" fill="#fff5f5"/>
-          
-          <!-- Potted plant on floor -->
-          <polygon points="90,260 115,260 110,305 95,305" fill="#a78bfa"/>
-          <circle cx="102" cy="245" r="18" fill="#10b981"/>
-          <circle cx="88" cy="235" r="12" fill="#059669"/>
-          <circle cx="116" cy="235" r="12" fill="#34d399"/>
-          
-          <!-- Round Table -->
-          <ellipse cx="230" cy="235" rx="145" ry="24" fill="#d97706"/>
-          <ellipse cx="230" cy="230" rx="140" ry="20" fill="#f59e0b"/>
-          <rect x="224" y="235" width="12" height="75" fill="#b45309"/>
-          
-          <!-- Coffee Mug -->
-          <rect x="135" y="200" width="16" height="22" rx="3" fill="#ed1c24"/>
-          <path d="M151 204 Q158 211 151 218" stroke="#ed1c24" stroke-width="2.5" fill="none"/>
-          
-          <!-- Laptop -->
-          <polygon points="195,190 265,190 272,220 188,220" fill="#e2e8f0"/>
-          <rect x="200" y="150" width="60" height="42" rx="3" fill="#ffffff" stroke="#94a3b8" stroke-width="2"/>
-          <circle cx="230" cy="171" r="5" fill="#0284c7"/>
-          
-          <!-- Customer Character -->
-          <circle cx="295" cy="135" r="24" fill="#fcd34d"/>
-          <!-- Hair -->
-          <path d="M285 116 Q300 110 315 125 Q322 140 308 140" fill="#1e293b"/>
-          <!-- Torso -->
-          <path d="M268 162 Q295 154 322 162 L328 238 L262 238 Z" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.5"/>
-          <!-- Arm working on laptop -->
-          <path d="M272 178 L230 205" stroke="#ffffff" stroke-width="10" stroke-linecap="round"/>
-          <!-- Chair -->
-          <rect x="330" y="170" width="10" height="70" fill="#f59e0b"/>
-          <rect x="300" y="238" width="35" height="8" fill="#d97706"/>
-        </svg>
-      </div>
-
-      <div class="hero-text-content">
-        <h3>Credit Cards</h3>
-        <p>Leave no room for stress, with effortless credit card bill payment</p>
-      </div>
-    </div>
-
-    <!-- RIGHT SIDE: WELCOME TO BANK BUDDY LOGIN CARD -->
-    <div class="kotak-login-card">
-      <div class="login-card-top">
-        <h2>Welcome to Bank Buddy</h2>
-        <div class="netbanking-dropdown" onclick="alert('Net Banking selected')">
-          <span>Net Banking</span>
-          <span>⌵</span>
-        </div>
-      </div>
-
-      <div class="login-tabs-row">
-        <div class="tab-header active" id="tab-btn-login" onclick="switchKotakTab('login')">Login</div>
-        <div class="tab-header" id="tab-btn-register" onclick="switchKotakTab('register')">Register with Bank Buddy</div>
-      </div>
-
-      <!-- Alert Box -->
-      <div class="kotak-alert" id="login-alert-box">
-        <span id="login-alert-msg">Invalid credentials</span>
-      </div>
-
-      <!-- 1. LOGIN FORM -->
-      <form id="kotak-login-form" onsubmit="handleKotakLogin(event)">
-        <!-- INPUT 1: CRN, Username or Card Number -->
-        <div class="input-box-wrapper">
-          <input
-            type="text"
-            id="login-id-field"
-            class="kotak-text-input"
-            placeholder="CRN, Username or Card Number"
-            required
-            autocomplete="username"
-            oninput="checkButtonActive()"
-          />
-        </div>
-
-        <!-- INPUT 2: Password -->
-        <div class="input-box-wrapper">
-          <input
-            type="password"
-            id="login-pass-field"
-            class="kotak-text-input"
-            placeholder="Password"
-            required
-            autocomplete="current-password"
-            oninput="checkButtonActive()"
-          />
-          <button type="button" class="show-password-trigger" onclick="togglePasswordVisibility()">
-            👁 <span id="show-hide-label">Show</span>
-          </button>
-        </div>
-
-        <!-- REMEMBER CRN -->
-        <div class="login-options-row">
-          <label class="remember-crn-label">
-            <input type="checkbox" id="remember-crn-check" checked>
-            <span>Remember my CRN</span>
-          </label>
-        </div>
-
-        <!-- FORGOT DETAILS LINK -->
-        <div class="forgot-link-box">
-          <a href="#" onclick="alert('Demo Client: Elena Rostova\nCRN: 98234105\nUsername: elena\nCard: 4441\nPassword: BankBuddy@2026\nOTP: 123456')">
-            Forgot CRN, username or password?
-          </a>
-        </div>
-
-        <!-- TERMS DISCLAIMER -->
-        <div class="terms-text">
-          By clicking on 'Secure login', you accept that you have read our <a href="#">Terms & conditions</a>, <a href="#">Privacy Policy</a> and the <a href="#">Tips for Safe Banking</a>
-        </div>
-
-        <!-- SECURE LOGIN BUTTON -->
-        <button type="submit" class="btn-secure-login" id="secure-login-btn">
-          Secure login
-        </button>
-      </form>
-
-      <!-- 2. REGISTRATION FORM (SWITCHABLE) -->
-      <form id="kotak-register-form" style="display: none;" onsubmit="handleKotakRegister(event)">
-        <div class="input-box-wrapper">
-          <input type="text" id="reg-name" class="kotak-text-input" placeholder="Full Name" required>
-        </div>
-        <div class="input-box-wrapper">
-          <input type="text" id="reg-user" class="kotak-text-input" placeholder="Desired Username" required>
-        </div>
-        <div class="input-box-wrapper">
-          <input type="email" id="reg-email" class="kotak-text-input" placeholder="Email Address" required>
-        </div>
-        <div class="input-box-wrapper">
-          <input type="password" id="reg-pass" class="kotak-text-input" placeholder="Password (Min 8 chars)" required>
-        </div>
-        <button type="submit" class="btn-secure-login active-ready" style="margin-top: 0.5rem;">
-          Register Net Banking Account
-        </button>
-      </form>
-    </div>
-  </main>
-
-  <!-- BOTTOM SAFETY WARNING & COMPATIBILITY BAR -->
-  <div class="bottom-safety-bar" id="safety-footer-bar">
-    <div>
-      🔒 Never share your password or Card details with anyone. <a href="#">Tips for Safe Banking</a>
-    </div>
-    <div>
-      <a href="#">Browser Compatibility</a>
-    </div>
-  </div>
-
-  <!-- ==============================================================
-       STEP 2: 2-FACTOR OTP STEP-UP MODAL (PRD R1 & R7 SPEC)
-       ============================================================== -->
-  <div class="otp-overlay" id="otp-modal-box">
-    <div class="otp-modal-box">
-      <div style="font-size: 2rem; margin-bottom: 0.5rem;">📲</div>
-      <h3 style="font-size: 1.2rem; font-weight: 700; margin-bottom: 0.4rem;">Two-Factor Authentication</h3>
-      <p style="font-size: 0.78rem; color: var(--text-muted); line-height: 1.4;">
-        Please enter the 6-digit Security OTP sent to your registered mobile ending in <strong id="otp-phone-txt">•••• 4321</strong>.
-      </p>
-
-      <div class="kotak-alert" id="otp-alert-box" style="margin-top: 0.75rem;">
-        <span id="otp-alert-msg">Invalid OTP code</span>
-      </div>
-
-      <div class="otp-input-boxes">
-        <input type="text" maxlength="1" class="otp-single-box" id="otp-digit-1" oninput="moveOtpFocus(this, 'otp-digit-2')" onkeydown="otpBack(event, this, null)">
-        <input type="text" maxlength="1" class="otp-single-box" id="otp-digit-2" oninput="moveOtpFocus(this, 'otp-digit-3')" onkeydown="otpBack(event, this, 'otp-digit-1')">
-        <input type="text" maxlength="1" class="otp-single-box" id="otp-digit-3" oninput="moveOtpFocus(this, 'otp-digit-4')" onkeydown="otpBack(event, this, 'otp-digit-2')">
-        <input type="text" maxlength="1" class="otp-single-box" id="otp-digit-4" oninput="moveOtpFocus(this, 'otp-digit-5')" onkeydown="otpBack(event, this, 'otp-digit-3')">
-        <input type="text" maxlength="1" class="otp-single-box" id="otp-digit-5" oninput="moveOtpFocus(this, 'otp-digit-6')" onkeydown="otpBack(event, this, 'otp-digit-4')">
-        <input type="text" maxlength="1" class="otp-single-box" id="otp-digit-6" oninput="moveOtpFocus(this, null)" onkeydown="otpBack(event, this, 'otp-digit-5')">
-      </div>
-
-      <div style="margin-bottom: 1.25rem;">
-        <button type="button" class="quick-preset-btn" onclick="fillDemoOtp()">⚡ Fill Demo OTP: 123456</button>
-      </div>
-
-      <button type="button" class="btn-secure-login active-ready" id="otp-submit-btn" onclick="confirmOtpAndLogin()" style="margin-bottom: 0.75rem;">
-        Verify & Enter Autonomous Wealth
-      </button>
-
-      <button type="button" onclick="closeOtpModal()" style="background: none; border: none; font-size: 0.75rem; color: var(--text-muted); cursor: pointer;">
-        ← Back to Net Banking login
-      </button>
-    </div>
-  </div>
-
-  <!-- ==============================================================
-       VIEW 2: BANK BUDDY AUTONOMOUS WEALTH WORKSPACE (IMAGES 1, 2, 3)
-       ============================================================== -->
-  <div id="wealth-dashboard-view">
-    <header class="wealth-top-header">
-      <div style="display: flex; align-items: center; gap: 1.5rem;">
-        <div style="display: flex; align-items: center; gap: 0.75rem;">
-          <div class="trust-shield-badge" style="width: 36px; height: 36px;">
-            <svg width="22" height="22" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M18 3L5 8.5V17C5 25.5 10.7 33.3 18 35C25.3 33.3 31 25.5 31 17V8.5L18 3Z" fill="#003366"/>
-              <path d="M18 5L7 9.5V17C7 24.3 11.9 31.2 18 32.8C24.1 31.2 29 24.3 29 17V9.5L18 5Z" stroke="#38bdf8" stroke-width="1.2" fill="none"/>
-              <path d="M13 18L16.5 21.5L23.5 14.5" stroke="#fbbf24" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
-              <circle cx="18" cy="10" r="1.5" fill="#38bdf8"/>
-            </svg>
-          </div>
-          <div>
-            <div style="font-size: 1.05rem; font-weight: 800; line-height: 1; color: #003366;">Bank <span style="color: #0284c7;">Buddy</span></div>
-            <div style="font-size: 0.65rem; font-weight: 700; color: #64748b;">AUTONOMOUS WEALTH</div>
-          </div>
-        </div>
-
-        <nav class="wealth-nav-pills">
-          <button class="wealth-pill active" id="btn-tab-home" onclick="switchWealthTab('home')">🏠 Home</button>
-          <button class="wealth-pill" id="btn-tab-chat" onclick="switchWealthTab('chat')">💬 Chat History <span style="background: #e0e7ff; color: #4338ca; padding: 0.1rem 0.4rem; border-radius: 9999px; font-size: 0.7rem;">14</span></button>
-          <a href="desktop.html" class="wealth-pill" style="text-decoration: none; color: inherit;">🖥️ Full Desktop</a>
-          <a href="chat.html" class="wealth-pill" style="text-decoration: none; color: inherit;">🤖 AI Chat Swarm</a>
-          <button class="wealth-pill" onclick="alert('Connecting to Private Banker...')">Help / Support •</button>
-        </nav>
-      </div>
-
-      <div style="display: flex; align-items: center; gap: 1rem;">
-        <div style="display: flex; align-items: center; gap: 0.65rem;">
-          <div style="width: 36px; height: 36px; border-radius: 50%; background: linear-gradient(135deg, #c084fc, #6366f1); color: #fff; font-weight: 700; font-size: 0.85rem; display: flex; align-items: center; justify-content: center;" id="dash-avatar">ER</div>
-          <div style="line-height: 1.2;">
-            <div style="font-size: 0.85rem; font-weight: 700;" id="dash-client-name">Elena Rostova</div>
-            <div style="font-size: 0.7rem; color: #6366f1; font-weight: 600;">Private Wealth Client</div>
-          </div>
-          <button onclick="handleLogout()" style="background: #f1f5f9; border: 1px solid #cbd5e1; padding: 0.35rem 0.65rem; border-radius: 6px; font-size: 0.75rem; font-weight: 600; cursor: pointer; margin-left: 0.5rem;">
-            Logout
-          </button>
-        </div>
-      </div>
-    </header>
-
-    <!-- DASHBOARD CONTENT (TAB 1: HOME) -->
-    <div class="dash-main-container" id="dash-home-panel">
-      <!-- LIQUID NET WORTH HERO -->
-      <div class="net-worth-banner">
-        <div>
-          <div style="display: flex; align-items: center; gap: 0.5rem; font-size: 0.75rem; color: #059669; font-weight: 700;">
-            <span>🟢 Real-time ISO 20022 Network Active</span>
-            <span style="color: var(--text-muted); font-weight: 500;">Synced 12s ago</span>
-          </div>
-          <div style="font-size: 0.75rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-top: 0.5rem;">
-            Total Liquid Net Worth
-          </div>
-          <div style="font-size: 2.25rem; font-weight: 800; letter-spacing: -0.03em; margin: 0.25rem 0;">
-            ₹159,500.00
-            <span style="background: #ecfdf5; color: #059669; font-size: 0.75rem; font-weight: 700; padding: 0.2rem 0.5rem; border-radius: 9999px; border: 1px solid #a7f3d0; vertical-align: middle; margin-left: 0.5rem;">↑ +4.2% MoM</span>
-          </div>
-          <div style="font-size: 0.8rem; color: var(--text-muted);">
-            Autonomous treasury sweeps active: Yielding an aggregate +₹842.10 monthly return across vault accounts and liquidity pools.
-          </div>
-        </div>
-
-        <div style="display: flex; gap: 0.75rem;">
-          <button style="background: #0f172a; color: #fff; border: none; padding: 0.65rem 1.25rem; font-size: 0.85rem; font-weight: 700; border-radius: 8px; cursor: pointer;" onclick="alert('Initiating ISO 20022 Transfer Protocol')">
-            + Transfer Funds
-          </button>
-          <button style="background: #ffffff; border: 1px solid #cbd5e1; color: #334155; padding: 0.65rem 1rem; font-size: 0.85rem; font-weight: 600; border-radius: 8px; cursor: pointer;" onclick="alert('Generating Certified Statement')">
-            📄 Generate Statement
-          </button>
-        </div>
-      </div>
-
-      <!-- 3 ACTIVE ACCOUNTS & PAYMENT CARDS (IMAGE 1 SPEC) -->
-      <div>
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem;">
-          <div>
-            <h3 style="font-size: 1.05rem; font-weight: 800;">Active Accounts & Payment Cards</h3>
-            <p style="font-size: 0.75rem; color: var(--text-muted);">Autonomous hardware freeze switches, settlement routing, and EMV profiles.</p>
-          </div>
-          <a href="#" style="font-size: 0.8rem; font-weight: 700; color: #2563eb; text-decoration: none;">Card Security Center →</a>
-        </div>
-
-        <div class="cards-triple-grid">
-          <!-- CARD 1: CHECKING VAULT -->
-          <div class="dashboard-account-card">
-            <div style="display: flex; justify-content: space-between; font-size: 0.7rem; font-weight: 700;">
-              <span>CHECKING • VAULT</span>
-              <span style="color: #10b981;">● Active</span>
-            </div>
-            <div class="vault-debit-plastic">
-              <div style="font-size: 0.7rem; letter-spacing: 0.1em; color: #94a3b8;">BANK BUDDY VAULT DEBIT</div>
-              <div style="font-size: 1.1rem; letter-spacing: 0.2em; font-family: 'Fira Code', monospace;">•••• •••• •••• 4441</div>
-              <div style="display: flex; justify-content: space-between; font-size: 0.7rem;">
-                <span>EXP 08/29</span>
-                <span style="font-weight: 800;">VISA</span>
-              </div>
-            </div>
-            <div>
-              <div style="font-size: 0.75rem; color: var(--text-muted);">Available Liquid Balance</div>
-              <div style="font-size: 1.35rem; font-weight: 800;">₹125,000.00</div>
-              <div style="font-size: 0.7rem; color: var(--text-muted);">Daily limit: ₹25,000.00 • ISO 20022 Settled</div>
-            </div>
-          </div>
-
-          <!-- CARD 2: SAPPHIRE RESERVE CREDIT -->
-          <div class="dashboard-account-card">
-            <div style="display: flex; justify-content: space-between; font-size: 0.7rem; font-weight: 700;">
-              <span>WORLD ELITE • CREDIT</span>
-              <span style="color: #10b981;">● Active</span>
-            </div>
-            <div class="sapphire-credit-plastic">
-              <div style="font-size: 0.7rem; letter-spacing: 0.1em; color: #bfdbfe;">SAPPHIRE RESERVE CREDIT</div>
-              <div style="font-size: 1.1rem; letter-spacing: 0.2em; font-family: 'Fira Code', monospace;">•••• •••• •••• 2343</div>
-              <div style="display: flex; justify-content: space-between; font-size: 0.7rem;">
-                <span>EXP 11/30</span>
-                <span style="font-weight: 800;">MasterCard</span>
-              </div>
-            </div>
-            <div>
-              <div style="display: flex; justify-content: space-between;">
-                <span style="font-size: 0.75rem; color: var(--text-muted);">Available Credit</span>
-                <span style="font-size: 0.75rem; color: #dc2626; font-weight: 700;">Due Nov 18</span>
-              </div>
-              <div style="font-size: 1.35rem; font-weight: 800;">₹34,500.00</div>
-              <div style="font-size: 0.7rem; color: var(--text-muted);">Statement balance: ₹9,500.00 • Auto-pay ON</div>
-            </div>
-          </div>
-
-          <!-- CARD 3: YIELD SWEEP AUTO-EARN -->
-          <div class="dashboard-account-card">
-            <div style="display: flex; justify-content: space-between; font-size: 0.7rem; font-weight: 700;">
-              <span>YIELD SWEEP • AUTO-EARN</span>
-              <span style="color: #9333ea; font-weight: 800;">7.20% APY</span>
-            </div>
-            <div class="yield-pool-plastic">
-              <div style="font-size: 0.7rem; letter-spacing: 0.1em; color: #f5d0fe;">TREASURY YIELD POOL</div>
-              <div style="font-size: 0.9rem; font-weight: 600;">📈 Daily interest compound</div>
-              <div style="display: flex; justify-content: space-between; font-size: 0.7rem;">
-                <span>FDIC / SIPC Insured</span>
-                <span style="font-family: 'Fira Code', monospace;">ID: #9902-TR</span>
-              </div>
-            </div>
-            <div>
-              <div style="font-size: 0.75rem; color: var(--text-muted);">Total Swept Treasury Balance</div>
-              <div style="font-size: 1.35rem; font-weight: 800;">₹28,200.00</div>
-              <div style="font-size: 0.7rem; color: #10b981; font-weight: 600;">+₹169.20 earned this calendar cycle</div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- DASHBOARD CONTENT (TAB 2: CHAT WORKSPACE - IMAGES 2 & 3) -->
-    <div class="dash-main-container" id="dash-chat-panel" style="display: none;">
-      <div style="background: var(--card-bg); border: 1px solid #e2e8f0; border-radius: 14px; padding: 1.5rem;">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; flex-wrap: wrap; gap: 0.5rem;">
-          <div>
-            <h3 style="font-size: 1.1rem; font-weight: 800;">Daily Financial Orchestration & Expense Breakdown</h3>
-            <p style="font-size: 0.75rem; color: var(--text-muted);">Dynamic Swarm Router: Autonomous Multi-Agent Execution (ISO-20022 Deterministic Verified)</p>
-          </div>
-        </div>
-
-        <div style="display: flex; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 1.5rem;">
-          <button style="background: #eff6ff; border: 1px solid #bfdbfe; color: #1d4ed8; font-size: 0.75rem; font-weight: 700; padding: 0.3rem 0.7rem; border-radius: 9999px;">🏦 Account •</button>
-          <button style="background: #f8fafc; border: 1px solid #e2e8f0; color: #475569; font-size: 0.75rem; font-weight: 600; padding: 0.3rem 0.7rem; border-radius: 9999px;">💸 Payments</button>
-          <button style="background: #f8fafc; border: 1px solid #e2e8f0; color: #475569; font-size: 0.75rem; font-weight: 600; padding: 0.3rem 0.7rem; border-radius: 9999px;">🏷️ Loans</button>
-          <button style="background: #2563eb; color: #fff; border: none; font-size: 0.75rem; font-weight: 700; padding: 0.3rem 0.7rem; border-radius: 9999px;">💳 Credit Card •</button>
-          <button style="background: #f8fafc; border: 1px solid #e2e8f0; color: #475569; font-size: 0.75rem; font-weight: 600; padding: 0.3rem 0.7rem; border-radius: 9999px;">🛡️ Fraud Detection</button>
-          <button style="background: #f8fafc; border: 1px solid #e2e8f0; color: #475569; font-size: 0.75rem; font-weight: 600; padding: 0.3rem 0.7rem; border-radius: 9999px;">📈 Investment •</button>
-        </div>
-
-        <!-- CONVERSATION CARDS -->
-        <div style="display: flex; flex-direction: column; gap: 1.25rem;">
-          <div style="align-self: flex-end; max-width: 80%; background: #0f172a; color: #ffffff; padding: 0.85rem 1.25rem; border-radius: 14px 14px 2px 14px; font-size: 0.85rem;">
-            Please freeze my Sapphire Reserve credit card right now for safety, and check if my Amazon UPI payment went through.
-          </div>
-
-          <div style="align-self: flex-start; max-width: 90%; background: #ffffff; border: 1px solid #e2e8f0; border-radius: 14px; padding: 1.25rem; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.03);">
-            <div style="display: flex; align-items: center; gap: 0.5rem; font-size: 0.7rem; color: #4338ca; font-weight: 700; margin-bottom: 0.75rem;">
-              <span>🤖 Handled by: Credit Card Agent + Payments Agent + Fraud Sentry</span>
-              <span>• Latency: 98ms</span>
-              <span>• 2FA Authenticated</span>
-            </div>
-            <p style="font-size: 0.85rem; margin-bottom: 1rem;">
-              I have securely executed the <strong>instant freeze protocol</strong> on your Sapphire Reserve card and reconciled your recent Amazon retail clearing record.
-            </p>
-
-            <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 1rem; margin-bottom: 1rem;">
-              <div style="display: flex; justify-content: space-between; align-items: center;">
-                <span style="font-weight: 700; font-size: 0.85rem;">Sapphire Reserve Credit Control</span>
-                <span style="background: #fef2f2; color: #b91c1c; border: 1px solid #fecaca; padding: 0.15rem 0.5rem; border-radius: 9999px; font-size: 0.7rem; font-weight: 800;">● FROZEN / LOCKED</span>
-              </div>
-              <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 0.25rem;">Physical & Virtual Tokens • Ending in •••• 2343</div>
-            </div>
-
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem;">
-              <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 0.75rem;">
-                <div style="font-size: 0.7rem; color: #059669; font-weight: 700;">✓ UPI Settlement Verification</div>
-                <div style="font-size: 0.85rem; font-weight: 800; margin: 0.25rem 0;">Amazon Retail Services Inc.</div>
-                <div style="font-size: 1.1rem; font-weight: 800;">₹2,499.00</div>
-                <div style="font-size: 0.65rem; color: var(--text-muted);">ISO-20022 Cleared • RRN: #UPI-9842104820</div>
-              </div>
-
-              <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 0.75rem;">
-                <div style="font-size: 0.7rem; color: #4338ca; font-weight: 700;">🛡️ Fraud Sentry Scan (Score: 0.02)</div>
-                <div style="font-size: 0.85rem; font-weight: 800; margin: 0.25rem 0; color: #059669;">Benign Merchant Signature</div>
-                <div style="font-size: 0.7rem; color: var(--text-muted);">Zero anomalous velocity flags detected.</div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <script>
-    // State
-    let authState = {
-      sessionToken: null,
-      accessToken: null,
-      user: null
-    };
-
-    // Accessibility handlers
-
-    function toggleHighContrast(isHigh) {
-      if (isHigh) {
-        document.body.classList.add('high-contrast');
-      } else {
-        document.body.classList.remove('high-contrast');
-      }
-    }
-
-    // Quick Fill Helper
-    function quickFill(id, pass) {
-      document.getElementById('login-id-field').value = id;
-      document.getElementById('login-pass-field').value = pass;
-      checkButtonActive();
-      hideKotakAlert();
-    }
-
-    // Toggle Password Visibility
-    function togglePasswordVisibility() {
-      const input = document.getElementById('login-pass-field');
-      const label = document.getElementById('show-hide-label');
-      if (input.type === 'password') {
-        input.type = 'text';
-        label.textContent = 'Hide';
-      } else {
-        input.type = 'password';
-        label.textContent = 'Show';
-      }
-    }
-
-    // Dynamic button color activation (Kotak peach to active red)
-    function checkButtonActive() {
-      const idVal = document.getElementById('login-id-field').value.trim();
-      const passVal = document.getElementById('login-pass-field').value;
-      const btn = document.getElementById('secure-login-btn');
-      if (idVal.length > 0 && passVal.length > 0) {
-        btn.classList.add('active-ready');
-      } else {
-        btn.classList.remove('active-ready');
-      }
-    }
-
-    // Switch between Login and Register tabs
-    function switchKotakTab(tab) {
-      const tabLogin = document.getElementById('tab-btn-login');
-      const tabReg = document.getElementById('tab-btn-register');
-      const formLogin = document.getElementById('kotak-login-form');
-      const formReg = document.getElementById('kotak-register-form');
-
-      if (tab === 'login') {
-        tabLogin.classList.add('active');
-        tabReg.classList.remove('active');
-        formLogin.style.display = 'block';
-        formReg.style.display = 'none';
-      } else {
-        tabLogin.classList.remove('active');
-        tabReg.classList.add('active');
-        formLogin.style.display = 'none';
-        formReg.style.display = 'block';
-      }
-      hideKotakAlert();
-    }
-
-
-    function showKotakAlert(msg) {
-      const box = document.getElementById('login-alert-box');
-      const label = document.getElementById('login-alert-msg');
-      label.textContent = msg;
-      box.style.display = 'block';
-    }
-
-    function hideKotakAlert() {
-      document.getElementById('login-alert-box').style.display = 'none';
-    }
-
-    // Step 1: Submit Login Form (CRN, Username, or Card Number)
-    async function handleKotakLogin(e) {
-      e.preventDefault();
-      const identifier = document.getElementById('login-id-field').value.trim();
-      const password = document.getElementById('login-pass-field').value;
-      const btn = document.getElementById('secure-login-btn');
-
-      if (!identifier || !password) return;
-
-      btn.disabled = true;
-      btn.textContent = 'Verifying with Net Banking Gateway...';
-      hideKotakAlert();
-
-      try {
-        // Try real backend API
-        let data;
-        try {
-          const res = await fetch('/api/v1/signin', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ identifier, password })
-          });
-          data = await res.json();
-          if (!res.ok) throw new Error(data.message || 'Invalid credentials');
-        } catch (netErr) {
-          // Graceful client fallback for standalone demo testing
-          if (
-            (identifier === '98234105' || identifier.toLowerCase() === 'elena' || identifier === '4441') &&
-            (password === 'BankBuddy@2026' || password === 'password123')
-          ) {
-            data = {
-              step: 'OTP_REQUIRED',
-              sessionToken: 'demo-session-token-' + Date.now(),
-              user: {
-                id: 1,
-                name: 'Elena Rostova',
-                username: 'elena',
-                crn: '98234105',
-                maskedPhone: '•••• •••• 4321'
-              }
-            };
-          } else {
-            throw new Error(netErr.message || 'Invalid credentials! Try CRN: 98234105 or User: elena');
+<html class="h-full bg-slate-50" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Bank Buddy — Executive Wealth &amp; Banking</title>
+<!-- Fonts -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS v3 CDN with forms & container queries -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+          },
+          colors: {
+            brand: {
+              50: '#EEF2FF',
+              100: '#E0E7FF',
+              500: '#4F46E5',
+              600: '#4338CA',
+              blue: '#2563EB',
+              violet: '#7C3AED',
+              pink: '#EC4899',
+            }
+          },
+          boxShadow: {
+            'soft': '0 4px 25px -4px rgba(0, 0, 0, 0.04), 0 2px 10px -2px rgba(0, 0, 0, 0.02)',
+            'float': '0 20px 40px -15px rgba(37, 99, 235, 0.15)',
+            'card': '0 10px 30px -5px rgba(15, 23, 42, 0.03)',
           }
         }
-
-        if (data.step === 'OTP_REQUIRED') {
-          authState.sessionToken = data.sessionToken;
-          authState.user = data.user;
-          document.getElementById('otp-phone-txt').textContent = (data.user && data.user.maskedPhone) || '•••• 4321';
-          openOtpModal();
-        } else if (data.accessToken) {
-          enterDashboard(data);
-        }
-      } catch (err) {
-        showKotakAlert(err.message);
-      } finally {
-        btn.disabled = false;
-        btn.textContent = 'Secure login';
-      }
-    }
-
-    // Step 2: OTP Modal
-    function openOtpModal() {
-      document.getElementById('otp-modal-box').style.display = 'flex';
-      document.getElementById('otp-alert-box').style.display = 'none';
-      for (let i = 1; i <= 6; i++) {
-        document.getElementById(`otp-digit-${i}`).value = '';
-      }
-      setTimeout(() => document.getElementById('otp-digit-1').focus(), 150);
-    }
-
-    function closeOtpModal() {
-      document.getElementById('otp-modal-box').style.display = 'none';
-    }
-
-    function moveOtpFocus(current, nextId) {
-      if (current.value.length === 1 && nextId) {
-        document.getElementById(nextId).focus();
-      }
-    }
-
-    function otpBack(event, current, prevId) {
-      if (event.key === 'Backspace' && current.value === '' && prevId) {
-        document.getElementById(prevId).focus();
-      }
-    }
-
-    function fillDemoOtp() {
-      const demo = '123456';
-      for (let i = 0; i < 6; i++) {
-        document.getElementById(`otp-digit-${i+1}`).value = demo[i];
-      }
-    }
-
-    async function confirmOtpAndLogin() {
-      let otp = '';
-      for (let i = 1; i <= 6; i++) {
-        otp += document.getElementById(`otp-digit-${i}`).value;
-      }
-
-      if (otp.length !== 6) {
-        const alertBox = document.getElementById('otp-alert-box');
-        document.getElementById('otp-alert-msg').textContent = 'Please enter all 6 digits of the OTP.';
-        alertBox.style.display = 'block';
-        return;
-      }
-
-      const btn = document.getElementById('otp-submit-btn');
-      btn.disabled = true;
-      btn.textContent = 'Authenticating ISO 20022 Token...';
-
-      try {
-        let data;
-        try {
-          const res = await fetch('/api/v1/verify-otp', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              sessionToken: authState.sessionToken,
-              otp: otp
-            })
-          });
-          data = await res.json();
-          if (!res.ok) throw new Error(data.message || 'OTP verification failed');
-        } catch (netErr) {
-          if (otp === '123456') {
-            data = {
-              accessToken: 'mock-jwt-token-mfa-elevated',
-              name: (authState.user && authState.user.name) || 'Elena Rostova'
-            };
-          } else {
-            throw new Error('Invalid OTP! Demo OTP is 123456');
-          }
-        }
-
-        enterDashboard(data);
-      } catch (err) {
-        const alertBox = document.getElementById('otp-alert-box');
-        document.getElementById('otp-alert-msg').textContent = err.message;
-        alertBox.style.display = 'block';
-      } finally {
-        btn.disabled = false;
-        btn.textContent = 'Verify & Enter Autonomous Wealth';
-      }
-    }
-
-    function enterDashboard(data) {
-      authState.accessToken = data.accessToken;
-      closeOtpModal();
-
-      document.getElementById('login-layout').style.display = 'none';
-      document.getElementById('demo-strip').style.display = 'none';
-      document.getElementById('safety-footer-bar').style.display = 'none';
-      document.getElementById('wealth-dashboard-view').style.display = 'flex';
-
-      if (data.name) {
-        document.getElementById('dash-client-name').textContent = data.name;
-        const initials = data.name.split(' ').map(n => n[0]).join('').substring(0, 2);
-        document.getElementById('dash-avatar').textContent = initials;
-      }
-    }
-
-    function switchWealthTab(tab) {
-      const homePanel = document.getElementById('dash-home-panel');
-      const chatPanel = document.getElementById('dash-chat-panel');
-      const btnHome = document.getElementById('btn-tab-home');
-      const btnChat = document.getElementById('btn-tab-chat');
-
-      if (tab === 'home') {
-        homePanel.style.display = 'flex';
-        chatPanel.style.display = 'none';
-        btnHome.classList.add('active');
-        btnChat.classList.remove('active');
-      } else {
-        homePanel.style.display = 'none';
-        chatPanel.style.display = 'block';
-        btnHome.classList.remove('active');
-        btnChat.classList.add('active');
-      }
-    }
-
-    function handleLogout() {
-      authState = { sessionToken: null, accessToken: null, user: null };
-      document.getElementById('wealth-dashboard-view').style.display = 'none';
-      document.getElementById('login-layout').style.display = 'grid';
-      document.getElementById('demo-strip').style.display = 'flex';
-      document.getElementById('safety-footer-bar').style.display = 'flex';
-    }
-
-    // Register Form Handler
-    async function handleKotakRegister(e) {
-      e.preventDefault();
-      const name = document.getElementById('reg-name').value;
-      const username = document.getElementById('reg-user').value;
-      const email = document.getElementById('reg-email').value;
-      const password = document.getElementById('reg-pass').value;
-
-      try {
-        const res = await fetch('/api/v1/signup', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ name, username, email, password })
-        });
-        const data = await res.json();
-        if (!res.ok) throw new Error(data.message || 'Registration failed');
-
-        alert(`Bank Buddy Net Banking Registration Successful!\nYour Generated CRN: ${data.user.crn}\nCard: ${data.user.cardNumber}\nUsername: ${data.user.username}`);
-        switchKotakTab('login');
-        quickFill(data.user.crn, password);
-      } catch (err) {
-        showKotakAlert(err.message);
       }
     }
   </script>
-</body>
-</html>
+<!-- BEGIN: Custom Micro-Styles -->
+<style data-purpose="custom-enhancements">
+    /* Custom subtle scrollbar */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #F1F5F9;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #CBD5E1;
+      border-radius: 9999px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #94A3B8;
+    }
+    
+    /* Radial ambient backgrounds reminiscent of Bank Buddy UI */
+    .bg-mesh-glow {
+      background-image: 
+        radial-gradient(circle at 10% 10%, rgba(224, 231, 255, 0.5) 0%, transparent 40%),
+        radial-gradient(circle at 90% 20%, rgba(243, 232, 255, 0.6) 0%, transparent 35%),
+        radial-gradient(circle at 50% 90%, rgba(224, 242, 254, 0.4) 0%, transparent 45%);
+    }
+
+    
+    /* High Contrast Mode Dark Styling */
+    body.high-contrast {
+      background-color: #0b0f19 !important;
+      color: #f1f5f9 !important;
+    }
+    body.high-contrast header {
+      background-color: rgba(15, 23, 42, 0.95) !important;
+      border-color: #334155 !important;
+    }
+    body.high-contrast .bg-white {
+      background-color: #1e293b !important;
+      border-color: #334155 !important;
+      color: #f8fafc !important;
+    }
+    body.high-contrast .text-slate-900,
+    body.high-contrast .text-slate-800,
+    body.high-contrast .text-slate-700 {
+      color: #f8fafc !important;
+    }
+    body.high-contrast .text-slate-600,
+    body.high-contrast .text-slate-500,
+    body.high-contrast .text-slate-400 {
+      color: #94a3b8 !important;
+    }
+    body.high-contrast .bg-slate-50,
+    body.high-contrast .bg-slate-100 {
+      background-color: #0f172a !important;
+      border-color: #334155 !important;
+    }
+    body.high-contrast .border-slate-100,
+    body.high-contrast .border-slate-200,
+    body.high-contrast .border-slate-200\/60,
+    body.high-contrast .border-slate-200\/70,
+    body.high-contrast .border-slate-200\/80,
+    body.high-contrast .border-slate-200\/90 {
+      border-color: #334155 !important;
+    }
+    body.high-contrast nav {
+      background-color: #1e293b !important;
+      border-color: #334155 !important;
+    }
+    body.high-contrast nav a.bg-white {
+      background-color: #334155 !important;
+      color: #ffffff !important;
+    }
+    body.high-contrast footer {
+      background-color: #0b0f19 !important;
+      border-color: #334155 !important;
+    }
+
+    /* Spline chart stroke animation */
+    .chart-path {
+      stroke-dasharray: 1000;
+      stroke-dashoffset: 0;
+      transition: stroke-dashoffset 1s ease-in-out;
+    }
+  </style>
+<!-- END: Custom Micro-Styles -->
+</head>
+<body class="min-h-full font-sans antialiased text-slate-800 bg-slate-50/80 bg-mesh-glow selection:bg-indigo-500 selection:text-white">
+<!-- BEGIN: Minimalistic Header -->
+<header class="sticky top-0 z-40 w-full border-b border-slate-200/70 bg-white/80 backdrop-blur-md">
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between gap-6">
+<!-- Brand Logo -->
+<div class="flex items-center gap-3">
+<a class="flex items-center gap-3 group" href="desktop.html">
+<div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-[#002244] via-[#003366] to-[#0284c7] flex items-center justify-center shadow-md shadow-blue-900/20 group-hover:scale-105 transition-transform duration-200">
+  <svg width="24" height="24" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M18 3L5 8.5V17C5 25.5 10.7 33.3 18 35C25.3 33.3 31 25.5 31 17V8.5L18 3Z" fill="#003366"/>
+    <path d="M18 5L7 9.5V17C7 24.3 11.9 31.2 18 32.8C24.1 31.2 29 24.3 29 17V9.5L18 5Z" stroke="#38bdf8" stroke-width="1.2" fill="none"/>
+    <path d="M13 18L16.5 21.5L23.5 14.5" stroke="#fbbf24" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+    <circle cx="18" cy="10" r="1.5" fill="#38bdf8"/>
+  </svg>
+</div>
+<div class="flex flex-col">
+  <span class="text-xl font-extrabold tracking-tight text-slate-900 leading-none">Bank <span class="text-[#0284c7]">Buddy</span></span>
+  <span class="text-[10px] font-bold text-slate-500 tracking-wider uppercase mt-1">Autonomous Wealth &bull; Trust Verified</span>
+</div>
+</a>
+</div>
+<!-- Navigation Links -->
+<nav aria-label="Main Navigation" class="flex items-center p-1 bg-slate-100/80 rounded-full border border-slate-200/60">
+<!-- Active Link: Home -->
+<a class="px-5 py-2 text-xs font-semibold text-slate-900 bg-white rounded-full shadow-sm transition-all duration-150 flex items-center gap-2" href="desktop.html">
+<svg class="w-3.5 h-3.5 text-[#0284c7]" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+<path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+<polyline points="9 22 9 12 15 12 15 22"></polyline>
+</svg>
+<span>Home</span>
+</a>
+<!-- Chat Link -->
+<a class="px-5 py-2 text-xs font-medium text-slate-600 hover:text-slate-900 rounded-full transition-all duration-150 flex items-center gap-2" href="chat.html">
+<svg class="w-3.5 h-3.5 text-indigo-600" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+<path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+</svg>
+<span>Chat</span>
+</a>
+<!-- Logout Link -->
+<a class="px-5 py-2 text-xs font-medium text-rose-600 hover:text-rose-700 hover:bg-rose-50 rounded-full transition-all duration-150 flex items-center gap-1.5" href="login.html">
+<svg class="w-3.5 h-3.5 text-rose-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+<path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+<polyline points="16 17 21 12 16 7"></polyline>
+<line x1="21" y1="12" x2="9" y2="12"></line>
+</svg>
+<span>Logout</span>
+</a>
+</nav>
+<!-- Right Action Items: Search, Bell & User Profile -->
+<div class="flex items-center gap-3">
+<!-- Search Pill -->
+<div class="relative hidden xl:block">
+<div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+<circle cx="11" cy="11" r="8"></circle>
+<line x1="21" x2="16.65" y1="21" y2="16.65"></line>
+</svg>
+</div>
+<input class="w-56 pl-9 pr-12 py-2 text-xs bg-white/90 border border-slate-200 rounded-full focus:outline-none focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-500 shadow-sm transition placeholder:text-slate-400" placeholder="Search transactions..." type="text"/>
+<div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+<kbd class="text-[10px] font-semibold text-slate-400 bg-slate-100 px-1.5 py-0.5 rounded border border-slate-200">⌘K</kbd>
+</div>
+</div>
+
+<!-- High Contrast Mode Toggle (BETA Spec) -->
+<label class="flex items-center gap-2 cursor-pointer select-none px-3 py-1.5 rounded-full bg-slate-100/90 border border-slate-200/80 hover:bg-slate-200/70 transition" title="Toggle High Contrast Mode">
+  <span class="text-xs font-semibold text-slate-700">High contrast mode</span>
+  <span class="px-1.5 py-0.5 text-[9px] font-extrabold uppercase bg-red-600 text-white rounded">BETA</span>
+  <label class="relative inline-flex items-center cursor-pointer">
+    <input type="checkbox" id="contrast-toggle" class="sr-only peer" onchange="toggleHighContrast(this.checked)">
+    <div class="w-8 h-4 bg-slate-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-3 after:w-3 after:transition-all peer-checked:bg-blue-600"></div>
+  </label>
+</label>
+
+<!-- Notification Bell -->
+<button aria-label="Notifications" class="relative p-2 text-slate-500 hover:text-slate-700 bg-white border border-slate-200 rounded-full shadow-sm hover:bg-slate-50 transition" type="button">
+<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+<path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+<path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+</svg>
+<span class="absolute top-1 right-1 w-2 h-2 bg-indigo-600 rounded-full ring-2 ring-white"></span>
+</button>
+<div class="h-6 w-px bg-slate-200 hidden sm:block"></div>
+<!-- Profile Avatar & Details -->
+<div class="flex items-center gap-3 pl-1">
+<div class="relative">
+<!-- Deterministic high quality avatar representation -->
+<div class="w-10 h-10 rounded-full ring-2 ring-indigo-500/20 bg-gradient-to-tr from-purple-200 via-pink-100 to-indigo-100 flex items-center justify-center font-bold text-sm text-indigo-700">
+              ER
+            </div>
+<span class="absolute bottom-0 right-0 w-2.5 h-2.5 bg-emerald-500 border-2 border-white rounded-full"></span>
+</div>
+<div class="hidden xl:flex flex-col text-left">
+<span class="text-xs font-bold text-slate-900 leading-tight">Elena Rostova</span>
+<span class="text-[10px] font-semibold text-indigo-600 tracking-tight">CRN: 98234105 &bull; Private Client</span>
+</div>
+<a href="login.html" class="p-2 text-slate-400 hover:text-red-600 rounded-full hover:bg-slate-100 transition" title="Logout &amp; Return to Login">
+  <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
+</a>
+</div>
+</div>
+</div>
+</header>
+<!-- END: Minimalistic Header -->
+<!-- BEGIN: Main Page Content -->
+<main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-10" id="home">
+<!-- Executive Overview Hero Banner -->
+<section class="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200/80 shadow-card relative overflow-hidden" data-purpose="executive-overview">
+<div class="absolute -right-14 -top-14 w-64 h-64 bg-indigo-50 rounded-full blur-3xl pointer-events-none opacity-70"></div>
+<div class="absolute right-40 -bottom-10 w-48 h-48 bg-purple-50 rounded-full blur-2xl pointer-events-none opacity-60"></div>
+<div class="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6 relative z-10">
+<div>
+<div class="flex items-center gap-2 mb-2">
+<span class="inline-flex items-center gap-1.5 py-1 px-3 rounded-full text-[11px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200/60">
+<span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+              Real-time ISO 20022 Network Active
+            </span>
+<span class="text-xs text-slate-400 font-medium">Synced 12s ago</span>
+</div>
+<div class="text-xs uppercase tracking-wider font-bold text-slate-400">Total Liquid Net Worth</div>
+<div class="flex items-baseline gap-3 mt-1">
+<h1 class="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-slate-900 tracking-tight">₹159,500.00</h1>
+<span class="inline-flex items-center text-xs font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-100">
+<svg class="w-3 h-3 mr-0.5" fill="none" stroke="currentColor" stroke-width="2.5" viewbox="0 0 24 24"><polyline points="18 15 12 9 6 15"></polyline></svg>
+              +4.2% MoM
+            </span>
+</div>
+<p class="text-xs text-slate-500 mt-1.5 max-w-xl">
+            Autonomous treasury sweeps active: Yielding an aggregate +₹842.10 monthly return across vault accounts and liquidity pools.
+          </p>
+</div>
+<!-- Quick Top Action Buttons -->
+<div class="flex flex-wrap items-center gap-3">
+<button class="px-4 py-2.5 rounded-2xl bg-slate-900 text-white text-xs font-semibold hover:bg-slate-800 transition shadow-sm flex items-center gap-2" type="button">
+<svg class="w-4 h-4 text-indigo-400" fill="none" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24"><path d="M12 5v14M5 12h14"></path></svg>
+<span>Transfer Funds</span>
+</button>
+<button class="px-4 py-2.5 rounded-2xl bg-white border border-slate-200 text-slate-700 text-xs font-semibold hover:bg-slate-50 transition shadow-sm flex items-center gap-2" type="button">
+<svg class="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24"><rect height="16" rx="2" width="18" x="3" y="4"></rect><path d="M7 15h0M7 9h0M7 12h0M11 15h6M11 9h6M11 12h6"></path></svg>
+<span>Generate Statement</span>
+</button>
+</div>
+</div>
+</section>
+<!-- BEGIN: Executive Account Balances & Interactive Cards Section -->
+<section class="space-y-4" data-purpose="card-controls-section">
+<div class="flex items-center justify-between">
+<div>
+<h2 class="text-lg font-bold text-slate-900 tracking-tight">Active Accounts &amp; Payment Cards</h2>
+<p class="text-xs text-slate-500">Autonomous hardware freeze switches, settlement routing, and EMV profiles.</p>
+</div>
+<a class="text-xs font-semibold text-indigo-600 hover:text-indigo-800 flex items-center gap-1 transition" href="#manage-cards">
+          Card Security Center <span aria-hidden="true">→</span>
+</a>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+<!-- CARD 1: Checking / Vault Debit Card -->
+<div class="bg-white rounded-3xl p-6 border border-slate-200/90 shadow-card hover:shadow-soft transition-all duration-200 flex flex-col justify-between relative overflow-hidden group">
+<!-- Subtle top accent line -->
+<div class="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-slate-800 to-slate-600"></div>
+<div>
+<div class="flex items-center justify-between mb-4">
+<span class="px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider rounded-full bg-slate-100 text-slate-700">Checking • Vault</span>
+<span class="inline-flex items-center gap-1 text-[11px] font-semibold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-100">
+<span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> Active
+              </span>
+</div>
+<!-- Virtual Card Mock Representation (Bank Buddy Style) -->
+<div class="w-full bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-white rounded-2xl p-4 shadow-md mb-5 relative overflow-hidden">
+<div class="absolute -right-6 -bottom-6 w-24 h-24 bg-white/5 rounded-full"></div>
+<div class="flex justify-between items-start">
+<span class="text-[10px] font-mono tracking-widest text-slate-400">BANK BUDDY VAULT DEBIT</span>
+<span class="text-xs font-extrabold italic text-slate-200 tracking-wider">VISA</span>
+</div>
+<div class="my-3 flex items-center gap-2">
+<div class="w-7 h-5 bg-amber-300/80 rounded-sm"></div>
+<svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24"><path d="M2 12a10 10 0 0 1 18-6M2 12a10 10 0 0 0 18 6"></path></svg>
+</div>
+<div class="flex justify-between items-end mt-2">
+<div class="font-mono text-sm tracking-wider text-slate-200">•••• •••• •••• 4441</div>
+<div class="text-[9px] text-slate-400">EXP 08/29</div>
+</div>
+</div>
+<!-- Balance Details -->
+<div class="space-y-1 mb-5">
+<div class="text-xs font-medium text-slate-400">Available Liquid Balance</div>
+<div class="text-2xl font-extrabold text-slate-900 tracking-tight">₹125,000.00</div>
+<div class="text-[11px] text-slate-500">Daily limit: ₹25,000.00 • ISO 20022 Settled</div>
+</div>
+</div>
+<!-- Bottom Control & Toggle Row -->
+<div class="pt-4 border-t border-slate-100 space-y-3">
+<div class="flex items-center justify-between">
+<div class="flex flex-col">
+<span class="text-xs font-semibold text-slate-800">Card Active / Freeze</span>
+<span class="text-[10px] text-slate-400">Lock contactless &amp; online POS</span>
+</div>
+<!-- Interactive Switch Toggle -->
+<label class="relative inline-flex items-center cursor-pointer">
+<input checked="" class="sr-only peer" type="checkbox"/>
+<div class="w-9 h-5 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-slate-900"></div>
+</label>
+</div>
+<a class="w-full inline-flex justify-center items-center py-2 px-3 text-xs font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200/80 rounded-xl transition" href="#debit-profile">
+              View Debit Profile &amp; Limits
+            </a>
+</div>
+</div>
+<!-- CARD 2: Sapphire Reserve Credit Card -->
+<div class="bg-white rounded-3xl p-6 border border-slate-200/90 shadow-card hover:shadow-soft transition-all duration-200 flex flex-col justify-between relative overflow-hidden group">
+<!-- Subtle top accent line -->
+<div class="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-blue-600 to-indigo-500"></div>
+<div>
+<div class="flex items-center justify-between mb-4">
+<span class="px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider rounded-full bg-blue-50 text-blue-700">World Elite • Credit</span>
+<span class="inline-flex items-center gap-1 text-[11px] font-semibold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-100">
+<span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> Active
+              </span>
+</div>
+<!-- Virtual Card Mock Representation -->
+<div class="w-full bg-gradient-to-br from-blue-600 via-indigo-600 to-indigo-700 text-white rounded-2xl p-4 shadow-md mb-5 relative overflow-hidden">
+<div class="absolute -right-6 -bottom-6 w-24 h-24 bg-white/10 rounded-full"></div>
+<div class="flex justify-between items-start">
+<span class="text-[10px] font-mono tracking-widest text-blue-200">SAPPHIRE RESERVE CREDIT</span>
+<div class="flex -space-x-1">
+<div class="w-4 h-4 rounded-full bg-red-400/80"></div>
+<div class="w-4 h-4 rounded-full bg-amber-400/80"></div>
+</div>
+</div>
+<div class="my-3 flex items-center gap-2">
+<div class="w-7 h-5 bg-amber-200/90 rounded-sm"></div>
+<svg class="w-4 h-4 text-blue-200" fill="none" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24"><path d="M2 12a10 10 0 0 1 18-6M2 12a10 10 0 0 0 18 6"></path></svg>
+</div>
+<div class="flex justify-between items-end mt-2">
+<div class="font-mono text-sm tracking-wider text-white">•••• •••• •••• 2343</div>
+<div class="text-[9px] text-blue-200">EXP 11/30</div>
+</div>
+</div>
+<!-- Balance Details & Statement Dues -->
+<div class="space-y-1 mb-5">
+<div class="flex justify-between items-center text-xs">
+<span class="text-slate-400 font-medium">Available Credit</span>
+<span class="text-rose-600 font-bold">Due Nov 18</span>
+</div>
+<div class="text-2xl font-extrabold text-slate-900 tracking-tight">₹34,500.00</div>
+<div class="text-[11px] text-slate-500 flex justify-between">
+<span>Statement balance: <strong class="text-slate-700 font-semibold">₹9,500.00</strong></span>
+<span class="text-indigo-600 font-medium hover:underline cursor-pointer">Auto-pay ON</span>
+</div>
+</div>
+</div>
+<!-- Bottom Control & Toggle Row -->
+<div class="pt-4 border-t border-slate-100 space-y-3">
+<div class="flex items-center justify-between">
+<div class="flex flex-col">
+<span class="text-xs font-semibold text-slate-800">Card Active / Freeze</span>
+<span class="text-[10px] text-slate-400">Lock transaction dispatch</span>
+</div>
+<!-- Interactive Switch Toggle -->
+<label class="relative inline-flex items-center cursor-pointer">
+<input checked="" class="sr-only peer" type="checkbox"/>
+<div class="w-9 h-5 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-blue-600"></div>
+</label>
+</div>
+<a class="w-full inline-flex justify-center items-center py-2 px-3 text-xs font-semibold text-blue-700 bg-blue-50 hover:bg-blue-100/80 rounded-xl transition" href="#credit-profile">
+              View Credit Card Profile &amp; Rewards
+            </a>
+</div>
+</div>
+<!-- CARD 3: High-Yield Treasury Sweep -->
+<div class="bg-white rounded-3xl p-6 border border-slate-200/90 shadow-card hover:shadow-soft transition-all duration-200 flex flex-col justify-between relative overflow-hidden group">
+<!-- Subtle top accent line -->
+<div class="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-purple-500 to-pink-500"></div>
+<div>
+<div class="flex items-center justify-between mb-4">
+<span class="px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider rounded-full bg-purple-50 text-purple-700">Yield Sweep • Auto-Earn</span>
+<span class="inline-flex items-center gap-1 text-[11px] font-semibold text-indigo-700 bg-indigo-50 px-2 py-0.5 rounded-full border border-indigo-100">
+                7.20% APY
+              </span>
+</div>
+<!-- Virtual Card Representation (Purple/Pink Bank Buddy style) -->
+<div class="w-full bg-gradient-to-br from-purple-500 via-purple-600 to-pink-500 text-white rounded-2xl p-4 shadow-md mb-5 relative overflow-hidden">
+<div class="absolute -right-6 -bottom-6 w-24 h-24 bg-white/10 rounded-full"></div>
+<div class="flex justify-between items-start">
+<span class="text-[10px] font-mono tracking-widest text-purple-100">TREASURY YIELD POOL</span>
+<span class="text-[10px] font-bold bg-white/20 px-2 py-0.5 rounded">SWEEP ON</span>
+</div>
+<div class="my-4 flex items-center gap-2">
+<svg class="w-6 h-6 text-purple-200" fill="none" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24"><path d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path></svg>
+<span class="text-xs font-medium text-white/90">Daily interest compound</span>
+</div>
+<div class="flex justify-between items-end mt-1">
+<div class="font-mono text-sm tracking-wider text-purple-100">FDIC / SIPC Insured</div>
+<div class="text-[9px] text-purple-200">ID: #9902-TR</div>
+</div>
+</div>
+<!-- Balance Details -->
+<div class="space-y-1 mb-5">
+<div class="text-xs font-medium text-slate-400">Total Swept Treasury Balance</div>
+<div class="text-2xl font-extrabold text-slate-900 tracking-tight">₹28,200.00</div>
+<div class="text-[11px] text-emerald-600 font-medium">+₹169.20 earned this calendar cycle</div>
+</div>
+</div>
+<!-- Bottom Control & Toggle Row -->
+<div class="pt-4 border-t border-slate-100 space-y-3">
+<div class="flex items-center justify-between">
+<div class="flex flex-col">
+<span class="text-xs font-semibold text-slate-800">Auto-Sweep Threshold</span>
+<span class="text-[10px] text-slate-400">Move deposits &gt; ₹10k to yield</span>
+</div>
+<label class="relative inline-flex items-center cursor-pointer">
+<input checked="" class="sr-only peer" type="checkbox"/>
+<div class="w-9 h-5 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-purple-600"></div>
+</label>
+</div>
+<a class="w-full inline-flex justify-center items-center py-2 px-3 text-xs font-semibold text-purple-700 bg-purple-50 hover:bg-purple-100/80 rounded-xl transition" href="#yield-profile">
+              Manage Treasury &amp; Sweeps
+            </a>
+</div>
+</div>
+</div>
+</section>
+<!-- END: Executive Account Balances Section -->
+<!-- BEGIN: Spending Analytics & Visual Graphs (Bank Buddy Style) -->
+<section class="space-y-4" data-purpose="spending-analytics-graphs">
+<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+<div>
+<h2 class="text-lg font-bold text-slate-900 tracking-tight">Spending &amp; Outflow Analytics</h2>
+<p class="text-xs text-slate-500">Autonomous categorization, velocity trendlines, and progress gauges.</p>
+</div>
+<div class="flex items-center gap-2">
+<!-- Timeframe selector -->
+<div class="inline-flex p-1 bg-white border border-slate-200 rounded-xl text-xs font-medium text-slate-600 shadow-sm">
+<button class="px-2.5 py-1 rounded-lg hover:text-slate-900 transition">24H</button>
+<button class="px-2.5 py-1 rounded-lg hover:text-slate-900 transition">1W</button>
+<button class="px-2.5 py-1 rounded-lg bg-slate-900 text-white font-semibold shadow-xs">1M</button>
+<button class="px-2.5 py-1 rounded-lg hover:text-slate-900 transition">1Y</button>
+</div>
+</div>
+</div>
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+<!-- Left Column: Donut Ring Chart & Category Breakdown (5 Cols) -->
+<div class="lg:col-span-5 bg-white rounded-3xl p-6 border border-slate-200/80 shadow-card flex flex-col justify-between">
+<div>
+<div class="flex items-center justify-between mb-4">
+<span class="text-xs font-bold uppercase tracking-wider text-slate-400">Monthly Outflow Composition</span>
+<span class="text-xs font-semibold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full">-2.4% MoM</span>
+</div>
+<!-- Bank Buddy Circular Donut Chart -->
+<div class="flex flex-col sm:flex-row items-center justify-center gap-6 py-4">
+<!-- SVG Donut Chart with glowing center -->
+<div class="relative w-44 h-44 flex items-center justify-center">
+<svg class="w-full h-full -rotate-90 transform" viewbox="0 0 100 100">
+<!-- Background Circle -->
+<circle cx="50" cy="50" fill="none" r="38" stroke="#F1F5F9" stroke-width="12"></circle>
+<!-- Segment 1: Shopping (42.5%) - Purple/Pink -->
+<circle cx="50" cy="50" fill="none" r="38" stroke="#D946EF" stroke-dasharray="101.4 238.7" stroke-dashoffset="0" stroke-linecap="round" stroke-width="12"></circle>
+<!-- Segment 2: Food & Drinks (30.1%) - Blue -->
+<circle cx="50" cy="50" fill="none" r="38" stroke="#3B82F6" stroke-dasharray="71.9 238.7" stroke-dashoffset="-105" stroke-linecap="round" stroke-width="12"></circle>
+<!-- Segment 3: Transport & Bills (Remaining) - Slate 800 -->
+<circle cx="50" cy="50" fill="none" r="38" stroke="#0F172A" stroke-dasharray="60 238.7" stroke-dashoffset="-180" stroke-linecap="round" stroke-width="12"></circle>
+</svg>
+<div class="absolute inset-0 flex flex-col items-center justify-center text-center">
+<span class="text-2xl font-extrabold text-slate-900 tracking-tight">₹28,200</span>
+<span class="text-[11px] font-medium text-slate-400">Total Outflow</span>
+</div>
+</div>
+<!-- Categories Breakdown Legend -->
+<div class="space-y-3 w-full sm:w-auto">
+<div class="flex items-center justify-between sm:justify-start gap-4">
+<div class="flex items-center gap-2">
+<span class="w-2.5 h-2.5 rounded-full bg-fuchsia-500"></span>
+<span class="text-xs font-medium text-slate-600">Shopping</span>
+</div>
+<span class="text-xs font-bold text-slate-900">₹12,000.40</span>
+</div>
+<div class="flex items-center justify-between sm:justify-start gap-4">
+<div class="flex items-center gap-2">
+<span class="w-2.5 h-2.5 rounded-full bg-blue-500"></span>
+<span class="text-xs font-medium text-slate-600">Food &amp; Drinks</span>
+</div>
+<span class="text-xs font-bold text-slate-900">₹8,500.00</span>
+</div>
+<div class="flex items-center justify-between sm:justify-start gap-4">
+<div class="flex items-center gap-2">
+<span class="w-2.5 h-2.5 rounded-full bg-slate-900"></span>
+<span class="text-xs font-medium text-slate-600">Bills &amp; Utility</span>
+</div>
+<span class="text-xs font-bold text-slate-900">₹4,500.00</span>
+</div>
+<div class="flex items-center justify-between sm:justify-start gap-4">
+<div class="flex items-center gap-2">
+<span class="w-2.5 h-2.5 rounded-full bg-slate-400"></span>
+<span class="text-xs font-medium text-slate-600">Transport</span>
+</div>
+<span class="text-xs font-bold text-slate-900">₹3,200.00</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Goals Mini Rings (Exact style from IMAGE_7) -->
+<div class="pt-5 border-t border-slate-100">
+<span class="text-[11px] font-bold uppercase tracking-wider text-slate-400 block mb-3">Savings Goals Progress</span>
+<div class="grid grid-cols-3 gap-3 text-center">
+<!-- Goal 1 -->
+<div class="p-2.5 rounded-2xl bg-slate-50 border border-slate-100 flex flex-col items-center">
+<div class="relative w-11 h-11 flex items-center justify-center mb-1">
+<svg class="w-full h-full -rotate-90 transform" viewbox="0 0 36 36">
+<path class="text-slate-200" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="currentColor" stroke-width="3.5"></path>
+<path class="text-indigo-600" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="currentColor" stroke-dasharray="35, 100" stroke-linecap="round" stroke-width="3.5"></path>
+</svg>
+<span class="absolute text-[10px] font-bold text-slate-800">35%</span>
+</div>
+<span class="text-[11px] font-semibold text-slate-700 truncate w-full">EV Sedan</span>
+</div>
+<!-- Goal 2 -->
+<div class="p-2.5 rounded-2xl bg-slate-50 border border-slate-100 flex flex-col items-center">
+<div class="relative w-11 h-11 flex items-center justify-center mb-1">
+<svg class="w-full h-full -rotate-90 transform" viewbox="0 0 36 36">
+<path class="text-slate-200" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="currentColor" stroke-width="3.5"></path>
+<path class="text-emerald-500" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="currentColor" stroke-dasharray="90, 100" stroke-linecap="round" stroke-width="3.5"></path>
+</svg>
+<span class="absolute text-[10px] font-bold text-slate-800">90%</span>
+</div>
+<span class="text-[11px] font-semibold text-slate-700 truncate w-full">Mac Studio</span>
+</div>
+<!-- Goal 3 -->
+<div class="p-2.5 rounded-2xl bg-slate-50 border border-slate-100 flex flex-col items-center">
+<div class="relative w-11 h-11 flex items-center justify-center mb-1">
+<svg class="w-full h-full -rotate-90 transform" viewbox="0 0 36 36">
+<path class="text-slate-200" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="currentColor" stroke-width="3.5"></path>
+<path class="text-purple-600" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="currentColor" stroke-dasharray="14, 100" stroke-linecap="round" stroke-width="3.5"></path>
+</svg>
+<span class="absolute text-[10px] font-bold text-slate-800">14%</span>
+</div>
+<span class="text-[11px] font-semibold text-slate-700 truncate w-full">Tokyo Trip</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Right Column: Interactive Spline Wave Graph (7 Cols) -->
+<div class="lg:col-span-7 bg-white rounded-3xl p-6 border border-slate-200/80 shadow-card flex flex-col justify-between relative overflow-hidden">
+<div>
+<div class="flex items-center justify-between mb-2">
+<div>
+<span class="text-xs font-bold uppercase tracking-wider text-slate-400">Weekly Velocity Trend</span>
+<div class="flex items-baseline gap-2 mt-0.5">
+<span class="text-2xl font-bold text-slate-900">₹340.50</span>
+<span class="text-xs text-slate-400">Peak spending reached Jan 18</span>
+</div>
+</div>
+<!-- Summary Filter Pill -->
+<div class="relative inline-block text-left">
+<button class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-slate-700 bg-slate-100 rounded-full hover:bg-slate-200 transition" type="button">
+<span>Summary: All Cards</span>
+<svg class="w-3.5 h-3.5 text-slate-500" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path d="M19 9l-7 7-7-7" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
+</button>
+</div>
+</div>
+<!-- SVG Smooth Area Curve Graph matching image style -->
+<div class="relative mt-6 w-full h-56">
+<!-- Grid line markers -->
+<div class="absolute inset-0 flex flex-col justify-between pointer-events-none text-[10px] text-slate-300 font-mono">
+<div class="border-b border-dashed border-slate-100 pb-1 flex justify-between"><span>₹500</span><span class="text-slate-300">Target Ceiling</span></div>
+<div class="border-b border-dashed border-slate-100 pb-1"><span>₹350</span></div>
+<div class="border-b border-dashed border-slate-100 pb-1"><span>₹200</span></div>
+<div class="border-b border-dashed border-slate-100 pb-1"><span>₹50</span></div>
+</div>
+<!-- The Vector Spline Area -->
+<svg class="w-full h-full overflow-visible" preserveaspectratio="none" viewbox="0 0 500 200">
+<defs>
+<!-- Gradient for soft fill under spline -->
+<lineargradient id="splineGradient" x1="0" x2="0" y1="0" y2="1">
+<stop offset="0%" stop-color="#3B82F6" stop-opacity="0.32"></stop>
+<stop offset="65%" stop-color="#60A5FA" stop-opacity="0.08"></stop>
+<stop offset="100%" stop-color="#FFFFFF" stop-opacity="0.0"></stop>
+</lineargradient>
+</defs>
+<!-- Soft area under curve -->
+<path d="M 0 170 
+                     C 70 160, 110 135, 160 145 
+                     C 210 155, 260 110, 310 80 
+                     C 350 50, 390 35, 420 40 
+                     C 460 48, 480 25, 500 15 
+                     L 500 200 L 0 200 Z" fill="url(#splineGradient)"></path>
+<!-- Stroke Line -->
+<path class="chart-path" d="M 0 170 
+                     C 70 160, 110 135, 160 145 
+                     C 210 155, 260 110, 310 80 
+                     C 350 50, 390 35, 420 40 
+                     C 460 48, 480 25, 500 15" fill="none" stroke="#3B82F6" stroke-linecap="round" stroke-width="3.5"></path>
+<!-- Active Tooltip Marker Node (at peak point ~390, 42) -->
+<g transform="translate(390, 40)">
+<circle class="animate-pulse" fill="#FFFFFF" r="7" stroke="#2563EB" stroke-width="3.5"></circle>
+</g>
+</svg>
+<!-- Floating Interactive Tooltip Pill -->
+<div class="absolute top-2 right-24 transform -translate-x-1/2 bg-slate-900 text-white text-[11px] font-bold py-1 px-2.5 rounded-lg shadow-lg pointer-events-none flex items-center gap-1.5">
+<span>₹340.50</span>
+<span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
+</div>
+</div>
+<!-- X Axis Months -->
+<div class="flex justify-between items-center text-xs text-slate-400 font-medium px-2 mt-3">
+<span>Jan</span>
+<span>Mar</span>
+<span>Jun</span>
+<span>Sep</span>
+<span>Nov</span>
+<span>Today</span>
+</div>
+</div>
+<!-- Bottom Stat Strip from image -->
+<div class="mt-6 pt-4 border-t border-slate-100 grid grid-cols-2 gap-4">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center">
+<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewbox="0 0 24 24"><path d="M19 14l-7 7m0 0l-7-7m7 7V3"></path></svg>
+</div>
+<div>
+<div class="text-[11px] text-slate-400 font-medium">Total Saved</div>
+<div class="text-sm font-bold text-slate-900 flex items-center gap-1.5">
+                  ₹1,136.00
+                  <span class="text-[10px] bg-slate-900 text-white px-1.5 py-0.2 rounded font-mono">+1.22%</span>
+</div>
+</div>
+</div>
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded-full bg-indigo-50 text-indigo-600 flex items-center justify-center">
+<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewbox="0 0 24 24"><path d="M5 10l7-7m0 0l7 7m-7-7v18"></path></svg>
+</div>
+<div>
+<div class="text-[11px] text-slate-400 font-medium">Total Spending</div>
+<div class="text-sm font-bold text-slate-900 flex items-center gap-1.5">
+                  ₹3,342.00
+                  <span class="text-[10px] bg-slate-900 text-white px-1.5 py-0.2 rounded font-mono">+1.01%</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- END: Spending Analytics Section -->
+<!-- BEGIN: Quick Functional Directory / Autonomous Services (All 10 Hackathon Use Cases) -->
+<section class="space-y-4 pt-4" data-purpose="banking-directory">
+<div class="flex flex-col sm:flex-row sm:items-end justify-between gap-2">
+<div>
+<span class="text-xs font-bold text-indigo-600 tracking-wider uppercase">Hackathon Core Engine</span>
+<h2 class="text-xl font-extrabold text-slate-900 tracking-tight">Banking Operations &amp; Autonomous Services</h2>
+<p class="text-xs text-slate-500">Access all 10 verified core banking and deterministic AI features. Hover any tile for operation details.</p>
+</div>
+<div class="text-xs text-slate-400 font-medium hidden sm:block">
+          ISO 20022 Compliant • Zero Hallucination Mode
+        </div>
+</div>
+<!-- 10 Autonomous Service Cards Grid -->
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+<!-- Use Case 1: Account and Balance Inquiry -->
+<div class="group relative bg-white rounded-2xl p-4 border border-slate-200/90 shadow-card hover:shadow-md hover:border-indigo-300 transition-all duration-200 cursor-pointer flex flex-col justify-between">
+<div>
+<div class="flex items-center justify-between mb-3">
+<div class="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center group-hover:scale-110 transition-transform">
+<svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24"><rect height="14" rx="2" width="20" x="2" y="5"></rect><line x1="2" x2="22" y1="10" y2="10"></line></svg>
+</div>
+<span class="text-[10px] font-bold text-slate-400 uppercase font-mono">01</span>
+</div>
+<h3 class="text-xs font-bold text-slate-900 group-hover:text-indigo-600 transition">Balance &amp; Ledger Inquiry</h3>
+<span class="inline-block mt-1 text-[10px] font-semibold text-slate-500 bg-slate-100 px-2 py-0.5 rounded-full">Settled Balances</span>
+</div>
+<!-- On Hover Descriptive Drawer / Tooltip -->
+<div class="mt-3 pt-2 border-t border-slate-100 text-[11px] text-slate-500 leading-snug group-hover:text-slate-700 transition">
+            Retrieve real-time settled balances, account statements, and recent credits &amp; debits.
+          </div>
+</div>
+<!-- Use Case 2: Daily Expense Tracking -->
+<div class="group relative bg-white rounded-2xl p-4 border border-slate-200/90 shadow-card hover:shadow-md hover:border-indigo-300 transition-all duration-200 cursor-pointer flex flex-col justify-between">
+<div>
+<div class="flex items-center justify-between mb-3">
+<div class="w-10 h-10 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center group-hover:scale-110 transition-transform">
+<svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg>
+</div>
+<span class="text-[10px] font-bold text-slate-400 uppercase font-mono">02</span>
+</div>
+<h3 class="text-xs font-bold text-slate-900 group-hover:text-indigo-600 transition">Expense Tracking &amp; AI</h3>
+<span class="inline-block mt-1 text-[10px] font-semibold text-purple-700 bg-purple-50 px-2 py-0.5 rounded-full">Analytics</span>
+</div>
+<div class="mt-3 pt-2 border-t border-slate-100 text-[11px] text-slate-500 leading-snug group-hover:text-slate-700 transition">
+            AI-driven transaction breakdown, monthly trends, and automated budget notifications.
+          </div>
+</div>
+<!-- Use Case 3: Credit Card Assistance -->
+<div class="group relative bg-white rounded-2xl p-4 border border-slate-200/90 shadow-card hover:shadow-md hover:border-indigo-300 transition-all duration-200 cursor-pointer flex flex-col justify-between">
+<div>
+<div class="flex items-center justify-between mb-3">
+<div class="w-10 h-10 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center group-hover:scale-110 transition-transform">
+<svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24"><rect height="16" rx="2" ry="2" width="22" x="1" y="4"></rect><line x1="1" x2="23" y1="10" y2="10"></line></svg>
+</div>
+<span class="text-[10px] font-bold text-slate-400 uppercase font-mono">03</span>
+</div>
+<h3 class="text-xs font-bold text-slate-900 group-hover:text-indigo-600 transition">Credit Card Dues Desk</h3>
+<span class="inline-block mt-1 text-[10px] font-semibold text-rose-700 bg-rose-50 px-2 py-0.5 rounded-full">Due Nov 18</span>
+</div>
+<div class="mt-3 pt-2 border-t border-slate-100 text-[11px] text-slate-500 leading-snug group-hover:text-slate-700 transition">
+            Review statement due dates, minimum payments, and instant payoff schedules.
+          </div>
+</div>
+<!-- Use Case 4: UPI and Payment Assistance -->
+<div class="group relative bg-white rounded-2xl p-4 border border-slate-200/90 shadow-card hover:shadow-md hover:border-indigo-300 transition-all duration-200 cursor-pointer flex flex-col justify-between">
+<div>
+<div class="flex items-center justify-between mb-3">
+<div class="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center group-hover:scale-110 transition-transform">
+<svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+</div>
+<span class="text-[10px] font-bold text-slate-400 uppercase font-mono">04</span>
+</div>
+<h3 class="text-xs font-bold text-slate-900 group-hover:text-indigo-600 transition">UPI &amp; Instant Settlement</h3>
+<span class="inline-block mt-1 text-[10px] font-semibold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full">RRN Lookup</span>
+</div>
+<div class="mt-3 pt-2 border-t border-slate-100 text-[11px] text-slate-500 leading-snug group-hover:text-slate-700 transition">
+            Track live gateway transaction settlement, RRN reference, and NPCI status.
+          </div>
+</div>
+<!-- Use Case 5: EMI and Loan Tracking -->
+<div class="group relative bg-white rounded-2xl p-4 border border-slate-200/90 shadow-card hover:shadow-md hover:border-indigo-300 transition-all duration-200 cursor-pointer flex flex-col justify-between">
+<div>
+<div class="flex items-center justify-between mb-3">
+<div class="w-10 h-10 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center group-hover:scale-110 transition-transform">
+<svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24"><path d="M3 3v18h18"></path><path d="m19 9-5 5-4-4-3 3"></path></svg>
+</div>
+<span class="text-[10px] font-bold text-slate-400 uppercase font-mono">05</span>
+</div>
+<h3 class="text-xs font-bold text-slate-900 group-hover:text-indigo-600 transition">Loan &amp; EMI Schedules</h3>
+<span class="inline-block mt-1 text-[10px] font-semibold text-amber-700 bg-amber-50 px-2 py-0.5 rounded-full">Amortization</span>
+</div>
+<div class="mt-3 pt-2 border-t border-slate-100 text-[11px] text-slate-500 leading-snug group-hover:text-slate-700 transition">
+            Track active home mortgage schedules, interest rates, and remaining principal.
+          </div>
+</div>
+<!-- Use Case 6: Personal Finance Guidance -->
+<div class="group relative bg-white rounded-2xl p-4 border border-slate-200/90 shadow-card hover:shadow-md hover:border-indigo-300 transition-all duration-200 cursor-pointer flex flex-col justify-between">
+<div>
+<div class="flex items-center justify-between mb-3">
+<div class="w-10 h-10 rounded-xl bg-cyan-50 text-cyan-600 flex items-center justify-center group-hover:scale-110 transition-transform">
+<svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><path d="m14 10-4 4M10 10l4 4"></path></svg>
+</div>
+<span class="text-[10px] font-bold text-slate-400 uppercase font-mono">06</span>
+</div>
+<h3 class="text-xs font-bold text-slate-900 group-hover:text-indigo-600 transition">Wealth Sweeps Guidance</h3>
+<span class="inline-block mt-1 text-[10px] font-semibold text-cyan-700 bg-cyan-50 px-2 py-0.5 rounded-full">Safe-to-Spend</span>
+</div>
+<div class="mt-3 pt-2 border-t border-slate-100 text-[11px] text-slate-500 leading-snug group-hover:text-slate-700 transition">
+            Algorithmic liquidity projection, safe-to-spend analysis, and high-yield sweeps.
+          </div>
+</div>
+<!-- Use Case 7: Smart Bill Reminder -->
+<div class="group relative bg-white rounded-2xl p-4 border border-slate-200/90 shadow-card hover:shadow-md hover:border-indigo-300 transition-all duration-200 cursor-pointer flex flex-col justify-between">
+<div>
+<div class="flex items-center justify-between mb-3">
+<div class="w-10 h-10 rounded-xl bg-orange-50 text-orange-600 flex items-center justify-center group-hover:scale-110 transition-transform">
+<svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
+</div>
+<span class="text-[10px] font-bold text-slate-400 uppercase font-mono">07</span>
+</div>
+<h3 class="text-xs font-bold text-slate-900 group-hover:text-indigo-600 transition">Smart Bill Reminders</h3>
+<span class="inline-block mt-1 text-[10px] font-semibold text-orange-700 bg-orange-50 px-2 py-0.5 rounded-full">3 Dues Pending</span>
+</div>
+<div class="mt-3 pt-2 border-t border-slate-100 text-[11px] text-slate-500 leading-snug group-hover:text-slate-700 transition">
+            Auto-detect upcoming utility dues, electricity, broadband, and subscriptions.
+          </div>
+</div>
+<!-- Use Case 8: Card Services -->
+<div class="group relative bg-white rounded-2xl p-4 border border-slate-200/90 shadow-card hover:shadow-md hover:border-indigo-300 transition-all duration-200 cursor-pointer flex flex-col justify-between">
+<div>
+<div class="flex items-center justify-between mb-3">
+<div class="w-10 h-10 rounded-xl bg-slate-100 text-slate-700 flex items-center justify-center group-hover:scale-110 transition-transform">
+<svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24"><rect height="11" rx="2" ry="2" width="18" x="3" y="11"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+</div>
+<span class="text-[10px] font-bold text-slate-400 uppercase font-mono">08</span>
+</div>
+<h3 class="text-xs font-bold text-slate-900 group-hover:text-indigo-600 transition">Card Freeze &amp; Re-Issue</h3>
+<span class="inline-block mt-1 text-[10px] font-semibold text-slate-700 bg-slate-100 px-2 py-0.5 rounded-full">EMV Control</span>
+</div>
+<div class="mt-3 pt-2 border-t border-slate-100 text-[11px] text-slate-500 leading-snug group-hover:text-slate-700 transition">
+            Lock cards, re-issue EMV chips, and manage international POS limits.
+          </div>
+</div>
+<!-- Use Case 9: Fraud Support & Disputes -->
+<div class="group relative bg-white rounded-2xl p-4 border border-slate-200/90 shadow-card hover:shadow-md hover:border-rose-300 transition-all duration-200 cursor-pointer flex flex-col justify-between">
+<div>
+<div class="flex items-center justify-between mb-3">
+<div class="w-10 h-10 rounded-xl bg-rose-50 text-rose-600 flex items-center justify-center group-hover:scale-110 transition-transform">
+<svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24"><polygon points="7.86 2 16.14 2 22 7.86 22 16.14 16.14 22 7.86 22 2 16.14 2 7.86 7.86 2"></polygon><line x1="12" x2="12" y1="8" y2="12"></line><line x1="12" x2="12.01" y1="16" y2="16"></line></svg>
+</div>
+<span class="text-[10px] font-bold text-rose-400 uppercase font-mono">09</span>
+</div>
+<h3 class="text-xs font-bold text-slate-900 group-hover:text-rose-600 transition">Fraud &amp; Dispute Desk</h3>
+<span class="inline-block mt-1 text-[10px] font-semibold text-rose-700 bg-rose-50 px-2 py-0.5 rounded-full">Zero Liability</span>
+</div>
+<div class="mt-3 pt-2 border-t border-slate-100 text-[11px] text-slate-500 leading-snug group-hover:text-slate-700 transition">
+            Inspect suspicious charges, initiate chargebacks, and connect to fraud specialists.
+          </div>
+</div>
+<!-- Use Case 10: Personalized Pre-Approved Offers -->
+<div class="group relative bg-white rounded-2xl p-4 border border-slate-200/90 shadow-card hover:shadow-md hover:border-indigo-300 transition-all duration-200 cursor-pointer flex flex-col justify-between">
+<div>
+<div class="flex items-center justify-between mb-3">
+<div class="w-10 h-10 rounded-xl bg-violet-50 text-violet-600 flex items-center justify-center group-hover:scale-110 transition-transform">
+<svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+</div>
+<span class="text-[10px] font-bold text-violet-400 uppercase font-mono">10</span>
+</div>
+<h3 class="text-xs font-bold text-slate-900 group-hover:text-indigo-600 transition">Pre-Approved Liquidity</h3>
+<span class="inline-block mt-1 text-[10px] font-semibold text-violet-700 bg-violet-50 px-2 py-0.5 rounded-full">₹50k Instant</span>
+</div>
+<div class="mt-3 pt-2 border-t border-slate-100 text-[11px] text-slate-500 leading-snug group-hover:text-slate-700 transition">
+            Check instant pre-approved credit lines and personalized liquidity facilities.
+          </div>
+</div>
+</div>
+</section>
+<!-- END: Quick Functional Directory -->
+<!-- Recent Transactions Mini Stream matching Bank Buddy Style -->
+<section class="bg-white rounded-3xl p-6 border border-slate-200/80 shadow-card" data-purpose="recent-stream">
+<div class="flex items-center justify-between mb-4">
+<div>
+<h3 class="text-sm font-bold text-slate-900">Recent Settled Transactions</h3>
+<p class="text-xs text-slate-400">Direct debit and card authorization feeds</p>
+</div>
+<a class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-slate-700 bg-slate-100 rounded-full hover:bg-slate-200 transition" href="#view-more">
+<svg class="w-3.5 h-3.5 text-slate-500" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
+          View More Statements
+        </a>
+</div>
+<div class="divide-y divide-slate-100">
+<!-- Item 1 -->
+<div class="py-3 flex items-center justify-between hover:bg-slate-50/50 px-2 rounded-xl transition">
+<div class="flex items-center gap-3">
+<div class="w-9 h-9 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center font-bold text-xs">IK</div>
+<div>
+<span class="text-xs font-bold text-slate-900 block leading-tight">IKEA Home Furnishings</span>
+<span class="text-[10px] text-slate-400">Debit card •••• 4441</span>
+</div>
+</div>
+<div class="text-right">
+<span class="text-xs font-bold text-slate-900 block leading-tight">-₹489.20</span>
+<span class="text-[10px] text-slate-400">Jan 22, 2025</span>
+</div>
+</div>
+<!-- Item 2 -->
+<div class="py-3 flex items-center justify-between hover:bg-slate-50/50 px-2 rounded-xl transition">
+<div class="flex items-center gap-3">
+<div class="w-9 h-9 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center font-bold text-xs">SL</div>
+<div>
+<span class="text-xs font-bold text-slate-900 block leading-tight">Sport Life Gym Club</span>
+<span class="text-[10px] text-slate-400">Recurring Subscription</span>
+</div>
+</div>
+<div class="text-right">
+<span class="text-xs font-bold text-slate-900 block leading-tight">-₹120.00</span>
+<span class="text-[10px] text-slate-400">Jan 17, 2025</span>
+</div>
+</div>
+<!-- Item 3 -->
+<div class="py-3 flex items-center justify-between hover:bg-slate-50/50 px-2 rounded-xl transition">
+<div class="flex items-center gap-3">
+<div class="w-9 h-9 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center font-bold text-xs">CS</div>
+<div>
+<span class="text-xs font-bold text-slate-900 block leading-tight">Coursera Pro Certification</span>
+<span class="text-[10px] text-slate-400">Credit card •••• 2343</span>
+</div>
+</div>
+<div class="text-right">
+<span class="text-xs font-bold text-slate-900 block leading-tight">-₹399.00</span>
+<span class="text-[10px] text-slate-400">Jan 16, 2025</span>
+</div>
+</div>
+</div>
+</section>
+</main>
+<!-- END: Main Page Content -->
+<!-- BEGIN: Minimal Footer -->
+<footer class="mt-16 border-t border-slate-200/70 bg-white/70 py-6 text-center text-xs text-slate-400">
+<div class="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-3">
+<div class="flex items-center gap-2">
+<span class="font-bold text-slate-700">Bank Buddy Private Banking</span>
+<span>•</span>
+<span>Deterministic Financial Orchestrator</span>
+</div>
+<div>
+        Security Grade Tier-1 • End-to-End Encrypted EMV Tokenization
+      </div>
+</div>
+</footer>
+<!-- END: Minimal Footer -->
+<!-- BEGIN: Floating Deterministic AI Banking Co-Pilot Widget -->
+<aside class="fixed bottom-6 right-6 z-50 flex flex-col items-end gap-3" data-purpose="floating-assistant">
+  
+  <!-- Co-Pilot Overlay Card: CLOSED BY DEFAULT AT START (style="display: none;") -->
+  <div id="copilot-card" style="display: none;" class="w-80 sm:w-96 bg-white rounded-3xl p-5 border border-slate-200 shadow-float backdrop-blur-xl relative transition-all duration-300">
+    <!-- Card Header -->
+    <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+      <div class="flex items-center gap-2.5">
+        <div class="w-8 h-8 rounded-full bg-gradient-to-tr from-blue-600 to-indigo-600 text-white flex items-center justify-center shadow-sm">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"></path></svg>
+        </div>
+        <div>
+          <h4 class="text-xs font-bold text-slate-900 leading-tight">Bank Buddy Assistant</h4>
+          <div class="flex items-center gap-1.5">
+            <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+            <span class="text-[10px] text-slate-400 font-medium">Online • Zero Hallucination</span>
+          </div>
+        </div>
+      </div>
+      <div class="flex items-center gap-2">
+        <a href="chat.html" class="text-[10px] font-bold text-indigo-600 hover:text-indigo-800 bg-indigo-50 px-2.5 py-1 rounded-full transition" title="Open Full Chat Workspace">
+          Full Chat ↗
+        </a>
+        <button type="button" onclick="toggleCopilotPopup()" class="p-1 rounded-full text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition" title="Close assistant popup">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12"></path></svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- Mini Conversation Area (Clean & empty by default) -->
+    <div id="copilot-mini-feed" class="my-3 space-y-2 max-h-48 overflow-y-auto">
+      <div class="p-3 bg-slate-50 rounded-2xl border border-slate-100 text-xs text-slate-600 leading-relaxed text-center" id="copilot-mini-placeholder">
+        <p class="font-medium text-slate-800">Hi Elena, how can I help you today?</p>
+        <p class="text-[11px] text-slate-400 mt-0.5">Click a prompt below or type your question.</p>
+      </div>
+    </div>
+
+    <!-- Quick Action Prompt Pills -->
+    <div class="flex flex-wrap gap-1.5 mb-3">
+      <button onclick="copilotQuickSend('Verify Amazon ₹2,499 charge')" class="px-2.5 py-1 text-[11px] font-semibold text-slate-700 bg-slate-100 hover:bg-indigo-50 hover:text-indigo-600 rounded-full transition" type="button">
+        Verify Amazon ₹2,499
+      </button>
+      <button onclick="copilotQuickSend('Freeze Vault Debit Card')" class="px-2.5 py-1 text-[11px] font-semibold text-slate-700 bg-slate-100 hover:bg-rose-50 hover:text-rose-600 rounded-full transition" type="button">
+        Freeze Debit Card
+      </button>
+      <button onclick="copilotQuickSend('What is my safe spending surplus?')" class="px-2.5 py-1 text-[11px] font-semibold text-slate-700 bg-slate-100 hover:bg-emerald-50 hover:text-emerald-700 rounded-full transition" type="button">
+        Safe Surplus
+      </button>
+    </div>
+
+    <!-- Interactive Input Bar -->
+    <div class="relative flex items-center">
+      <input id="copilot-mini-input" class="w-full text-xs pl-3.5 pr-10 py-2.5 bg-slate-50 border border-slate-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 text-slate-800 placeholder:text-slate-400" placeholder="Ask balances, dues, transfers, fraud..." type="text" onkeydown="if (event.key === 'Enter') copilotSend()"/>
+      <button onclick="copilotSend()" aria-label="Send query" class="absolute right-1.5 p-1.5 rounded-xl bg-slate-900 text-white hover:bg-indigo-600 transition flex items-center justify-center" type="button">
+        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="22" x2="11" y1="2" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+      </button>
+    </div>
+  </div>
+
+  <!-- Floating Trigger Pill Button (Toggles popup open/closed) -->
+  <button class="inline-flex items-center gap-2.5 px-4 py-3 bg-slate-900 hover:bg-slate-800 text-white rounded-full shadow-float border border-slate-700/50 transition-all duration-200 hover:scale-105 active:scale-95 group" type="button" onclick="toggleCopilotPopup()">
+    <div class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></div>
+    <span class="text-xs font-bold tracking-tight">AI Banking Co-Pilot</span>
+    <div class="w-5 h-5 rounded-full bg-white/10 flex items-center justify-center text-indigo-300">
+      <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"></path></svg>
+    </div>
+  </button>
+</aside>
+<!-- END: Floating Deterministic AI Banking Co-Pilot Widget -->
+
+<script>
+  
+  // High Contrast Mode Handler
+  function toggleHighContrast(isHigh) {
+    if (isHigh) {
+      document.body.classList.add('high-contrast');
+      localStorage.setItem('bankBuddyContrast', 'true');
+    } else {
+      document.body.classList.remove('high-contrast');
+      localStorage.setItem('bankBuddyContrast', 'false');
+    }
+  }
+
+  // Restore saved contrast state
+  if (localStorage.getItem('bankBuddyContrast') === 'true') {
+    document.body.classList.add('high-contrast');
+    const toggle = document.getElementById('contrast-toggle');
+    if (toggle) toggle.checked = true;
+  }
+
+  function toggleCopilotPopup() {
+    const card = document.getElementById('copilot-card');
+    if (!card) return;
+    if (card.style.display === 'none') {
+      card.style.display = 'block';
+    } else {
+      card.style.display = 'none';
+    }
+  }
+
+  function copilotQuickSend(text) {
+    const input = document.getElementById('copilot-mini-input');
+    if (input) input.value = text;
+    copilotSend();
+  }
+
+  function copilotSend() {
+    const input = document.getElementById('copilot-mini-input');
+    const feed = document.getElementById('copilot-mini-feed');
+    const placeholder = document.getElementById('copilot-mini-placeholder');
+    if (!input || !feed || !input.value.trim()) return;
+
+    if (placeholder) placeholder.style.display = 'none';
+    const text = input.value.trim();
+    input.value = '';
+
+    // Append user message
+    const userMsg = document.createElement('div');
+    userMsg.className = 'p-2.5 bg-slate-900 text-white rounded-xl text-xs ml-8 leading-snug';
+    userMsg.textContent = text;
+    feed.appendChild(userMsg);
+    feed.scrollTop = feed.scrollHeight;
+
+    // Append reply
+    setTimeout(() => {
+      const reply = document.createElement('div');
+      reply.className = 'p-2.5 bg-indigo-50 border border-indigo-100 text-indigo-950 rounded-xl text-xs mr-6 leading-snug';
+      const lower = text.toLowerCase();
+      if (lower.includes('freeze') || lower.includes('card')) {
+        reply.innerHTML = '<strong>Card Guard:</strong> Vault Debit *4441 status updated to FROZEN. <a href="chat.html" class="text-indigo-600 underline font-semibold">Manage in Full Chat &rarr;</a>';
+      } else if (lower.includes('surplus') || lower.includes('balance')) {
+        reply.innerHTML = '<strong>Ledger Verified:</strong> Liquid Checking ₹99,500 | Sapphire Due -₹9,500 | <strong>Safe Surplus ₹90,000.00</strong>.';
+      } else {
+        reply.innerHTML = '<strong>Assistant:</strong> Processed "' + text + '". Verified against ISO-20022 compliance rules.';
+      }
+      feed.appendChild(reply);
+      feed.scrollTop = feed.scrollHeight;
+    }, 400);
+  }
+</script>
+</body></html>

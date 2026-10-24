@@ -64,6 +64,57 @@
         radial-gradient(circle at 50% 90%, rgba(224, 242, 254, 0.4) 0%, transparent 45%);
     }
 
+    
+    /* High Contrast Mode Dark Styling */
+    body.high-contrast {
+      background-color: #0b0f19 !important;
+      color: #f1f5f9 !important;
+    }
+    body.high-contrast header {
+      background-color: rgba(15, 23, 42, 0.95) !important;
+      border-color: #334155 !important;
+    }
+    body.high-contrast .bg-white {
+      background-color: #1e293b !important;
+      border-color: #334155 !important;
+      color: #f8fafc !important;
+    }
+    body.high-contrast .text-slate-900,
+    body.high-contrast .text-slate-800,
+    body.high-contrast .text-slate-700 {
+      color: #f8fafc !important;
+    }
+    body.high-contrast .text-slate-600,
+    body.high-contrast .text-slate-500,
+    body.high-contrast .text-slate-400 {
+      color: #94a3b8 !important;
+    }
+    body.high-contrast .bg-slate-50,
+    body.high-contrast .bg-slate-100 {
+      background-color: #0f172a !important;
+      border-color: #334155 !important;
+    }
+    body.high-contrast .border-slate-100,
+    body.high-contrast .border-slate-200,
+    body.high-contrast .border-slate-200\/60,
+    body.high-contrast .border-slate-200\/70,
+    body.high-contrast .border-slate-200\/80,
+    body.high-contrast .border-slate-200\/90 {
+      border-color: #334155 !important;
+    }
+    body.high-contrast nav {
+      background-color: #1e293b !important;
+      border-color: #334155 !important;
+    }
+    body.high-contrast nav a.bg-white {
+      background-color: #334155 !important;
+      color: #ffffff !important;
+    }
+    body.high-contrast footer {
+      background-color: #0b0f19 !important;
+      border-color: #334155 !important;
+    }
+
     /* Spline chart stroke animation */
     .chart-path {
       stroke-dasharray: 1000;
@@ -112,7 +163,7 @@
 <span>Chat</span>
 </a>
 <!-- Logout Link -->
-<a class="px-5 py-2 text-xs font-medium text-rose-600 hover:text-rose-700 hover:bg-rose-50 rounded-full transition-all duration-150 flex items-center gap-1.5" href="index.html">
+<a class="px-5 py-2 text-xs font-medium text-rose-600 hover:text-rose-700 hover:bg-rose-50 rounded-full transition-all duration-150 flex items-center gap-1.5" href="login.html">
 <svg class="w-3.5 h-3.5 text-rose-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
 <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
 <polyline points="16 17 21 12 16 7"></polyline>
@@ -122,27 +173,38 @@
 </a>
 </nav>
 <!-- Right Action Items: Search, Bell & User Profile -->
-<div class="flex items-center gap-4">
+<div class="flex items-center gap-3">
 <!-- Search Pill -->
-<div class="relative hidden sm:block">
+<div class="relative hidden xl:block">
 <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
-<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24">
+<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
 <circle cx="11" cy="11" r="8"></circle>
 <line x1="21" x2="16.65" y1="21" y2="16.65"></line>
 </svg>
 </div>
-<input class="w-64 pl-9 pr-12 py-2 text-xs bg-white/90 border border-slate-200 rounded-full focus:outline-none focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-500 shadow-sm transition placeholder:text-slate-400" placeholder="Search transactions, cards, dues..." type="text"/>
+<input class="w-56 pl-9 pr-12 py-2 text-xs bg-white/90 border border-slate-200 rounded-full focus:outline-none focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-500 shadow-sm transition placeholder:text-slate-400" placeholder="Search transactions..." type="text"/>
 <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
 <kbd class="text-[10px] font-semibold text-slate-400 bg-slate-100 px-1.5 py-0.5 rounded border border-slate-200">⌘K</kbd>
 </div>
 </div>
+
+<!-- High Contrast Mode Toggle (BETA Spec) -->
+<label class="flex items-center gap-2 cursor-pointer select-none px-3 py-1.5 rounded-full bg-slate-100/90 border border-slate-200/80 hover:bg-slate-200/70 transition" title="Toggle High Contrast Mode">
+  <span class="text-xs font-semibold text-slate-700">High contrast mode</span>
+  <span class="px-1.5 py-0.5 text-[9px] font-extrabold uppercase bg-red-600 text-white rounded">BETA</span>
+  <label class="relative inline-flex items-center cursor-pointer">
+    <input type="checkbox" id="contrast-toggle" class="sr-only peer" onchange="toggleHighContrast(this.checked)">
+    <div class="w-8 h-4 bg-slate-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-3 after:w-3 after:transition-all peer-checked:bg-blue-600"></div>
+  </label>
+</label>
+
 <!-- Notification Bell -->
-<button aria-label="Notifications" class="relative p-2.5 text-slate-500 hover:text-slate-700 bg-white border border-slate-200 rounded-full shadow-sm hover:bg-slate-50 transition" type="button">
-<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24">
+<button aria-label="Notifications" class="relative p-2 text-slate-500 hover:text-slate-700 bg-white border border-slate-200 rounded-full shadow-sm hover:bg-slate-50 transition" type="button">
+<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
 <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
 <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
 </svg>
-<span class="absolute top-1.5 right-1.5 w-2 h-2 bg-indigo-600 rounded-full ring-2 ring-white"></span>
+<span class="absolute top-1 right-1 w-2 h-2 bg-indigo-600 rounded-full ring-2 ring-white"></span>
 </button>
 <div class="h-6 w-px bg-slate-200 hidden sm:block"></div>
 <!-- Profile Avatar & Details -->
@@ -158,10 +220,9 @@
 <span class="text-xs font-bold text-slate-900 leading-tight">Elena Rostova</span>
 <span class="text-[10px] font-semibold text-indigo-600 tracking-tight">CRN: 98234105 &bull; Private Client</span>
 </div>
-<a href="index.html" class="p-2 text-slate-400 hover:text-red-600 rounded-full hover:bg-slate-100 transition" title="Logout &amp; Return to Login">
+<a href="login.html" class="p-2 text-slate-400 hover:text-red-600 rounded-full hover:bg-slate-100 transition" title="Logout &amp; Return to Login">
   <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
 </a>
-</div>
 </div>
 </div>
 </div>
@@ -928,6 +989,25 @@
 <!-- END: Floating Deterministic AI Banking Co-Pilot Widget -->
 
 <script>
+  
+  // High Contrast Mode Handler
+  function toggleHighContrast(isHigh) {
+    if (isHigh) {
+      document.body.classList.add('high-contrast');
+      localStorage.setItem('bankBuddyContrast', 'true');
+    } else {
+      document.body.classList.remove('high-contrast');
+      localStorage.setItem('bankBuddyContrast', 'false');
+    }
+  }
+
+  // Restore saved contrast state
+  if (localStorage.getItem('bankBuddyContrast') === 'true') {
+    document.body.classList.add('high-contrast');
+    const toggle = document.getElementById('contrast-toggle');
+    if (toggle) toggle.checked = true;
+  }
+
   function toggleCopilotPopup() {
     const card = document.getElementById('copilot-card');
     if (!card) return;

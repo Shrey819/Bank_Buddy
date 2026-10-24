@@ -41,6 +41,10 @@ if (fs.existsSync(frontendPath)) {
     res.sendFile(path.join(frontendPath, "desktop.html"));
   });
 
+  app.get("/login", (req, res) => {
+    res.sendFile(path.join(frontendPath, "login.html"));
+  });
+
   app.get("/chat", (req, res) => {
     res.sendFile(path.join(frontendPath, "chat.html"));
   });
