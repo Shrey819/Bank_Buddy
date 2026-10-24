@@ -695,12 +695,17 @@
       }
 
       // Verify active session with backend /api/v1/me
-      const res = await fetch('/api/v1/me', {
-        headers: { 'Authorization': 'Bearer ' + token }
-      });
-      if (!res.ok) {
-        localStorage.removeItem('bankBuddyUser');
-        window.location.href = 'login.html';
+      try {
+        const res = await fetch('/api/v1/me', {
+          headers: { 'Authorization': 'Bearer ' + token }
+        });
+        // Only invalidate and redirect if explicitly 401 Unauthorized or 403 Forbidden
+        if (res.status === 401 || res.status === 403) {
+          localStorage.removeItem('bankBuddyUser');
+          window.location.href = 'login.html';
+        }
+      } catch (netErr) {
+        // Preserve session gracefully on network hiccups or static file servers
       }
     } catch (err) {
       // Graceful offline/network fallback
