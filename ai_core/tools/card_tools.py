@@ -15,9 +15,10 @@ from __future__ import annotations
 import uuid
 from datetime import date, datetime
 from decimal import Decimal
-from typing import Literal
+from typing import Literal, Optional
 
 from pydantic import BaseModel
+from sqlalchemy import text
 
 
 # ---------------------------------------------------------------------------
@@ -26,6 +27,7 @@ from pydantic import BaseModel
 
 class GetCreditCardDetailsInput(BaseModel):
     customer_id: str  # injected from JWT, never from LLM
+    card_id: Optional[str] = None
 
 
 class CardDetail(BaseModel):
@@ -62,7 +64,7 @@ def get_credit_card_details(inp: GetCreditCardDetailsInput, db) -> GetCreditCard
     today = date.today()
 
     rows = db.execute(
-        """
+        text("""
         SELECT card_id,
                card_type,
                card_last4,
@@ -72,26 +74,27 @@ def get_credit_card_details(inp: GetCreditCardDetailsInput, db) -> GetCreditCard
                statement_balance,
                credit_limit
         FROM   cards
-        WHERE  customer_id = ?
+        WHERE  customer_id = :customer_id
         ORDER BY due_date ASC
-        """,
-        (inp.customer_id,),
+        """),
+        {"customer_id": inp.customer_id},
     ).fetchall()
 
     cards: list[CardDetail] = []
     for row in rows:
-        due = date.fromisoformat(str(row["due_date"])[:10])
+        m = row._mapping
+        due = date.fromisoformat(str(m["due_date"])[:10])
         days_until_due = (due - today).days  # deterministic Python arithmetic
         cards.append(
             CardDetail(
-                card_id=row["card_id"],
-                card_type=row["card_type"],
-                card_last4=str(row["card_last4"]),
-                status=row["status"],
+                card_id=m["card_id"],
+                card_type=m["card_type"],
+                card_last4=str(m["card_last4"]),
+                status=m["status"],
                 due_date=due,
-                amount_due=Decimal(str(row["amount_due"])),
-                statement_balance=Decimal(str(row["statement_balance"])),
-                credit_limit=Decimal(str(row["credit_limit"])),
+                amount_due=Decimal(str(m["amount_due"])),
+                statement_balance=Decimal(str(m["statement_balance"])),
+                credit_limit=Decimal(str(m["credit_limit"])),
                 days_until_due=days_until_due,
             )
         )
@@ -143,13 +146,13 @@ def block_card(inp: BlockCardInput, db) -> BlockCardOutput:
 
     # ---- ownership check + fetch current status ----
     row = db.execute(
-        """
+        text("""
         SELECT card_id, status, blocked_ticket
         FROM   cards
-        WHERE  card_id      = ?
-          AND  customer_id  = ?
-        """,
-        (inp.card_id, inp.customer_id),
+        WHERE  card_id      = :card_id
+          AND  customer_id  = :customer_id
+        """),
+        {"card_id": inp.card_id, "customer_id": inp.customer_id},
     ).fetchone()
 
     if row is None:
@@ -157,11 +160,12 @@ def block_card(inp: BlockCardInput, db) -> BlockCardOutput:
             f"[{trace_id}] Card {inp.card_id!r} not found for this customer."
         )
 
-    previous_status: str = row["status"]
+    m = row._mapping
+    previous_status: str = m["status"]
 
     # ---- idempotency: already blocked → return existing info ----
     if previous_status == "blocked":
-        existing_ticket = row["blocked_ticket"] or f"TKT-{uuid.uuid4().hex[:8].upper()}"
+        existing_ticket = m["blocked_ticket"] or f"TKT-{uuid.uuid4().hex[:8].upper()}"
         return BlockCardOutput(
             card_id=inp.card_id,
             previous_status="blocked",
@@ -180,15 +184,20 @@ def block_card(inp: BlockCardInput, db) -> BlockCardOutput:
     blocked_at = datetime.utcnow()
 
     db.execute(
-        """
+        text("""
         UPDATE cards
         SET    status         = 'blocked',
-               blocked_ticket = ?,
-               blocked_at     = ?
-        WHERE  card_id       = ?
-          AND  customer_id   = ?
-        """,
-        (ticket_number, blocked_at.isoformat(), inp.card_id, inp.customer_id),
+               blocked_ticket = :ticket_number,
+               blocked_at     = :blocked_at
+        WHERE  card_id       = :card_id
+          AND  customer_id   = :customer_id
+        """),
+        {
+            "ticket_number": ticket_number,
+            "blocked_at": blocked_at.isoformat(),
+            "card_id": inp.card_id,
+            "customer_id": inp.customer_id,
+        },
     )
     db.commit()
 

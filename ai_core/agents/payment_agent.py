@@ -4,19 +4,24 @@ from typing import TypedDict, Any
 from langgraph.graph import StateGraph, END
 from langchain_core.messages import SystemMessage, HumanMessage
 from .base_agent import get_llm, AgentResult, check_grounding
-from tools.payment_tools import get_upi_status, GetUpiStatusInput
+from tools.payment_tools import get_upi_status, GetUPIStatusInput
 
-SYSTEM_PROMPT = """You are the Payments Agent for Bank Buddy. You ONLY handle UPI and payment status lookups.
+SYSTEM_PROMPT = """You are the Payments Agent for Bank Buddy. You handle payment status, transaction history, and UPI lookups.
 
-You have exactly 1 tool available:
-1. get_upi_status - returns the current status and details of a UPI transaction
+You have 1 tool available:
+1. get_upi_status - returns recent transactions or details for a specific transaction/merchant.
+   Arguments (all optional):
+   - reference_number (or transaction_id): string (optional transaction ID)
+   - merchant: string (optional merchant name like Swiggy, Uber, Zomato)
 
 Rules:
 - NEVER compute or guess a number yourself. Always call a tool.
 - customer_id is always provided to you - never ask for it.
-- Respond with a JSON object: {"tool": "get_upi_status", "args": {"transaction_id": "..."}} to call a tool.
-- Respond with {"done": true, "answer": "..."} when you have all the data.
-- If the user's question does not involve a specific UPI transaction ID, ask them to provide it.
+- To look up recent transactions or last transaction, call:
+  {"tool": "get_upi_status", "args": {}}
+- To look up a specific transaction, call:
+  {"tool": "get_upi_status", "args": {"transaction_id": "..."}}
+- Respond with {"done": true, "answer": "<concise summary with date, merchant, amount in INR, and status>"} when you have the data.
 """
 
 
@@ -66,9 +71,11 @@ def act_node(state: PaymentAgentState) -> PaymentAgentState:
     customer_id = state['customer_id']
 
     if tool_name == 'get_upi_status':
-        transaction_id = parsed.get('args', {}).get('transaction_id', '')
+        args = parsed.get('args', {})
+        ref_id = args.get('transaction_id') or args.get('reference_number')
+        merchant = args.get('merchant')
         result = get_upi_status(
-            GetUpiStatusInput(customer_id=customer_id, transaction_id=transaction_id), db
+            GetUPIStatusInput(customer_id=customer_id, reference_number=ref_id, merchant=merchant), db
         )
         state['tool_outputs']['get_upi_status'] = result.model_dump()
         state['tools_invoked'].append('get_upi_status')
@@ -78,7 +85,6 @@ def act_node(state: PaymentAgentState) -> PaymentAgentState:
 
 
 def observe_node(state: PaymentAgentState) -> PaymentAgentState:
-    # Fold tool results back for next reason step
     return state
 
 

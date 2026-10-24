@@ -72,15 +72,30 @@ export const AuthProvider = ({ children }) => {
     verifySession();
   }, []);
 
-  const login = async (identifier, password) => {
+  const login = async (identifier, password, skipOtp = false) => {
     const res = await fetch('/api/v1/signin', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ identifier, password })
+      body: JSON.stringify({ identifier, password, skipOtp })
     });
     const data = await res.json();
     if (!res.ok) {
       throw new Error(data.message || 'Invalid credentials');
+    }
+    if (data.accessToken) {
+      const userData = {
+        token: data.accessToken,
+        accessToken: data.accessToken,
+        id: data.id,
+        name: data.name,
+        username: data.username,
+        email: data.email,
+        crn: data.crn,
+        cardNumber: data.cardNumber,
+        role: data.role
+      };
+      setUser(userData);
+      localStorage.setItem('bankBuddyUser', JSON.stringify(userData));
     }
     return data;
   };

@@ -1,7 +1,7 @@
 """
 payment_tools.py
 ----------------
-Deterministic banking tool function for UPI transaction status lookup.
+Deterministic banking tool functions for UPI transaction queries and payment status.
 
 SECURITY: customer_id is ALWAYS injected from JWT server-side.
           It must never originate from LLM-generated text.
@@ -15,6 +15,7 @@ from decimal import Decimal
 from typing import Optional
 
 from pydantic import BaseModel
+from sqlalchemy import text
 
 
 # ---------------------------------------------------------------------------
@@ -22,10 +23,15 @@ from pydantic import BaseModel
 # ---------------------------------------------------------------------------
 
 class GetUPIStatusInput(BaseModel):
-    customer_id: str            # injected from JWT, never from LLM
-    reference_number: Optional[str] = None   # UPI reference / UTR number
-    merchant: Optional[str] = None           # partial merchant name filter
-    date: Optional[date] = None              # filter to a specific date
+    customer_id: str  # injected from JWT, never from LLM
+    reference_number: Optional[str] = None
+    transaction_id: Optional[str] = None
+    merchant: Optional[str] = None
+    channel: Optional[str] = None
+    date: Optional[date] = None
+
+# Backward compatibility alias
+GetUpiStatusInput = GetUPIStatusInput
 
 
 class UPITransaction(BaseModel):
@@ -46,68 +52,66 @@ class GetUPIStatusOutput(BaseModel):
 
 def get_upi_status(inp: GetUPIStatusInput, db) -> GetUPIStatusOutput:
     """
-    Look up UPI transactions for the authenticated customer with optional filters.
-
-    Filters are applied server-side in SQL; the LLM only receives the result.
-    All filter parameters are optional — omitting all returns the last 30 days
-    of UPI transactions.
+    Look up transactions for the authenticated customer with optional filters.
 
     Args:
         inp: Validated input with JWT-injected customer_id and optional filters.
         db:  Database connection / session object.
 
     Returns:
-        GetUPIStatusOutput containing matched UPI transactions and a count.
+        GetUPIStatusOutput containing matched transactions and a count.
     """
     trace_id = str(uuid.uuid4())[:8]
 
-    # Build the query dynamically to handle optional filters safely
-    base_query = """
+    # Build query safely
+    clauses = ["customer_id = :customer_id"]
+    params = {"customer_id": inp.customer_id}
+
+    if inp.channel:
+        clauses.append("channel = :channel")
+        params["channel"] = inp.channel
+
+    ref = inp.reference_number or inp.transaction_id
+    if ref:
+        clauses.append("txn_id = :ref_num")
+        params["ref_num"] = ref
+
+    if inp.merchant:
+        clauses.append("LOWER(merchant) LIKE :merchant")
+        params["merchant"] = f"%{inp.merchant.lower()}%"
+
+    if inp.date is not None:
+        clauses.append("date = :dt")
+        params["dt"] = inp.date.isoformat()
+
+    where_sql = " AND ".join(clauses)
+    query_str = f"""
         SELECT txn_id,
                amount,
                merchant,
                status,
-               failure_reason,
                channel,
-               txn_date
+               date
         FROM   transactions
-        WHERE  customer_id = ?
-          AND  channel      = 'UPI'
+        WHERE  {where_sql}
+        ORDER BY date DESC
+        LIMIT  20
     """
-    params: list = [inp.customer_id]
 
-    if inp.reference_number is not None:
-        base_query += " AND txn_id = ?"
-        params.append(inp.reference_number)
-
-    if inp.merchant is not None:
-        # Case-insensitive partial match via SQL LIKE
-        base_query += " AND LOWER(merchant) LIKE ?"
-        params.append(f"%{inp.merchant.lower()}%")
-
-    if inp.date is not None:
-        base_query += " AND DATE(txn_date) = ?"
-        params.append(inp.date.isoformat())
-
-    # Default: limit to last 30 days when no date-based filter is provided
-    if inp.reference_number is None and inp.date is None:
-        base_query += " AND txn_date >= DATE('now', '-30 days')"
-
-    base_query += " ORDER BY txn_date DESC"
-
-    rows = db.execute(base_query, params).fetchall()
+    rows = db.execute(text(query_str), params).fetchall()
 
     transactions: list[UPITransaction] = []
     for row in rows:
+        m = row._mapping
         transactions.append(
             UPITransaction(
-                txn_id=row["txn_id"],
-                amount=Decimal(str(row["amount"])),
-                merchant=row["merchant"],
-                status=row["status"],
-                failure_reason=row["failure_reason"] or None,
-                channel=row["channel"],
-                date=date.fromisoformat(str(row["txn_date"])[:10]),
+                txn_id=m["txn_id"],
+                amount=Decimal(str(m["amount"])),
+                merchant=m["merchant"],
+                status=m["status"],
+                failure_reason=None,
+                channel=m["channel"],
+                date=m["date"] if isinstance(m["date"], date) else date.fromisoformat(str(m["date"])),
             )
         )
 

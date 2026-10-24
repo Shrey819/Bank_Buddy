@@ -9,12 +9,14 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
+from auth.jwt_verify import verify_jwt as verify_jwt_import
+
 app = FastAPI(title='Bank Buddy AI Core', version='1.0.0')
 
-# CORS — only allow Node gateway
+# CORS — allow Node gateway and local dev
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=['http://localhost:8080', 'http://127.0.0.1:8080'],
+    allow_origins=['*'],
     allow_credentials=True,
     allow_methods=['*'],
     allow_headers=['*'],
@@ -64,7 +66,6 @@ async def chat(
     req: ChatRequest,
     token_data: dict = Depends(verify_jwt_import)
 ):
-    # Import here to avoid circular imports at module load
     from graph.banking_graph import run_banking_graph
     from db.connection import SessionLocal
 
@@ -72,9 +73,9 @@ async def chat(
     customer_id = token_data.get('customer_id')
     user_id = token_data.get('user_id')
 
-    # If customer_id not in token yet, use user_id as fallback
+    # If customer_id not in token yet, use user_id or default to C1001 for demo
     if not customer_id:
-        customer_id = f'USER-{user_id}'  # fallback for demo
+        customer_id = 'C1001'
 
     db = SessionLocal()
     try:
@@ -143,6 +144,3 @@ async def confirm_action(
         raise HTTPException(status_code=500, detail=str(e))
     finally:
         db.close()
-
-# Local import helper to avoid circular dependency at top level
-from auth.jwt_verify import verify_jwt as verify_jwt_import

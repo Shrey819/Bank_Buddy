@@ -66,13 +66,37 @@ export default function DashboardPage() {
     }
   ];
 
-  const handleSendCopilot = (textToSend) => {
+  const handleSendCopilot = async (textToSend) => {
     const text = textToSend || copilotInput;
     if (!text.trim()) return;
 
     const userMsg = { sender: 'user', text };
     setCopilotMessages((prev) => [...prev, userMsg]);
     setCopilotInput('');
+
+    try {
+      const token = user?.token || user?.accessToken;
+      const res = await fetch('/api/v1/chat', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token ? { Authorization: `Bearer ${token}` } : {})
+        },
+        body: JSON.stringify({
+          message: text.trim(),
+          session_id: `DASH-${user?.id || 'C1001'}`,
+          conversation_history: []
+        })
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        setCopilotMessages((prev) => [...prev, { sender: 'assistant', text: data.answer }]);
+        return;
+      }
+    } catch (e) {
+      console.warn('Dashboard Copilot chat error:', e);
+    }
 
     setTimeout(() => {
       let replyText = `Processed "${text}". Verified against ISO-20022 compliance rules.`;
@@ -85,7 +109,7 @@ export default function DashboardPage() {
         }.`;
       } else if (lower.includes('surplus') || lower.includes('balance')) {
         replyText =
-          'Ledger Verified: Liquid Checking ₹99,500.00 | Sapphire Due -₹9,500.00 | Safe Surplus is ₹90,000.00.';
+          'Ledger Verified: Liquid Checking ₹125,000.00 | Safe surplus ready for allocation.';
       } else if (lower.includes('sweep') || lower.includes('transfer')) {
         setTransferSuccess(true);
         replyText =

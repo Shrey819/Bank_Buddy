@@ -9,7 +9,7 @@ from datetime import date, datetime
 from decimal import Decimal
 
 from sqlalchemy import (
-    ARRAY,
+    JSON,
     Column,
     Date,
     DateTime,
@@ -92,6 +92,8 @@ class Card(Base):
     amount_due:        Decimal = Column(Numeric(15, 2), default=Decimal("0.00"))
     statement_balance: Decimal = Column(Numeric(15, 2), default=Decimal("0.00"))
     credit_limit:      Decimal = Column(Numeric(15, 2), default=Decimal("100000.00"))
+    blocked_ticket:    str     = Column(String(30), nullable=True)
+    blocked_at:        datetime = Column(DateTime, nullable=True)
     created_at: datetime       = Column(DateTime, default=func.now())
 
 
@@ -157,9 +159,7 @@ class FraudCase(Base):
 class AuditLog(Base):
     """
     Immutable trace of every AI agent invocation.
-
-    agents_invoked / tools_invoked are stored as PostgreSQL TEXT[] arrays,
-    making it easy to query which agents handled a given customer session.
+    Compatible with both SQLite and PostgreSQL.
     """
 
     __tablename__ = "audit_log"
@@ -167,8 +167,8 @@ class AuditLog(Base):
     id:             int      = Column(Integer, primary_key=True, autoincrement=True)
     trace_id:       str      = Column(String(50), nullable=False)
     customer_id:    str      = Column(String(20))
-    agents_invoked: list     = Column(ARRAY(String))
-    tools_invoked:  list     = Column(ARRAY(String))
+    agents_invoked: list     = Column(JSON)
+    tools_invoked:  list     = Column(JSON)
     decision:       str      = Column(String(50))
     outcome:        str      = Column(String(20))
     answer_type:    str      = Column(String(30))

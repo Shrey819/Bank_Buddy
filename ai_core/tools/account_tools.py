@@ -16,6 +16,7 @@ from typing import Literal
 
 import pandas as pd
 from pydantic import BaseModel
+from sqlalchemy import text
 
 
 # ---------------------------------------------------------------------------
@@ -52,13 +53,13 @@ def get_balance(inp: GetBalanceInput, db) -> GetBalanceOutput:
     trace_id = str(uuid.uuid4())[:8]
 
     row = db.execute(
-        """
+        text("""
         SELECT account_id, balance, currency, account_type
         FROM   accounts
-        WHERE  customer_id = ?
+        WHERE  customer_id = :customer_id
         LIMIT  1
-        """,
-        (inp.customer_id,),
+        """),
+        {"customer_id": inp.customer_id},
     ).fetchone()
 
     if row is None:
@@ -66,11 +67,12 @@ def get_balance(inp: GetBalanceInput, db) -> GetBalanceOutput:
             f"[{trace_id}] No account found for customer_id={inp.customer_id!r}"
         )
 
+    mapping = row._mapping
     return GetBalanceOutput(
-        account_id=row["account_id"],
-        balance=Decimal(str(row["balance"])),
-        currency=row["currency"],
-        account_type=row["account_type"],
+        account_id=mapping["account_id"],
+        balance=Decimal(str(mapping["balance"])),
+        currency=mapping["currency"],
+        account_type=mapping["account_type"],
         as_of=datetime.utcnow(),
         trace_id=trace_id,
     )
@@ -146,15 +148,18 @@ def analyze_expenses(inp: AnalyzeExpensesInput, db) -> AnalyzeExpensesOutput:
     period_start, period_end = _resolve_period(inp.period)
 
     rows = db.execute(
-        """
+        text("""
         SELECT category,
                amount
         FROM   transactions
-        WHERE  customer_id = ?
-          AND  txn_date    BETWEEN ? AND ?
-          AND  txn_type    = 'debit'
-        """,
-        (inp.customer_id, period_start.isoformat(), period_end.isoformat()),
+        WHERE  customer_id = :customer_id
+          AND  date        BETWEEN :start_date AND :end_date
+        """),
+        {
+            "customer_id": inp.customer_id,
+            "start_date": period_start.isoformat(),
+            "end_date": period_end.isoformat(),
+        },
     ).fetchall()
 
     if not rows:
@@ -169,7 +174,8 @@ def analyze_expenses(inp: AnalyzeExpensesInput, db) -> AnalyzeExpensesOutput:
         )
 
     # ------------------------------------------------------------------ pandas
-    df = pd.DataFrame(rows, columns=["category", "amount"])
+    rows_data = [{"category": r._mapping["category"], "amount": r._mapping["amount"]} for r in rows]
+    df = pd.DataFrame(rows_data, columns=["category", "amount"])
     df["amount"] = pd.to_numeric(df["amount"], errors="coerce").fillna(0)
 
     grouped = (

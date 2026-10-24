@@ -1,22 +1,21 @@
 """
 loan_tools.py
 -------------
-Deterministic banking tool functions for loan details and upcoming payment lookup.
+Deterministic banking tool functions for loan details and upcoming payment schedules.
 
 SECURITY: customer_id is ALWAYS injected from JWT server-side.
           It must never originate from LLM-generated text.
-
-IMPORTANT: total_amount in get_upcoming_payments is computed in Python as
-           sum(p.amount for p in payments) — the LLM never performs this sum.
 """
 
 from __future__ import annotations
 
 import uuid
-from datetime import date, datetime, timedelta
+from datetime import date, datetime
 from decimal import Decimal
+from typing import Literal
 
 from pydantic import BaseModel
+from sqlalchemy import text
 
 
 # ---------------------------------------------------------------------------
@@ -29,11 +28,11 @@ class GetLoanDetailsInput(BaseModel):
 
 class LoanDetail(BaseModel):
     loan_id: str
-    loan_type: str
+    loan_type: str        # e.g. 'Personal Loan', 'Home Loan', 'Auto Loan'
     principal: Decimal
     outstanding: Decimal
     emi_amount: Decimal
-    interest_rate: float      # annual rate as percentage, e.g. 8.5 means 8.5 %
+    interest_rate: float  # annual percentage rate (APR)
     next_due_date: date
     tenure_months: int
 
@@ -60,7 +59,7 @@ def get_loan_details(inp: GetLoanDetailsInput, db) -> GetLoanDetailsOutput:
     trace_id = str(uuid.uuid4())[:8]
 
     rows = db.execute(
-        """
+        text("""
         SELECT loan_id,
                loan_type,
                principal,
@@ -70,32 +69,30 @@ def get_loan_details(inp: GetLoanDetailsInput, db) -> GetLoanDetailsOutput:
                next_due_date,
                tenure_months
         FROM   loans
-        WHERE  customer_id = ?
-          AND  status       = 'active'
+        WHERE  customer_id = :customer_id
         ORDER BY next_due_date ASC
-        """,
-        (inp.customer_id,),
+        """),
+        {"customer_id": inp.customer_id},
     ).fetchall()
 
     loans: list[LoanDetail] = []
     for row in rows:
+        m = row._mapping
         loans.append(
             LoanDetail(
-                loan_id=row["loan_id"],
-                loan_type=row["loan_type"],
-                principal=Decimal(str(row["principal"])),
-                outstanding=Decimal(str(row["outstanding"])),
-                emi_amount=Decimal(str(row["emi_amount"])),
-                interest_rate=float(row["interest_rate"]),
-                next_due_date=date.fromisoformat(str(row["next_due_date"])[:10]),
-                tenure_months=int(row["tenure_months"]),
+                loan_id=m["loan_id"],
+                loan_type=m["loan_type"],
+                principal=Decimal(str(m["principal"])),
+                outstanding=Decimal(str(m["outstanding"])),
+                emi_amount=Decimal(str(m["emi_amount"])),
+                interest_rate=float(m["interest_rate"]),
+                next_due_date=date.fromisoformat(str(m["next_due_date"])[:10]),
+                tenure_months=int(m["tenure_months"]),
             )
         )
 
-    # Python-computed aggregate — LLM must not perform this calculation
-    total_outstanding: Decimal = sum(
-        (loan.outstanding for loan in loans), Decimal("0.00")
-    )
+    # Deterministic Python arithmetic: sum across all active loans
+    total_outstanding = sum((loan.outstanding for loan in loans), Decimal("0.00"))
 
     return GetLoanDetailsOutput(
         loans=loans,
@@ -109,83 +106,88 @@ def get_loan_details(inp: GetLoanDetailsInput, db) -> GetLoanDetailsOutput:
 # ---------------------------------------------------------------------------
 
 class GetUpcomingPaymentsInput(BaseModel):
-    customer_id: str           # injected from JWT, never from LLM
-    days_ahead: int = 30       # look-ahead window in days (default: 30)
+    customer_id: str  # injected from JWT, never from LLM
+    window_days: int = 30  # look-ahead window; default: next 30 days
 
 
-class PaymentItem(BaseModel):
+class UpcomingPaymentItem(BaseModel):
     payment_id: str
-    payment_type: str          # e.g. 'loan_emi', 'credit_card', 'utility'
+    payment_type: str    # e.g. 'Credit Card', 'Loan EMI', 'Utility Bill'
     description: str
     amount: Decimal
     due_date: date
-    days_until_due: int        # Python-computed from due_date - today
+    days_until_due: int  # Python-computed: (due_date - today).days
+    status: str          # 'pending', 'scheduled'
 
 
 class GetUpcomingPaymentsOutput(BaseModel):
-    payments: list[PaymentItem]
-    total_amount: Decimal      # Python-computed sum — LLM must NOT compute this
-    currency: str = "INR"
+    payments: list[UpcomingPaymentItem]
+    total_amount: Decimal  # Python-computed sum of all upcoming amounts in the window
+    window_days: int
     trace_id: str
 
 
 def get_upcoming_payments(inp: GetUpcomingPaymentsInput, db) -> GetUpcomingPaymentsOutput:
     """
-    Return all upcoming payments due within `days_ahead` days for the customer.
+    Retrieve all scheduled payments due within the look-ahead window.
 
-    CRITICAL: total_amount is calculated in Python as
-              sum(p.amount for p in payments) — never by the LLM.
+    total_amount and days_until_due are computed in Python — never by the LLM.
 
     Args:
-        inp: Validated input with JWT-injected customer_id and days_ahead window.
+        inp: Validated input with JWT-injected customer_id and window_days.
         db:  Database connection / session object.
 
     Returns:
-        GetUpcomingPaymentsOutput sorted by due_date ascending.
+        GetUpcomingPaymentsOutput with individual line items and a grand total.
     """
     trace_id = str(uuid.uuid4())[:8]
     today = date.today()
-    cutoff = today + timedelta(days=inp.days_ahead)
+    cutoff = today + __import__("datetime").timedelta(days=inp.window_days)
 
     rows = db.execute(
-        """
+        text("""
         SELECT payment_id,
                payment_type,
                description,
                amount,
-               due_date
+               due_date,
+               status
         FROM   upcoming_payments
-        WHERE  customer_id = ?
-          AND  due_date    BETWEEN ? AND ?
+        WHERE  customer_id = :customer_id
+          AND  due_date    BETWEEN :start_date AND :end_date
           AND  status      != 'paid'
         ORDER BY due_date ASC
-        """,
-        (inp.customer_id, today.isoformat(), cutoff.isoformat()),
+        """),
+        {
+            "customer_id": inp.customer_id,
+            "start_date": today.isoformat(),
+            "end_date": cutoff.isoformat(),
+        },
     ).fetchall()
 
-    payments: list[PaymentItem] = []
+    payments: list[UpcomingPaymentItem] = []
     for row in rows:
-        due = date.fromisoformat(str(row["due_date"])[:10])
-        days_until_due = (due - today).days  # deterministic Python arithmetic
+        m = row._mapping
+        due = date.fromisoformat(str(m["due_date"])[:10])
+        days_until = (due - today).days  # deterministic Python arithmetic
         payments.append(
-            PaymentItem(
-                payment_id=row["payment_id"],
-                payment_type=row["payment_type"],
-                description=row["description"],
-                amount=Decimal(str(row["amount"])),
+            UpcomingPaymentItem(
+                payment_id=m["payment_id"],
+                payment_type=m["payment_type"],
+                description=m["description"],
+                amount=Decimal(str(m["amount"])),
                 due_date=due,
-                days_until_due=days_until_due,
+                days_until_due=days_until,
+                status=m["status"],
             )
         )
 
-    # IMPORTANT: computed in Python — the LLM must never perform this sum
-    total_amount: Decimal = sum(
-        (p.amount for p in payments), Decimal("0.00")
-    )
+    # Deterministic Python arithmetic: sum all obligations in window
+    total_amount = sum((p.amount for p in payments), Decimal("0.00"))
 
     return GetUpcomingPaymentsOutput(
         payments=payments,
         total_amount=total_amount,
-        currency="INR",
+        window_days=inp.window_days,
         trace_id=trace_id,
     )

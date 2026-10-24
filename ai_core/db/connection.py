@@ -1,65 +1,67 @@
 """
 connection.py – SQLAlchemy sync engine + session factory for Bank_Buddy.
 
-Uses the existing 'learnnode' PostgreSQL database.
-Override DATABASE_URL via environment variable or a .env file.
+Uses the configured database URL with automatic fallback to local SQLite
+if PostgreSQL is unreachable or times out.
 """
 
 import os
+import re
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, DeclarativeBase
 from dotenv import load_dotenv
 
 load_dotenv()
 
-# ---------------------------------------------------------------------------
-# Database URL – falls back to the shared learnnode dev instance
-# ---------------------------------------------------------------------------
 DATABASE_URL: str = os.getenv(
-    "DATABASE_URL",
-    "postgresql://postgresdb:Yuhu123@localhost:5432/learnnode",
+    "AI_DATABASE_URL",
+    os.getenv("DATABASE_URL", "sqlite:///ai_core/banking.db")
 )
 
-# ---------------------------------------------------------------------------
-# Engine – pool_pre_ping ensures stale connections are recycled automatically
-# ---------------------------------------------------------------------------
-engine = create_engine(
-    DATABASE_URL,
-    echo=False,           # set to True for SQL debug output
-    pool_pre_ping=True,   # reconnect on dropped connections
-    pool_size=5,
-    max_overflow=10,
-)
+# Normalize postgresql prefix for psycopg2 if configured
+normalized_url = DATABASE_URL
+if normalized_url.startswith("postgresql://"):
+    normalized_url = normalized_url.replace("postgresql://", "postgresql+psycopg2://", 1)
+if "channel_binding=" in normalized_url:
+    normalized_url = re.sub(r"[?&]channel_binding=[^&]+", "", normalized_url)
 
-# ---------------------------------------------------------------------------
-# Session factory
-# ---------------------------------------------------------------------------
+fallback_sqlite = False
+engine = None
+
+if "postgresql" in normalized_url:
+    try:
+        test_engine = create_engine(
+            normalized_url,
+            echo=False,
+            pool_pre_ping=True,
+            connect_args={"connect_timeout": 3}
+        )
+        with test_engine.connect() as conn:
+            pass
+        engine = test_engine
+    except Exception as e:
+        print(f"[DB Notice] Remote PostgreSQL connection failed or timed out: {e}")
+        fallback_sqlite = True
+else:
+    fallback_sqlite = True
+
+if fallback_sqlite or engine is None:
+    db_file = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "banking.db"))
+    print(f"[DB] Using local SQLite database at: {db_file}")
+    sqlite_url = f"sqlite:///{db_file}"
+    engine = create_engine(sqlite_url, echo=False)
+
 SessionLocal = sessionmaker(
     autocommit=False,
     autoflush=False,
     bind=engine,
 )
 
-# ---------------------------------------------------------------------------
-# Declarative base – all ORM models inherit from this
-# ---------------------------------------------------------------------------
 class Base(DeclarativeBase):
     """Shared declarative base for all Bank_Buddy ORM models."""
     pass
 
-
-# ---------------------------------------------------------------------------
-# FastAPI / dependency-injection compatible DB session provider
-# ---------------------------------------------------------------------------
 def get_db():
-    """
-    Yield a SQLAlchemy session and guarantee it is closed afterwards.
-
-    Usage (FastAPI):
-        @app.get("/")
-        def route(db: Session = Depends(get_db)):
-            ...
-    """
     db = SessionLocal()
     try:
         yield db

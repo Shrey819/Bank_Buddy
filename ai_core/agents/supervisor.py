@@ -40,7 +40,7 @@ def route_query(question: str) -> list[str]:
     llm = ChatOpenAI(
         base_url=os.getenv('OPENROUTER_BASE_URL', 'https://openrouter.ai/api/v1'),
         api_key=os.getenv('OPENROUTER_API_KEY', 'placeholder'),
-        model=os.getenv('OPENROUTER_MODEL', 'meta-llama/llama-3.1-8b-instruct:free'),
+        model=os.getenv('OPENROUTER_MODEL', 'openrouter/free'),
         temperature=0.0,
     )
     messages = [

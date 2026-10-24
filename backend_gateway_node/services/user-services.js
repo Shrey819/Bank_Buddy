@@ -329,17 +329,13 @@ exports.verifyOtp = async (req, res) => {
       return res.status(400).send({ message: "Invalid OTP! Hint: Demo OTP is 123456." });
     }
 
-<<<<<<< HEAD
-    // Mint elevated JWT with acr: "mfa" (PRD Section 10 requirement)
-    const customerId = user.customer_id || (user.id === 1 || user.username === "elena" ? "C1001" : "C1001");
-=======
     // Invalidate pre-MFA sessionToken to prevent replay attacks
     if (sessionToken) {
       jwtAuth.revokeToken(sessionToken);
     }
 
-    // Mint elevated JWT with acr: "mfa"
->>>>>>> 2b7974f1edda60a37b96c96ee26ff894945e6f41
+    // Mint elevated JWT with acr: "mfa" (PRD Section 10 requirement)
+    const customerId = user.customer_id || (user.id === 1 || user.username === "elena" ? "C1001" : "C1001");
     const token = jwt.sign(
       {
         id: user.id,
