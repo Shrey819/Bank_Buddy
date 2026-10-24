@@ -133,7 +133,26 @@ exports.signup = async (req, res) => {
         kycStatus: "VERIFIED",
         otpSecret: "123456"
       });
-      console.log(`Created new user ${targetUser.username} in database (CRN: ${targetUser.crn})`);
+
+      const assignedCid = 'C' + (2000 + targetUser.id);
+      targetUser.customer_id = assignedCid;
+      await targetUser.save();
+
+      await db.sequelize.query(
+        `INSERT INTO customers (customer_id, full_name, email, phone, city, preferred_language, is_active)
+         VALUES (:cid, :name, :email, :phone, 'Mumbai', 'English', true)
+         ON CONFLICT (customer_id) DO UPDATE SET full_name = EXCLUDED.full_name, email = EXCLUDED.email`,
+        {
+          replacements: {
+            cid: assignedCid,
+            name: targetUser.name,
+            email: targetUser.email,
+            phone: targetUser.phone || '+91 9876543210'
+          }
+        }
+      );
+
+      console.log(`Created new user ${targetUser.username} in database (CRN: ${targetUser.crn}, Customer ID: ${targetUser.customer_id})`);
     }
 
     // Mint elevated JWT token so the user is immediately authenticated
@@ -159,6 +178,7 @@ exports.signup = async (req, res) => {
         email: targetUser.email,
         crn: targetUser.crn,
         cardNumber: targetUser.cardNumber,
+        customer_id: targetUser.customer_id,
         role: targetUser.role
       }
     });
@@ -263,6 +283,7 @@ exports.signin = async (req, res) => {
       email: user.email,
       crn: user.crn,
       cardNumber: user.cardNumber,
+      customer_id: user.customer_id,
       role: user.role,
       accessToken: token
     });
@@ -383,6 +404,7 @@ exports.getMe = async (req, res) => {
         email: user.email,
         crn: user.crn,
         cardNumber: user.cardNumber,
+        customer_id: user.customer_id,
         phone: user.phone,
         role: user.role,
         kycStatus: user.kycStatus

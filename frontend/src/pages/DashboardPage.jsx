@@ -335,7 +335,7 @@ export default function DashboardPage() {
               </span>
             </div>
             <p className="text-xs text-slate-500 dark:text-slate-400 font-medium mt-0.5">
-              Welcome back, <strong className="text-indigo-600 dark:text-indigo-400">{bankingData?.customer?.full_name || user?.name || 'Elena Rostova'}</strong> &bull; Customer ID: <span className="font-mono font-bold text-indigo-500">{bankingData?.customer?.customer_id || 'C1001'}</span> &bull; CRN: {user?.crn || '98234105'} &bull; City: {bankingData?.customer?.city || 'Mumbai'}
+              Welcome back, <strong className="text-indigo-600 dark:text-indigo-400">{bankingData?.customer?.full_name || user?.name || user?.username || 'Client'}</strong> &bull; Customer ID: <span className="font-mono font-bold text-indigo-500">{bankingData?.customer?.customer_id || user?.customer_id || '—'}</span> &bull; CRN: {user?.crn || '—'} &bull; City: {bankingData?.customer?.city || '—'}
             </p>
           </div>
 
@@ -432,12 +432,18 @@ export default function DashboardPage() {
               {formatINR(summary.totalAvailableBalance)}
             </div>
             <div className="space-y-1">
-              {accounts.map((acc) => (
-                <div key={acc.account_id} className="text-[11px] text-slate-500 dark:text-slate-400 font-medium flex justify-between">
-                  <span className="capitalize">{acc.account_type} ({acc.account_id}):</span>
-                  <span className="font-bold text-slate-700 dark:text-slate-300">{formatINR(acc.available_balance)}</span>
+              {accounts.length === 0 ? (
+                <div className="text-[11px] text-slate-400 italic py-1">
+                  No active accounts &bull; Balance: ₹0.00
                 </div>
-              ))}
+              ) : (
+                accounts.map((acc) => (
+                  <div key={acc.account_id} className="text-[11px] text-slate-500 dark:text-slate-400 font-medium flex justify-between">
+                    <span className="capitalize">{acc.account_type} ({acc.account_id}):</span>
+                    <span className="font-bold text-slate-700 dark:text-slate-300">{formatINR(acc.available_balance)}</span>
+                  </div>
+                ))
+              )}
             </div>
             <div className="mt-3 pt-2.5 border-t border-slate-100 dark:border-slate-800 text-[10px] text-emerald-600 dark:text-emerald-400 font-semibold flex items-center justify-between">
               <span>Ledger Balance: {formatINR(summary.totalLedgerBalance)}</span>
@@ -449,7 +455,7 @@ export default function DashboardPage() {
           <div className="p-6 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-sm hover:shadow-md transition">
             <div className="flex justify-between items-center mb-3">
               <span className="text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-400">
-                {primaryCreditCard?.card_network || 'Visa'} Credit Card
+                {primaryCreditCard ? `${primaryCreditCard.card_network} Credit Card` : 'Credit Card'}
               </span>
               <div className="p-2 bg-rose-50 dark:bg-rose-950/60 text-rose-600 dark:text-rose-400 rounded-xl">
                 <CreditCard className="w-4 h-4" />
@@ -469,7 +475,7 @@ export default function DashboardPage() {
               </div>
             </div>
             <div className="mt-3 pt-2.5 border-t border-slate-100 dark:border-slate-800 text-[10px] text-slate-500 font-semibold flex items-center justify-between">
-              <span>Due: {primaryCreditCard?.statement_due_date ? new Date(primaryCreditCard.statement_due_date).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }) : '29 Oct 2026'}</span>
+              <span>Due: {primaryCreditCard?.statement_due_date ? new Date(primaryCreditCard.statement_due_date).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }) : 'No Dues (₹0.00)'}</span>
               <span>Min Due: {formatINR(primaryCreditCard?.minimum_due || 0)}</span>
             </div>
           </div>
@@ -489,7 +495,7 @@ export default function DashboardPage() {
                 {formatINR(summary.safeSurplus)}
               </div>
               <p className="text-[11px] text-indigo-200/90 font-medium leading-relaxed">
-                Calculated strictly from database tables for {bankingData?.customer?.full_name}: Liquid balance minus {formatINR(summary.upcomingOutflows)} upcoming commitments.
+                {summary.totalAvailableBalance > 0 ? `Calculated strictly from database tables for ${bankingData?.customer?.full_name || user?.name}: Liquid balance minus ${formatINR(summary.upcomingOutflows)} upcoming commitments.` : `No liquid balance in account (₹0.00). Safe surplus is ₹0.00.`}
               </p>
             </div>
             <div className="mt-4 pt-2.5 border-t border-indigo-700/50 flex items-center justify-between text-[10px] text-indigo-200 font-semibold">
@@ -516,10 +522,10 @@ export default function DashboardPage() {
                 <span className="text-xs text-slate-400">&bull; ISO 20022 Rule {bankingData?.customer?.customer_id}</span>
               </div>
               <h3 className="text-base font-bold text-slate-900 dark:text-white mb-2">
-                Optimize Safe Surplus: Sweep {formatINR(Math.min(summary.safeSurplus, 50000))} into 7.45% Sovereign Vault
+                {summary.safeSurplus > 0 ? `Optimize Safe Surplus: Sweep ${formatINR(Math.min(summary.safeSurplus, 50000))} into 7.45% Sovereign Vault` : 'Account Portfolio Ready • Current Balance ₹0.00'}
               </h3>
               <p className="text-xs text-slate-600 dark:text-slate-400 mb-5 leading-relaxed">
-                {bankingData?.customer?.full_name}'s liquid balance of {formatINR(summary.totalAvailableBalance)} safely covers 30-day projected commitments ({formatINR(summary.upcomingOutflows)}). Sweeping excess earns 7.45% APY compounding yield with zero withdrawal penalties.
+                {summary.totalAvailableBalance > 0 ? `${bankingData?.customer?.full_name || user?.name}'s liquid balance of ${formatINR(summary.totalAvailableBalance)} safely covers 30-day projected commitments (${formatINR(summary.upcomingOutflows)}). Sweeping excess earns 7.45% APY compounding yield.` : 'This user account currently has ₹0.00 balance and 0 active commitments. Deposit funds to activate automated ISO 20022 monitoring and high-yield sweeps.'}
               </p>
             </div>
             <div className="flex items-center gap-3">
@@ -570,11 +576,11 @@ export default function DashboardPage() {
                   <span className="font-bold uppercase tracking-widest">{primaryDebitCard?.card_network || 'VISA'}</span>
                 </div>
                 <div className="text-sm font-mono tracking-widest my-3">
-                  {primaryDebitCard?.masked_card_number || '•••• •••• •••• 4441'}
+                  {primaryDebitCard?.masked_card_number || '•••• •••• •••• ••••'}
                 </div>
                 <div className="flex justify-between text-[10px] text-slate-300 font-mono">
-                  <span>{bankingData?.customer?.full_name?.toUpperCase() || user?.name?.toUpperCase() || 'ELENA ROSTOVA'}</span>
-                  <span>{primaryDebitCard?.expires_on ? new Date(primaryDebitCard.expires_on).toLocaleDateString('en-IN', { month: '2-digit', year: '2-digit' }) : '01/29'}</span>
+                  <span>{(bankingData?.customer?.full_name || user?.name || user?.username || 'NEW CLIENT').toUpperCase()}</span>
+                  <span>{primaryDebitCard?.expires_on ? new Date(primaryDebitCard.expires_on).toLocaleDateString('en-IN', { month: '2-digit', year: '2-digit' }) : '—'}</span>
                 </div>
                 {isCardFrozen && (
                   <div className="absolute inset-0 bg-slate-950/60 backdrop-blur-[1px] flex items-center justify-center gap-1.5 text-xs font-black text-rose-300 tracking-wider uppercase">
@@ -586,25 +592,27 @@ export default function DashboardPage() {
               <div className="text-[11px] text-slate-500 dark:text-slate-400 mb-3 space-y-0.5">
                 <div className="flex justify-between">
                   <span>Daily ATM Limit:</span>
-                  <span className="font-bold text-slate-700 dark:text-slate-300">{formatINR(primaryDebitCard?.daily_atm_limit || 25000)}</span>
+                  <span className="font-bold text-slate-700 dark:text-slate-300">{formatINR(primaryDebitCard?.daily_atm_limit || 0)}</span>
                 </div>
                 <div className="flex justify-between">
                   <span>Daily Purchase Limit:</span>
-                  <span className="font-bold text-slate-700 dark:text-slate-300">{formatINR(primaryDebitCard?.daily_purchase_limit || 75000)}</span>
+                  <span className="font-bold text-slate-700 dark:text-slate-300">{formatINR(primaryDebitCard?.daily_purchase_limit || 0)}</span>
                 </div>
               </div>
             </div>
 
             <button
               onClick={handleToggleCardFreeze}
-              className={`w-full py-2.5 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 cursor-pointer shadow-sm ${
-                isCardFrozen
-                  ? 'bg-emerald-600 hover:bg-emerald-700 text-white'
-                  : 'bg-rose-600 hover:bg-rose-700 text-white'
+              disabled={!primaryDebitCard}
+              className={`w-full py-2.5 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 shadow-sm ${
+                !primaryDebitCard
+                  ? 'bg-slate-100 dark:bg-slate-800 text-slate-400 cursor-not-allowed'
+                  : isCardFrozen
+                  ? 'bg-emerald-600 hover:bg-emerald-700 text-white cursor-pointer'
+                  : 'bg-rose-600 hover:bg-rose-700 text-white cursor-pointer'
               }`}
             >
-              {isCardFrozen ? <Unlock className="w-3.5 h-3.5" /> : <Lock className="w-3.5 h-3.5" />}
-              {isCardFrozen ? 'Unfreeze Card (Make Active)' : 'Instant Freeze Card'}
+              {!primaryDebitCard ? 'No Debit Card Issued' : isCardFrozen ? 'Unfreeze Card (Make Active)' : 'Instant Freeze Card'}
             </button>
           </div>
         </div>
@@ -626,6 +634,11 @@ export default function DashboardPage() {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            {(bankingData?.bills?.length === 0 && bankingData?.scheduledPayments?.length === 0 && bankingData?.loans?.length === 0) ? (
+              <div className="p-6 rounded-xl border border-dashed border-slate-200 dark:border-slate-800 text-center text-xs text-slate-400 col-span-full">
+                No upcoming obligations, scheduled payments, or loan EMIs for this customer. Total due: ₹0.00
+              </div>
+            ) : null}
             {/* Bills from bills table */}
             {(bankingData?.bills || []).map((bill) => (
               <div key={bill.bill_id} className="p-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/40 flex flex-col justify-between">
@@ -864,11 +877,15 @@ export default function DashboardPage() {
                   onChange={(e) => setSelectedAccountId(e.target.value)}
                   className="w-full p-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-semibold text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
                 >
-                  {accounts.map((a) => (
-                    <option key={a.account_id} value={a.account_id}>
-                      {a.account_id} — {a.account_type.toUpperCase()} (Available: {formatINR(a.available_balance)})
-                    </option>
-                  ))}
+                  {accounts.length === 0 ? (
+                    <option value="NEW_PRIMARY">Primary Savings Account (New Deposit)</option>
+                  ) : (
+                    accounts.map((a) => (
+                      <option key={a.account_id} value={a.account_id}>
+                        {a.account_id} — {a.account_type.toUpperCase()} (Available: {formatINR(a.available_balance)})
+                      </option>
+                    ))
+                  )}
                 </select>
               </div>
 
