@@ -1,19 +1,43 @@
 const configuration = require("../config/config-db.js");
 const Sequelize = require("sequelize");
 
-const sequelize = new Sequelize(
-  configuration.DB, 
-  configuration.USER, 
-  configuration.PASSWORD, {
-    host: configuration.HOST,
-    dialect: configuration.dialect,
-    pool: {
-      max: configuration.pool.max,
-      min: configuration.pool.min,
-      acquire: configuration.pool.acquire,
-      idle: configuration.pool.idle
+const dialectOptions = configuration.ssl
+  ? {
+      ssl: {
+        require: true,
+        rejectUnauthorized: false
+      }
     }
-  });
+  : {};
+
+let dialectModule;
+if (configuration.DATABASE_URL) {
+  const neon = require("@neondatabase/serverless");
+  const ws = require("ws");
+  neon.neonConfig.webSocketConstructor = ws;
+  dialectModule = neon;
+}
+
+const sequelize = configuration.DATABASE_URL
+  ? new Sequelize(configuration.DATABASE_URL, {
+      dialect: configuration.dialect,
+      dialectModule,
+      dialectOptions,
+      pool: configuration.pool,
+      logging: false
+    })
+  : new Sequelize(
+      configuration.DB, 
+      configuration.USER, 
+      configuration.PASSWORD, {
+        host: configuration.HOST,
+        port: configuration.PORT,
+        dialect: configuration.dialect,
+        dialectOptions,
+        pool: configuration.pool,
+        logging: false
+      }
+    );
 
 const database = {};
 database.Sequelize = Sequelize;

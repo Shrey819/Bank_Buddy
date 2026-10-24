@@ -4,7 +4,8 @@
   "description": "Bank Buddy - Autonomous Wealth & Net Banking Application",
   "scripts": {
     "start": "node backend_gateway_node/server.js",
-    "test": "cd backend_gateway_node && npm test"
+    "test": "cd backend_gateway_node && npm test",
+    "db:seed": "cd backend_gateway_node && npm run db:seed"
   },
   "keywords": [
     "bank-buddy",

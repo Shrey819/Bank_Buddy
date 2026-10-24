@@ -13,9 +13,12 @@ function assert(condition, message) {
   console.log(`✅ PASSED: ${message}`);
 }
 
+const db = require("./models");
+
 async function runTests() {
   console.log("🚀 Starting Integration Tests for Bank Buddy Backend...\n");
 
+  await db.sequelize.sync({ alter: true });
   testServer = app.listen(PORT);
 
   try {
