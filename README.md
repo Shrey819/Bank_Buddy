@@ -1,5 +1,7 @@
 # 🏦 Bank Buddy - Secure Node.js & PostgreSQL JWT Authentication System
 
+> Active Development Branch: `shrey`
+
 A secure, modular, token-based authentication backend system with PostgreSQL and Sequelize for **Bank Buddy**.
 
 ---
