@@ -519,7 +519,7 @@
       const chatThread = document.getElementById('chat-thread');
       let toggleCount = 0;
 
-      function handleSend(customText) {
+      async function handleSend(customText) {
         const text = (customText || (chatInput ? chatInput.value : '')).trim();
         if (!text || !chatThread) return;
         if (chatInput) chatInput.value = '';
@@ -545,108 +545,106 @@
         chatThread.appendChild(userTurn);
         window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
 
-        // 2. Simulate AI Assistant Response
-        setTimeout(() => {
+        // Show typing indicator
+        const typingTurn = document.createElement('div');
+        typingTurn.id = 'chat-typing-indicator';
+        typingTurn.className = 'flex items-start gap-3 pr-8';
+        typingTurn.innerHTML = `
+          <div class="w-8 h-8 rounded-xl bg-primary text-on-primary flex items-center justify-center shrink-0 shadow-sm">
+            <span class="material-symbols-outlined text-[18px]">smart_toy</span>
+          </div>
+          <div class="p-3.5 rounded-2xl bg-surface-container-lowest border border-surface-container-high/60 shadow-sm flex items-center gap-2 text-xs text-on-surface-variant">
+            <span class="w-1.5 h-1.5 rounded-full bg-primary animate-bounce"></span>
+            <span class="w-1.5 h-1.5 rounded-full bg-primary animate-bounce" style="animation-delay: 0.2s"></span>
+            <span class="w-1.5 h-1.5 rounded-full bg-primary animate-bounce" style="animation-delay: 0.4s"></span>
+            <span class="ml-1 text-[11px] font-medium">Querying LangGraph ledger...</span>
+          </div>
+        `;
+        chatThread.appendChild(typingTurn);
+        window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+
+        try {
+          const raw = localStorage.getItem('bankBuddyUser');
+          let token = '';
+          if (raw) {
+            try {
+              const u = JSON.parse(raw);
+              token = u.token || u.accessToken || '';
+            } catch(e) {}
+          }
+
+          const res = await fetch('/api/v1/chat', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              ...(token ? { 'Authorization': 'Bearer ' + token } : {})
+            },
+            body: JSON.stringify({
+              message: text,
+              session_id: 'SESSION-STATIC',
+              conversation_history: []
+            })
+          });
+
+          const indicator = document.getElementById('chat-typing-indicator');
+          if (indicator) indicator.remove();
+
+          if (!res.ok) {
+            const errJson = await res.json().catch(() => ({}));
+            throw new Error(errJson.detail || errJson.error || ('HTTP ' + res.status));
+          }
+
+          const data = await res.json();
           const aiTurn = document.createElement('div');
           aiTurn.className = 'flex items-start gap-3 pr-8';
-          const lower = text.toLowerCase();
 
-          if (lower.includes('freeze') || lower.includes('lock') || lower.includes('card')) {
-            toggleCount++;
-            const btnId = 'card-toggle-btn-' + toggleCount;
-            const thumbId = 'card-toggle-thumb-' + toggleCount;
-            const badgeId = 'card-status-badge-' + toggleCount;
-            const textId = 'card-state-text-' + toggleCount;
+          const agentBadges = (data.agents_invoked || []).map(a =>
+            `<span class="px-2 py-0.5 rounded-md bg-primary/10 text-primary text-[10px] font-semibold">${a}</span>`
+          ).join(' ');
 
-            aiTurn.innerHTML = `
-              <div class="w-8 h-8 rounded-xl bg-secondary text-on-secondary flex items-center justify-center shrink-0 shadow-sm">
-                <span class="material-symbols-outlined text-[18px]">credit_card</span>
-              </div>
-              <div class="flex flex-col gap-2 max-w-2xl w-full">
-                <div class="bg-surface-container-lowest p-5 rounded-2xl border border-surface-container-high/60 shadow-sm flex flex-col gap-3">
-                  <div class="flex items-center justify-between pb-3 border-b border-surface-container-high/60">
-                    <div class="flex items-center gap-2.5">
-                      <div class="w-10 h-7 rounded-md bg-slate-900 text-white flex items-center justify-center text-[10px] font-mono font-bold tracking-wider">
-                        4441
-                      </div>
-                      <div>
-                        <div class="text-xs font-bold text-on-surface">Bank Buddy Vault Debit</div>
-                        <div class="text-[10px] text-on-surface-variant">Cardholder: Elena Rostova</div>
-                      </div>
-                    </div>
-                    <span id="${badgeId}" class="px-2.5 py-1 rounded-full bg-error/10 text-error text-[11px] font-bold flex items-center gap-1">
-                      <span class="w-2 h-2 rounded-full bg-error"></span> FROZEN / LOCKED
-                    </span>
-                  </div>
-                  <div class="flex items-center justify-between p-3.5 rounded-xl bg-surface-container-low border border-surface-container-high">
-                    <div class="flex flex-col">
-                      <span class="text-xs font-bold text-on-surface">Card Freeze Switch</span>
-                      <span id="${textId}" class="text-[11px] text-error font-medium">Card Active State: OFF (Locked for transactions)</span>
-                    </div>
-                    <button id="${btnId}" class="w-12 h-7 rounded-full bg-surface-container-high transition-colors relative flex items-center px-1 focus:outline-none" type="button" aria-label="Toggle card freeze status">
-                      <div id="${thumbId}" class="w-5 h-5 rounded-full bg-outline-variant shadow-sm transition-transform translate-x-0"></div>
-                    </button>
-                  </div>
-                  <div class="text-xs text-on-surface-variant leading-relaxed">
-                    Debit card *4441 is locked. Transactions will be rejected with code <code class="bg-slate-100 px-1 py-0.5 rounded text-[11px] font-mono">BB-LOCKED</code>. Click the switch above anytime to toggle.
-                  </div>
+          const toolBadges = (data.tools_invoked || []).map(t =>
+            `<span class="px-2 py-0.5 rounded-md bg-secondary/10 text-secondary text-[10px] font-semibold">${t}</span>`
+          ).join(' ');
+
+          aiTurn.innerHTML = `
+            <div class="w-8 h-8 rounded-xl bg-primary text-on-primary flex items-center justify-center shrink-0 shadow-sm">
+              <span class="material-symbols-outlined text-[18px]">smart_toy</span>
+            </div>
+            <div class="flex flex-col gap-2 max-w-2xl w-full">
+              <div class="bg-surface-container-lowest p-5 rounded-2xl border border-surface-container-high/60 shadow-sm flex flex-col gap-2.5">
+                <p class="text-sm text-on-surface leading-relaxed whitespace-pre-line">
+                  ${data.answer}
+                </p>
+                <div class="pt-2 border-t border-surface-container-high/40 flex flex-wrap items-center gap-1.5 text-xs">
+                  <span class="font-mono text-[10px] text-on-surface-variant font-bold">${data.trace_id || ''}</span>
+                  ${agentBadges}
+                  ${toolBadges}
                 </div>
-                <span class="text-[10px] text-on-surface-variant pl-1">Executed by Card Guard Agent &bull; 42ms</span>
               </div>
-            `;
-            chatThread.appendChild(aiTurn);
-            attachToggleListener(btnId, thumbId, badgeId, textId);
-          } else if (lower.includes('balance') || lower.includes('surplus') || lower.includes('emi') || lower.includes('amount')) {
-            aiTurn.innerHTML = `
-              <div class="w-8 h-8 rounded-xl bg-primary text-on-primary flex items-center justify-center shrink-0 shadow-sm">
-                <span class="material-symbols-outlined text-[18px]">smart_toy</span>
+              <span class="text-[10px] text-on-surface-variant pl-1">Bank Buddy AI Core &bull; Grounded Deterministic Response</span>
+            </div>
+          `;
+          chatThread.appendChild(aiTurn);
+        } catch (err) {
+          const indicator = document.getElementById('chat-typing-indicator');
+          if (indicator) indicator.remove();
+
+          const errTurn = document.createElement('div');
+          errTurn.className = 'flex items-start gap-3 pr-8';
+          errTurn.innerHTML = `
+            <div class="w-8 h-8 rounded-xl bg-error text-white flex items-center justify-center shrink-0 shadow-sm">
+              <span class="material-symbols-outlined text-[18px]">error</span>
+            </div>
+            <div class="flex flex-col gap-2 max-w-2xl w-full">
+              <div class="bg-surface-container-lowest p-4 rounded-2xl border border-error/30 text-error text-xs">
+                ${err.message}
               </div>
-              <div class="flex flex-col gap-2 max-w-2xl w-full">
-                <div class="bg-surface-container-lowest p-5 rounded-2xl border border-surface-container-high/60 shadow-sm flex flex-col gap-3">
-                  <p class="text-sm text-on-surface leading-relaxed">
-                    Here is your verified liquid ledger breakdown, <strong>Elena</strong>:
-                  </p>
-                  <div class="grid grid-cols-3 gap-2.5 text-center">
-                    <div class="p-3 rounded-xl bg-surface-container-low border border-surface-container-high">
-                      <div class="text-[10px] text-on-surface-variant uppercase font-semibold">Checking</div>
-                      <div class="text-base font-bold text-on-surface mt-0.5">₹99,500.00</div>
-                    </div>
-                    <div class="p-3 rounded-xl bg-surface-container-low border border-surface-container-high">
-                      <div class="text-[10px] text-on-surface-variant uppercase font-semibold">Sapphire Due</div>
-                      <div class="text-base font-bold text-error mt-0.5">-₹9,500.00</div>
-                    </div>
-                    <div class="p-3 rounded-xl bg-primary/10 border border-primary/20">
-                      <div class="text-[10px] text-primary uppercase font-bold">Safe Surplus</div>
-                      <div class="text-base font-extrabold text-primary mt-0.5">₹90,000.00</div>
-                    </div>
-                  </div>
-                </div>
-                <span class="text-[10px] text-on-surface-variant pl-1">Bank Buddy Core &bull; 85ms</span>
-              </div>
-            `;
-            chatThread.appendChild(aiTurn);
-          } else {
-            aiTurn.innerHTML = `
-              <div class="w-8 h-8 rounded-xl bg-primary text-on-primary flex items-center justify-center shrink-0 shadow-sm">
-                <span class="material-symbols-outlined text-[18px]">smart_toy</span>
-              </div>
-              <div class="flex flex-col gap-2 max-w-2xl w-full">
-                <div class="bg-surface-container-lowest p-5 rounded-2xl border border-surface-container-high/60 shadow-sm flex flex-col gap-2.5">
-                  <p class="text-sm text-on-surface leading-relaxed">
-                    I have processed your request: "<em>${text}</em>". Account telemetry and ISO-20022 security policies confirmed 100% compliant.
-                  </p>
-                  <div class="p-2.5 rounded-xl bg-surface-container-low flex items-center justify-between text-xs">
-                    <span class="text-on-surface-variant">Deterministic Safety Check</span>
-                    <span class="text-primary font-bold">100% Verified Safe</span>
-                  </div>
-                </div>
-                <span class="text-[10px] text-on-surface-variant pl-1">Bank Buddy Core &bull; 110ms</span>
-              </div>
-            `;
-            chatThread.appendChild(aiTurn);
-          }
-          window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
-        }, 500);
+            </div>
+          `;
+          chatThread.appendChild(errTurn);
+        }
+
+        window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
       }
 
       // Prompt Chips click to send
