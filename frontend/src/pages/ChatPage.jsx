@@ -1,11 +1,12 @@
 import React, { useState, useRef, useEffect } from 'react';
 import Sidebar from '../components/Sidebar';
 import { useAuth } from '../context/AuthContext';
-import { Send, Bot, User, Sparkles, ShieldCheck, CheckCircle2, AlertCircle } from 'lucide-react';
+import { Send, Bot, ShieldCheck, CheckCircle2, AlertTriangle, Cpu, Wrench } from 'lucide-react';
 
 export default function ChatPage() {
   const { user } = useAuth();
   const messagesEndRef = useRef(null);
+  const sessionId = useRef(`SESSION-${Math.random().toString(36).substring(2, 9).toUpperCase()}`);
 
   const [input, setInput] = useState('');
   const [messages, setMessages] = useState([
@@ -19,10 +20,10 @@ export default function ChatPage() {
   const [isTyping, setIsTyping] = useState(false);
 
   const quickPrompts = [
-    'Freeze my debit card',
-    'Check my safe surplus',
-    'Sweep ₹50,000 to High-Yield Vault',
-    'View ISO 20022 audit logs'
+    'What is my account balance?',
+    'Analyze my expenses',
+    'What are my upcoming payments?',
+    'What is my credit card balance and due date?'
   ];
 
   const scrollToBottom = () => {
@@ -33,9 +34,9 @@ export default function ChatPage() {
     scrollToBottom();
   }, [messages, isTyping]);
 
-  const handleSend = (textToSend) => {
+  const handleSend = async (textToSend) => {
     const text = textToSend || input;
-    if (!text.trim()) return;
+    if (!text.trim() || isTyping) return;
 
     const userMessage = {
       id: Date.now(),
@@ -48,54 +49,120 @@ export default function ChatPage() {
     setInput('');
     setIsTyping(true);
 
-    setTimeout(() => {
-      let replyText = `Processed instruction "${text}". ISO-20022 compliance checks verified.`;
-      let card = null;
+    try {
+      const token = user?.token || user?.accessToken;
+      const history = messages
+        .filter((m) => m.sender === 'user' || m.sender === 'assistant')
+        .slice(-6)
+        .map((m) => ({
+          role: m.sender === 'user' ? 'user' : 'assistant',
+          content: m.text
+        }));
 
-      const lower = text.toLowerCase();
+      const res = await fetch('/api/v1/chat', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token ? { Authorization: `Bearer ${token}` } : {})
+        },
+        body: JSON.stringify({
+          message: text.trim(),
+          session_id: sessionId.current,
+          conversation_history: history
+        })
+      });
 
-      if (lower.includes('freeze') || lower.includes('card')) {
-        replyText = `Card Guard Update: Bank Buddy Debit Card ending in *${
-          user?.cardNumber || '4441'
-        } has been set to FROZEN. All online and POS transactions are blocked.`;
-        card = {
-          type: 'card_status',
-          title: `Debit Card *${user?.cardNumber || '4441'} Status: FROZEN`,
-          desc: 'Instant biometric unfreeze is available anytime.',
-          status: 'Secured'
-        };
-      } else if (lower.includes('surplus') || lower.includes('balance')) {
-        replyText =
-          'Autonomous Ledger Analysis: Your Liquid Checking account holds ₹99,500.00. Outstanding credit bill is ₹9,500.00. Your safe calculated surplus is ₹90,000.00.';
-        card = {
-          type: 'surplus',
-          title: 'Calculated Safe Surplus: ₹90,000.00',
-          desc: 'Zero risk of bill overdraft. Ready for high-yield allocation.',
-          status: 'Optimal'
-        };
-      } else if (lower.includes('sweep') || lower.includes('vault') || lower.includes('transfer')) {
-        replyText =
-          'ISO 20022 Real-time Wire: Initiated instant transfer of ₹50,000.00 from Liquid Checking into Sovereign High-Yield Vault (7.45% APY).';
-        card = {
-          type: 'transfer',
-          title: 'Direct Transfer Executed: ₹50,000.00',
-          desc: 'Reference: ISO20022-IND-8829104 &bull; Settlement: Immediate',
-          status: 'Settled'
-        };
+      if (!res.ok) {
+        const errorData = await res.json().catch(() => ({}));
+        throw new Error(errorData.detail || errorData.error || `HTTP ${res.status}`);
       }
 
-      setMessages((prev) => [
-        ...prev,
-        {
-          id: Date.now() + 1,
-          sender: 'assistant',
-          text: replyText,
-          card,
-          time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-        }
-      ]);
+      const data = await res.json();
+
+      const assistantMessage = {
+        id: Date.now() + 1,
+        sender: 'assistant',
+        text: data.answer || 'Response processed successfully.',
+        trace_id: data.trace_id,
+        agents_invoked: data.agents_invoked || [],
+        tools_invoked: data.tools_invoked || [],
+        answer_type: data.answer_type,
+        requires_confirmation: data.requires_confirmation,
+        confirmation_token: data.confirmation_token,
+        data: data.data,
+        time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+      };
+
+      setMessages((prev) => [...prev, assistantMessage]);
+    } catch (err) {
+      console.error('Chat error:', err);
+      const errorMessage = {
+        id: Date.now() + 1,
+        sender: 'assistant',
+        text: `AI Copilot Notice: ${err.message}. Please verify that the AI Core service is running.`,
+        isError: true,
+        time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+      };
+      setMessages((prev) => [...prev, errorMessage]);
+    } finally {
       setIsTyping(false);
-    }, 600);
+    }
+  };
+
+  const handleConfirmAction = async (confirmationToken, decision, parentMsgId) => {
+    setIsTyping(true);
+    try {
+      const token = user?.token || user?.accessToken;
+      const res = await fetch('/api/v1/chat/confirm', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token ? { Authorization: `Bearer ${token}` } : {})
+        },
+        body: JSON.stringify({
+          confirmation_token: confirmationToken,
+          decision: decision,
+          session_id: sessionId.current
+        })
+      });
+
+      if (!res.ok) {
+        const errorData = await res.json().catch(() => ({}));
+        throw new Error(errorData.detail || errorData.error || `HTTP ${res.status}`);
+      }
+
+      const data = await res.json();
+
+      // Mark the original message's confirmation as resolved
+      setMessages((prev) =>
+        prev.map((m) =>
+          m.id === parentMsgId ? { ...m, confirmation_resolved: decision } : m
+        )
+      );
+
+      const confirmResultMessage = {
+        id: Date.now(),
+        sender: 'assistant',
+        text: data.answer || (decision === 'yes' ? 'Action confirmed.' : 'Action cancelled.'),
+        trace_id: data.trace_id,
+        agents_invoked: data.agents_invoked || [],
+        tools_invoked: data.tools_invoked || [],
+        time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+      };
+
+      setMessages((prev) => [...prev, confirmResultMessage]);
+    } catch (err) {
+      const errorMsg = {
+        id: Date.now(),
+        sender: 'assistant',
+        text: `Confirmation failed: ${err.message}`,
+        isError: true,
+        time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+      };
+      setMessages((prev) => [...prev, errorMsg]);
+    } finally {
+      setIsTyping(false);
+    }
   };
 
   return (
@@ -114,17 +181,17 @@ export default function ChatPage() {
             <div className="flex flex-col">
               <span className="font-bold text-sm text-slate-900 dark:text-white flex items-center gap-1.5">
                 Bank Buddy Copilot
-                <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
+                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
               </span>
               <span className="text-[10px] text-slate-400 font-medium">
-                ISO 20022 Compliant Wealth Intelligence
+                Autonomous LangGraph &bull; Grounded Deterministic Banking Tools
               </span>
             </div>
           </div>
 
           <div className="flex items-center gap-2">
             <span className="px-2.5 py-1 bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-200 dark:border-emerald-800 text-emerald-700 dark:text-emerald-400 rounded-full text-[10px] font-bold flex items-center gap-1">
-              <ShieldCheck className="w-3.5 h-3.5" /> End-to-End Encrypted
+              <ShieldCheck className="w-3.5 h-3.5" /> ISO 20022 Verified Gateway
             </span>
           </div>
         </header>
@@ -141,7 +208,8 @@ export default function ChatPage() {
                 <button
                   key={i}
                   onClick={() => handleSend(prompt)}
-                  className="px-3 py-1.5 bg-white dark:bg-slate-800 border border-indigo-200 dark:border-slate-700 hover:border-indigo-500 rounded-xl text-xs font-semibold text-slate-700 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-indigo-400 transition shadow-sm cursor-pointer"
+                  disabled={isTyping}
+                  className="px-3 py-1.5 bg-white dark:bg-slate-800 border border-indigo-200 dark:border-slate-700 hover:border-indigo-500 rounded-xl text-xs font-semibold text-slate-700 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-indigo-400 transition shadow-sm cursor-pointer disabled:opacity-50"
                 >
                   {prompt}
                 </button>
@@ -159,6 +227,8 @@ export default function ChatPage() {
                 className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 ${
                   msg.sender === 'user'
                     ? 'bg-indigo-600 text-white font-bold text-xs'
+                    : msg.isError
+                    ? 'bg-rose-100 dark:bg-rose-950 text-rose-600'
                     : 'bg-indigo-100 dark:bg-indigo-950 text-indigo-700 dark:text-indigo-300'
                 }`}
               >
@@ -169,28 +239,77 @@ export default function ChatPage() {
                 )}
               </div>
 
-              <div className="flex flex-col gap-1">
+              <div className="flex flex-col gap-1 max-w-[85%]">
                 <div
                   className={`p-3.5 rounded-2xl text-xs leading-relaxed ${
                     msg.sender === 'user'
                       ? 'bg-indigo-600 text-white rounded-tr-none'
+                      : msg.isError
+                      ? 'bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-900 text-rose-800 dark:text-rose-200 rounded-tl-none'
                       : 'bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-200 border border-slate-200 dark:border-slate-800 shadow-sm rounded-tl-none'
                   }`}
                 >
-                  {msg.text}
+                  <p className="whitespace-pre-line">{msg.text}</p>
 
-                  {/* Optional Rich Response Card */}
-                  {msg.card && (
-                    <div className="mt-3 p-3 bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 rounded-xl">
-                      <div className="flex justify-between items-center mb-1">
-                        <span className="font-bold text-slate-900 dark:text-white">
-                          {msg.card.title}
-                        </span>
-                        <span className="px-1.5 py-0.5 bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-400 font-extrabold text-[9px] uppercase rounded">
-                          {msg.card.status}
-                        </span>
+                  {/* High-Risk Action Confirmation Panel */}
+                  {msg.requires_confirmation && !msg.confirmation_resolved && (
+                    <div className="mt-3 p-3 bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800 rounded-xl">
+                      <div className="flex items-center gap-1.5 text-amber-800 dark:text-amber-300 font-bold text-xs mb-1.5">
+                        <AlertTriangle className="w-4 h-4 text-amber-600" />
+                        Human Confirmation Required
                       </div>
-                      <p className="text-[11px] text-slate-500 dark:text-slate-400">{msg.card.desc}</p>
+                      <p className="text-[11px] text-amber-700 dark:text-amber-400 mb-3">
+                        This is a high-risk irreversible action. Please confirm to proceed.
+                      </p>
+                      <div className="flex gap-2">
+                        <button
+                          onClick={() => handleConfirmAction(msg.confirmation_token, 'yes', msg.id)}
+                          disabled={isTyping}
+                          className="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-bold transition shadow-sm cursor-pointer disabled:opacity-50"
+                        >
+                          Confirm &amp; Execute
+                        </button>
+                        <button
+                          onClick={() => handleConfirmAction(msg.confirmation_token, 'no', msg.id)}
+                          disabled={isTyping}
+                          className="px-3 py-1.5 bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600 text-slate-800 dark:text-slate-200 rounded-lg text-xs font-bold transition cursor-pointer disabled:opacity-50"
+                        >
+                          Cancel
+                        </button>
+                      </div>
+                    </div>
+                  )}
+
+                  {msg.confirmation_resolved && (
+                    <div className="mt-2 text-[10px] font-semibold text-slate-400 italic">
+                      Resolution: {msg.confirmation_resolved === 'yes' ? 'Confirmed & Executed' : 'Cancelled by user'}
+                    </div>
+                  )}
+
+                  {/* Audit Trail & Grounding Transparency */}
+                  {(msg.agents_invoked?.length > 0 || msg.tools_invoked?.length > 0 || msg.trace_id) && (
+                    <div className="mt-2.5 pt-2 border-t border-slate-100 dark:border-slate-800 flex flex-wrap items-center gap-1.5 text-[10px]">
+                      {msg.trace_id && (
+                        <span className="px-1.5 py-0.5 bg-slate-100 dark:bg-slate-800 rounded text-slate-500 font-mono">
+                          {msg.trace_id}
+                        </span>
+                      )}
+                      {msg.agents_invoked?.map((agent, idx) => (
+                        <span
+                          key={idx}
+                          className="px-1.5 py-0.5 bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 rounded font-medium flex items-center gap-0.5"
+                        >
+                          <Cpu className="w-2.5 h-2.5" /> {agent}
+                        </span>
+                      ))}
+                      {msg.tools_invoked?.map((tool, idx) => (
+                        <span
+                          key={idx}
+                          className="px-1.5 py-0.5 bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 rounded font-medium flex items-center gap-0.5"
+                        >
+                          <Wrench className="w-2.5 h-2.5" /> {tool}
+                        </span>
+                      ))}
                     </div>
                   )}
                 </div>
@@ -210,7 +329,7 @@ export default function ChatPage() {
                 <span className="w-1.5 h-1.5 rounded-full bg-indigo-600 animate-bounce"></span>
                 <span className="w-1.5 h-1.5 rounded-full bg-indigo-600 animate-bounce [animation-delay:0.2s]"></span>
                 <span className="w-1.5 h-1.5 rounded-full bg-indigo-600 animate-bounce [animation-delay:0.4s]"></span>
-                <span className="ml-1 text-[11px]">Verifying with ISO 20022 gateway...</span>
+                <span className="ml-1 text-[11px]">Reasoning &amp; querying banking ledger...</span>
               </div>
             </div>
           )}
@@ -231,12 +350,13 @@ export default function ChatPage() {
               type="text"
               value={input}
               onChange={(e) => setInput(e.target.value)}
-              placeholder="Ask Bank Buddy Copilot or type 'freeze debit card', 'check surplus'..."
-              className="flex-1 px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl text-xs sm:text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              disabled={isTyping}
+              placeholder="Ask Bank Buddy Copilot e.g. 'What is my balance?', 'Analyze my expenses'..."
+              className="flex-1 px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl text-xs sm:text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 disabled:opacity-60"
             />
             <button
               type="submit"
-              disabled={!input.trim()}
+              disabled={!input.trim() || isTyping}
               className="p-3 bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white rounded-xl transition shadow-sm cursor-pointer shrink-0"
             >
               <Send className="w-4 h-4" />

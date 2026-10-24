@@ -260,6 +260,30 @@ export default function DashboardPage() {
     setCopilotMessages((prev) => [...prev, userMsg]);
     setCopilotInput('');
 
+    try {
+      const token = user?.token || user?.accessToken;
+      const res = await fetch('/api/v1/chat', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token ? { Authorization: `Bearer ${token}` } : {})
+        },
+        body: JSON.stringify({
+          message: text.trim(),
+          session_id: `DASH-${user?.id || 'C1001'}`,
+          conversation_history: []
+        })
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        setCopilotMessages((prev) => [...prev, { sender: 'assistant', text: data.answer }]);
+        return;
+      }
+    } catch (e) {
+      console.warn('Dashboard Copilot chat error:', e);
+    }
+
     const lower = text.toLowerCase();
     if (lower.includes('freeze') || lower.includes('unfreeze') || lower.includes('lock card')) {
       await handleToggleCardFreeze();
@@ -276,7 +300,7 @@ export default function DashboardPage() {
         ...prev,
         {
           sender: 'assistant',
-          text: `ISO 20022 Wire executed: ₹${Math.min(summary.safeSurplus, 50000).toLocaleString('en-IN')} swept into Sovereign High-Yield Bond Vault (7.45% APY). Ledger updated.`
+          text: `ISO 20022 Wire executed: ?${Math.min(summary.safeSurplus, 50000).toLocaleString('en-IN')} swept into Sovereign High-Yield Bond Vault (7.45% APY). Ledger updated.`
         }
       ]);
     } else if (lower.includes('surplus') || lower.includes('balance') || lower.includes('metric')) {

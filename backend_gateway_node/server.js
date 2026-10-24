@@ -51,6 +51,7 @@ app.get("/api", (req, res) => {
 require("./routes/user-routes")(app);
 require("./routes/product-routes")(app);
 require("./routes/banking-routes")(app);
+require("./routes/chat-routes")(app);
 
 // React SPA Route Fallback (enables client-side routing on reload for /login, /desktop, /chat)
 app.get("*", (req, res, next) => {

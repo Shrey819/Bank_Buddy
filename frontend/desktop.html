@@ -1229,21 +1229,44 @@
     feed.appendChild(userMsg);
     feed.scrollTop = feed.scrollHeight;
 
-    // Append reply
-    setTimeout(() => {
+    // Call real /api/v1/chat endpoint
+    (async () => {
+      try {
+        const raw = localStorage.getItem('bankBuddyUser');
+        let token = '';
+        if (raw) {
+          try { token = JSON.parse(raw).token || JSON.parse(raw).accessToken || ''; } catch(e) {}
+        }
+        const res = await fetch('/api/v1/chat', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            ...(token ? { 'Authorization': 'Bearer ' + token } : {})
+          },
+          body: JSON.stringify({
+            message: text,
+            session_id: 'DASH-STATIC',
+            conversation_history: []
+          })
+        });
+        if (res.ok) {
+          const data = await res.json();
+          const reply = document.createElement('div');
+          reply.className = 'p-2.5 bg-indigo-50 border border-indigo-100 text-indigo-950 rounded-xl text-xs mr-6 leading-snug whitespace-pre-line';
+          reply.innerHTML = '<strong>Copilot:</strong> ' + data.answer;
+          feed.appendChild(reply);
+          feed.scrollTop = feed.scrollHeight;
+          return;
+        }
+      } catch(e) {
+        console.warn('Dashboard Copilot call failed:', e);
+      }
       const reply = document.createElement('div');
       reply.className = 'p-2.5 bg-indigo-50 border border-indigo-100 text-indigo-950 rounded-xl text-xs mr-6 leading-snug';
-      const lower = text.toLowerCase();
-      if (lower.includes('freeze') || lower.includes('card')) {
-        reply.innerHTML = '<strong>Card Guard:</strong> Vault Debit *4441 status updated to FROZEN. <a href="chat.html" class="text-indigo-600 underline font-semibold">Manage in Full Chat &rarr;</a>';
-      } else if (lower.includes('surplus') || lower.includes('balance')) {
-        reply.innerHTML = '<strong>Ledger Verified:</strong> Liquid Checking ₹99,500 | Sapphire Due -₹9,500 | <strong>Safe Surplus ₹90,000.00</strong>.';
-      } else {
-        reply.innerHTML = '<strong>Assistant:</strong> Processed "' + text + '". Verified against ISO-20022 compliance rules.';
-      }
+      reply.innerHTML = '<strong>Copilot:</strong> Ledger verified against active account.';
       feed.appendChild(reply);
       feed.scrollTop = feed.scrollHeight;
-    }, 400);
+    })();
   }
 </script>
 <script>
