@@ -1,36 +1,19 @@
 {
-  "name": "bank-buddy-jwt-auth",
+  "name": "bank-buddy",
   "version": "1.0.0",
-  "description": "Bank Buddy - Secure Banking API with JWT Authentication, Node.js, Express, PostgreSQL and Sequelize",
-  "main": "server.js",
+  "description": "Bank Buddy - Autonomous Wealth & Net Banking Application",
   "scripts": {
-    "start": "node server.js",
-    "test": "node test-server.js",
-    "db:seed": "node backend_gateway_node/db/seed.js"
+    "start": "node backend_gateway_node/server.js",
+    "test": "cd backend_gateway_node && npm test",
+    "db:seed": "cd backend_gateway_node && npm run db:seed"
   },
   "keywords": [
     "bank-buddy",
-    "nodejs",
-    "express",
-    "sequelize",
-    "rest-api",
-    "postgresql",
+    "net-banking",
     "jwt",
-    "authentication"
+    "postgresql",
+    "frontend"
   ],
   "author": "Shrey819",
-  "license": "ISC",
-  "dependencies": {
-    "@neondatabase/serverless": "^1.2.0",
-    "bcryptjs": "^2.4.3",
-    "body-parser": "^1.19.0",
-    "cors": "^2.8.5",
-    "dotenv": "^18.0.9",
-    "express": "^4.17.1",
-    "jsonwebtoken": "^8.5.1",
-    "pg": "^8.6.0",
-    "pg-hstore": "^2.3.4",
-    "sequelize": "^5.21.3",
-    "ws": "^8.22.0"
-  }
+  "license": "ISC"
 }

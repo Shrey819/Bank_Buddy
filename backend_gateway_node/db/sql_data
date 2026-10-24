@@ -8,6 +8,8 @@ BEGIN;
 DROP TABLE IF EXISTS audit_logs CASCADE;
 DROP TABLE IF EXISTS fraud_disputes CASCADE;
 DROP TABLE IF EXISTS card_replacement_requests CASCADE;
+DROP TABLE IF EXISTS card_status_history CASCADE;
+DROP TABLE IF EXISTS debit_cards CASCADE;
 DROP TABLE IF EXISTS personalized_offers CASCADE;
 DROP TABLE IF EXISTS scheduled_payments CASCADE;
 DROP TABLE IF EXISTS loan_emis CASCADE;

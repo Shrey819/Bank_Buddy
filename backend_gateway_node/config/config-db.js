@@ -1,4 +1,11 @@
-require("dotenv").config();
+const path = require("path");
+const fs = require("fs");
+const dotenv = require("dotenv");
+if (fs.existsSync(path.join(__dirname, "../.env"))) {
+  dotenv.config({ path: path.join(__dirname, "../.env") });
+} else {
+  dotenv.config({ path: path.join(__dirname, "../../.env") });
+}
 
 module.exports = {
   DATABASE_URL: process.env.DATABASE_URL || null,
