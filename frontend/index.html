@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Kotak Mahindra Bank | Net Banking Login</title>
+  <title>Bank Buddy | Net Banking Login & Autonomous Wealth</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
@@ -57,45 +57,50 @@
       gap: 1rem;
     }
 
-    .kotak-logo-group {
+    .bank-logo-group {
       display: flex;
       align-items: center;
-      gap: 0.65rem;
+      gap: 0.75rem;
       text-decoration: none;
     }
 
-    .kotak-infinity-emblem {
-      width: 36px;
-      height: 36px;
-      border-radius: 50%;
-      background: linear-gradient(135deg, #003366 40%, #ed1c24 100%);
+    .trust-shield-badge {
+      width: 44px;
+      height: 44px;
+      border-radius: 10px;
+      background: linear-gradient(135deg, #002244 0%, #003366 50%, #0284c7 100%);
       display: flex;
       align-items: center;
       justify-content: center;
-      color: #fff;
-      font-weight: 800;
-      font-size: 1.4rem;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+      box-shadow: 0 4px 12px rgba(0, 51, 102, 0.25);
+      position: relative;
     }
 
-    .kotak-logo-title {
+    .bank-logo-title {
       display: flex;
       flex-direction: column;
-      line-height: 1;
+      line-height: 1.15;
     }
-    .kotak-logo-title .brand-main {
-      font-size: 1.45rem;
+    .bank-logo-title .brand-main {
+      font-size: 1.4rem;
       font-weight: 800;
-      color: var(--kotak-red);
+      color: #003366;
       letter-spacing: -0.03em;
     }
-    .kotak-logo-title .brand-sub {
+    .bank-logo-title .brand-main span {
+      color: #0284c7;
+    }
+    body.high-contrast .bank-logo-title .brand-main { color: #ffffff; }
+    body.high-contrast .bank-logo-title .brand-main span { color: #38bdf8; }
+
+    .bank-logo-title .brand-sub {
       font-size: 0.65rem;
       font-weight: 700;
-      color: var(--kotak-blue);
-      letter-spacing: 0.02em;
+      color: #64748b;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
     }
-    body.high-contrast .kotak-logo-title .brand-sub { color: #93c5fd; }
+    body.high-contrast .bank-logo-title .brand-sub { color: #94a3b8; }
 
     /* ACCESSIBILITY TOOLS */
     .accessibility-bar {
@@ -693,14 +698,22 @@
 <body>
 
   <!-- ==============================================================
-       TOP NAVBAR: KOTAK MAHINDRA BANKING HEADER SPEC
+       TOP NAVBAR: BANK BUDDY TRUST HEADER SPEC
        ============================================================== -->
   <header class="kotak-top-nav">
-    <div class="kotak-logo-group">
-      <div class="kotak-infinity-emblem">∞</div>
-      <div class="kotak-logo-title">
-        <span class="brand-main">kotak</span>
-        <span class="brand-sub">Kotak Mahindra Bank</span>
+    <div class="bank-logo-group">
+      <!-- Modern Banking Trust Shield SVG -->
+      <div class="trust-shield-badge">
+        <svg width="28" height="28" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M18 3L5 8.5V17C5 25.5 10.7 33.3 18 35C25.3 33.3 31 25.5 31 17V8.5L18 3Z" fill="#003366"/>
+          <path d="M18 5L7 9.5V17C7 24.3 11.9 31.2 18 32.8C24.1 31.2 29 24.3 29 17V9.5L18 5Z" stroke="#38bdf8" stroke-width="1.2" fill="none"/>
+          <path d="M13 18L16.5 21.5L23.5 14.5" stroke="#fbbf24" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+          <circle cx="18" cy="10" r="1.5" fill="#38bdf8"/>
+        </svg>
+      </div>
+      <div class="bank-logo-title">
+        <span class="brand-main">Bank <span>Buddy</span></span>
+        <span class="brand-sub">Autonomous Wealth &bull; Verified Banking</span>
       </div>
     </div>
 
@@ -728,7 +741,7 @@
   <div class="demo-credentials-strip" id="demo-strip">
     <div>
       <strong>⚡ Test Login Helper (PRD C1001 Client):</strong>
-      Click any chip to auto-fill Kotak Net Banking login:
+      Click any chip to auto-fill Bank Buddy Net Banking login:
     </div>
     <div style="display: flex; gap: 0.4rem; flex-wrap: wrap;">
       <button class="quick-preset-btn" type="button" onclick="quickFill('98234105', 'BankBuddy@2026')">🔑 CRN: 98234105</button>
@@ -795,10 +808,10 @@
       </div>
     </div>
 
-    <!-- RIGHT SIDE: WELCOME TO KOTAK LOGIN CARD (IMAGE 4) -->
+    <!-- RIGHT SIDE: WELCOME TO BANK BUDDY LOGIN CARD -->
     <div class="kotak-login-card">
       <div class="login-card-top">
-        <h2>Welcome to Kotak</h2>
+        <h2>Welcome to Bank Buddy</h2>
         <div class="netbanking-dropdown" onclick="alert('Net Banking selected')">
           <span>Net Banking</span>
           <span>⌵</span>
@@ -807,7 +820,7 @@
 
       <div class="login-tabs-row">
         <div class="tab-header active" id="tab-btn-login" onclick="switchKotakTab('login')">Login</div>
-        <div class="tab-header" id="tab-btn-register" onclick="switchKotakTab('register')">Register with Kotak</div>
+        <div class="tab-header" id="tab-btn-register" onclick="switchKotakTab('register')">Register with Bank Buddy</div>
       </div>
 
       <!-- Alert Box -->
@@ -1503,7 +1516,7 @@
         const data = await res.json();
         if (!res.ok) throw new Error(data.message || 'Registration failed');
 
-        alert(`Kotak Net Banking Registration Successful!\nYour Generated CRN: ${data.user.crn}\nCard: ${data.user.cardNumber}\nUsername: ${data.user.username}`);
+        alert(`Bank Buddy Net Banking Registration Successful!\nYour Generated CRN: ${data.user.crn}\nCard: ${data.user.cardNumber}\nUsername: ${data.user.username}`);
         switchKotakTab('login');
         quickFill(data.user.crn, password);
       } catch (err) {
