@@ -25,21 +25,13 @@ import {
   AlertCircle,
   Building2,
   Receipt,
-  PiggyBank,
-  Users,
-  ChevronDown,
-  UserCheck
+  PiggyBank
 } from 'lucide-react';
 
 export default function DashboardPage() {
   const { user } = useAuth();
 
-  // Active Customer ID in Neon PostgreSQL (retrieved from user's customer_id or defaulted from DB)
-  const [selectedCustomerId, setSelectedCustomerId] = useState(() => {
-    return user?.customer_id || 'C1001';
-  });
-
-  // Banking data state loaded from Neon PostgreSQL tables
+  // Banking data state loaded from Neon PostgreSQL tables strictly for authenticated user
   const [bankingData, setBankingData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -68,24 +60,18 @@ export default function DashboardPage() {
     }
   ]);
 
-  // Load real banking data for the selected customer ID from PostgreSQL
-  const fetchDashboardData = async (targetCid = selectedCustomerId, isSilent = false) => {
+  // Load real banking data for authenticated user from PostgreSQL
+  const fetchDashboardData = async (isSilent = false) => {
     if (!isSilent) setRefreshing(true);
     try {
       const token = user?.token || user?.accessToken;
       const headers = token ? { Authorization: `Bearer ${token}` } : {};
-      const url = targetCid
-        ? `/api/v1/dashboard-data?customerId=${targetCid}`
-        : `/api/v1/dashboard-data`;
-      const res = await fetch(url, { headers });
+      const res = await fetch('/api/v1/dashboard-data', { headers });
 
       if (res.ok) {
         const json = await res.json();
         if (json.success && json.data) {
           setBankingData(json.data);
-          if (json.data.activeCustomerId && json.data.activeCustomerId !== selectedCustomerId) {
-            setSelectedCustomerId(json.data.activeCustomerId);
-          }
           // Set default selected account from database accounts
           if (json.data.accounts?.length > 0) {
             setSelectedAccountId(json.data.accounts[0].account_id);
@@ -101,18 +87,8 @@ export default function DashboardPage() {
   };
 
   useEffect(() => {
-    fetchDashboardData(selectedCustomerId, true);
-  }, [selectedCustomerId]);
-
-  // Handle customer switcher change directly from database customers list
-  const handleSwitchCustomer = (newCid) => {
-    setSelectedCustomerId(newCid);
-    fetchDashboardData(newCid, false);
-    setNotification({
-      type: 'success',
-      message: `Switched view to Customer ${newCid} in database. All balances and ledger records updated.`
-    });
-  };
+    fetchDashboardData(true);
+  }, [user]);
 
   // Format currency in Indian Rupees
   const formatINR = (val) => {
@@ -153,7 +129,7 @@ export default function DashboardPage() {
           type: 'success',
           message: data.message
         });
-        await fetchDashboardData(selectedCustomerId, true);
+        await fetchDashboardData(true);
       } else {
         setNotification({
           type: 'error',
@@ -200,7 +176,7 @@ export default function DashboardPage() {
         setActionAmount('');
         setActionMerchant('');
         setActionDescription('');
-        await fetchDashboardData(selectedCustomerId, true);
+        await fetchDashboardData(true);
       } else {
         setNotification({
           type: 'error',
@@ -227,8 +203,7 @@ export default function DashboardPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           amount: sweepAmount,
-          sourceAccountId: accounts[0]?.account_id,
-          customerId: selectedCustomerId
+          sourceAccountId: accounts[0]?.account_id
         })
       });
       const data = await res.json();
@@ -237,7 +212,7 @@ export default function DashboardPage() {
           type: 'success',
           message: data.message
         });
-        await fetchDashboardData(selectedCustomerId, true);
+        await fetchDashboardData(true);
       } else {
         setNotification({
           type: 'error',
@@ -309,7 +284,7 @@ export default function DashboardPage() {
         ...prev,
         {
           sender: 'assistant',
-          text: `Neon DB Ledger Verified for Customer ${selectedCustomerId}: Total Liquid Balance: ${formatINR(summary.totalAvailableBalance)} | Credit Due: -${formatINR(summary.creditOutstanding)} | Upcoming Outflows: ${formatINR(summary.upcomingOutflows)} | Safe Sweepable Surplus is ${formatINR(summary.safeSurplus)}.`
+          text: `Neon DB Ledger Verified: Total Liquid Balance: ${formatINR(summary.totalAvailableBalance)} | Credit Due: -${formatINR(summary.creditOutstanding)} | Upcoming Outflows: ${formatINR(summary.upcomingOutflows)} | Safe Sweepable Surplus is ${formatINR(summary.safeSurplus)}.`
         }
       ]);
     } else if (lower.includes('add') || lower.includes('deposit')) {
@@ -335,7 +310,7 @@ export default function DashboardPage() {
         ...prev,
         {
           sender: 'assistant',
-          text: `Command "${text}" analyzed against ISO 20022 database rules for Customer ${selectedCustomerId}. You can ask me to "deposit funds", "transfer money", "freeze card", "sweep surplus", or "check balance".`
+          text: `Command "${text}" analyzed against ISO 20022 database rules. You can ask me to "deposit funds", "transfer money", "freeze card", "sweep surplus", or "check balance".`
         }
       ]);
     }
@@ -348,8 +323,8 @@ export default function DashboardPage() {
 
       {/* Main Content Area */}
       <main className="flex-1 ml-64 p-8 max-w-7xl">
-        {/* Top Header & Customer Switcher Bar */}
-        <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 mb-6">
+        {/* Top Header */}
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
           <div>
             <div className="flex items-center gap-2">
               <h1 className="text-2xl font-black tracking-tight text-slate-900 dark:text-white">
@@ -360,77 +335,14 @@ export default function DashboardPage() {
               </span>
             </div>
             <p className="text-xs text-slate-500 dark:text-slate-400 font-medium mt-0.5">
-              Active Client: <strong className="text-indigo-600 dark:text-indigo-400">{bankingData?.customer?.full_name || 'Loading customer...'}</strong> &bull; Customer ID: <span className="font-mono font-bold text-indigo-500">{bankingData?.customer?.customer_id || selectedCustomerId}</span> &bull; City: {bankingData?.customer?.city || 'Jaipur'} &bull; Email: {bankingData?.customer?.email || ''}
+              Welcome back, <strong className="text-indigo-600 dark:text-indigo-400">{bankingData?.customer?.full_name || user?.name || 'Elena Rostova'}</strong> &bull; Customer ID: <span className="font-mono font-bold text-indigo-500">{bankingData?.customer?.customer_id || 'C1001'}</span> &bull; CRN: {user?.crn || '98234105'} &bull; City: {bankingData?.customer?.city || 'Mumbai'}
             </p>
           </div>
 
-          {/* User/Customer Live Switcher: 100% Derived from Database Customers Table */}
-          {bankingData?.availableCustomers && bankingData.availableCustomers.length > 0 && (
-            <div className="flex items-center gap-2 flex-wrap bg-white dark:bg-slate-900 p-1.5 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-sm">
-              <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider px-2 flex items-center gap-1">
-                <Users className="w-3.5 h-3.5 text-indigo-500" /> Database Clients:
-              </span>
-              {bankingData.availableCustomers.map((cust) => (
-                <button
-                  key={cust.customerId}
-                  onClick={() => handleSwitchCustomer(cust.customerId)}
-                  className={`px-3 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5 cursor-pointer ${
-                    selectedCustomerId === cust.customerId
-                      ? 'bg-indigo-600 text-white shadow-sm'
-                      : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'
-                  }`}
-                  title={`${cust.name} (${cust.city}) - Total Balance: ${formatINR(cust.totalBalance)}`}
-                >
-                  <span>{cust.name} ({cust.customerId})</span>
-                  <span className={`text-[10px] px-1.5 py-0.2 rounded font-extrabold ${
-                    selectedCustomerId === cust.customerId
-                      ? 'bg-indigo-500 text-white'
-                      : 'bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300'
-                  }`}>
-                    {formatINR(cust.totalBalance)}
-                  </span>
-                </button>
-              ))}
-            </div>
-          )}
-        </div>
-
-        {/* Quick Action Control Bar */}
-        <div className="flex items-center justify-between gap-3 mb-6 flex-wrap">
+          {/* Sync & Copilot Quick Controls */}
           <div className="flex items-center gap-2">
             <button
-              onClick={() => {
-                setModalMode('add');
-                setActionAmount('');
-              }}
-              className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold transition shadow-sm flex items-center gap-1.5 cursor-pointer"
-              title="Deposit or Add funds into account"
-            >
-              <Plus className="w-4 h-4 stroke-[3]" /> Add / Deposit Funds
-            </button>
-
-            <button
-              onClick={() => {
-                setModalMode('subtract');
-                setActionAmount('');
-              }}
-              className="px-4 py-2 bg-slate-800 hover:bg-slate-900 dark:bg-slate-700 dark:hover:bg-slate-600 text-white rounded-xl text-xs font-bold transition shadow-sm flex items-center gap-1.5 cursor-pointer"
-              title="Transfer, Pay, or Subtract funds"
-            >
-              <Minus className="w-4 h-4 stroke-[3]" /> Transfer / Subtract Funds
-            </button>
-
-            <button
-              onClick={handleSweepSurplus}
-              className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold transition shadow-sm flex items-center gap-1.5 cursor-pointer"
-            >
-              <Sparkles className="w-3.5 h-3.5" /> Sweep Safe Surplus
-            </button>
-          </div>
-
-          <div className="flex items-center gap-2">
-            <button
-              onClick={() => fetchDashboardData(selectedCustomerId)}
+              onClick={() => fetchDashboardData()}
               className="px-3 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700/60 rounded-xl text-xs font-semibold text-slate-700 dark:text-slate-300 transition shadow-sm flex items-center gap-1.5 cursor-pointer"
               title="Refresh ledger from database tables"
             >
@@ -444,6 +356,38 @@ export default function DashboardPage() {
               <Bot className="w-3.5 h-3.5 text-indigo-600 dark:text-indigo-400" /> AI Copilot
             </button>
           </div>
+        </div>
+
+        {/* Quick Action Control Bar: Add, Subtract, Sweep */}
+        <div className="flex items-center gap-2 mb-6 flex-wrap">
+          <button
+            onClick={() => {
+              setModalMode('add');
+              setActionAmount('');
+            }}
+            className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold transition shadow-sm flex items-center gap-1.5 cursor-pointer"
+            title="Deposit or Add funds into account"
+          >
+            <Plus className="w-4 h-4 stroke-[3]" /> Add / Deposit Funds
+          </button>
+
+          <button
+            onClick={() => {
+              setModalMode('subtract');
+              setActionAmount('');
+            }}
+            className="px-4 py-2 bg-slate-800 hover:bg-slate-900 dark:bg-slate-700 dark:hover:bg-slate-600 text-white rounded-xl text-xs font-bold transition shadow-sm flex items-center gap-1.5 cursor-pointer"
+            title="Transfer, Pay, or Subtract funds"
+          >
+            <Minus className="w-4 h-4 stroke-[3]" /> Transfer / Subtract Funds
+          </button>
+
+          <button
+            onClick={handleSweepSurplus}
+            className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold transition shadow-sm flex items-center gap-1.5 cursor-pointer"
+          >
+            <Sparkles className="w-3.5 h-3.5" /> Sweep Safe Surplus
+          </button>
         </div>
 
         {/* Live Notification Banner */}
@@ -626,10 +570,10 @@ export default function DashboardPage() {
                   <span className="font-bold uppercase tracking-widest">{primaryDebitCard?.card_network || 'VISA'}</span>
                 </div>
                 <div className="text-sm font-mono tracking-widest my-3">
-                  {primaryDebitCard?.masked_card_number || '•••• •••• •••• 2468'}
+                  {primaryDebitCard?.masked_card_number || '•••• •••• •••• 4441'}
                 </div>
                 <div className="flex justify-between text-[10px] text-slate-300 font-mono">
-                  <span>{bankingData?.customer?.full_name?.toUpperCase() || 'ELENA ROSTOVA'}</span>
+                  <span>{bankingData?.customer?.full_name?.toUpperCase() || user?.name?.toUpperCase() || 'ELENA ROSTOVA'}</span>
                   <span>{primaryDebitCard?.expires_on ? new Date(primaryDebitCard.expires_on).toLocaleDateString('en-IN', { month: '2-digit', year: '2-digit' }) : '01/29'}</span>
                 </div>
                 {isCardFrozen && (

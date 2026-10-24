@@ -5,31 +5,10 @@ const configJwt = require("../config/config-jwt.js");
 
 /**
  * Resolve customer ID strictly from PostgreSQL database tables:
- * 1. Checks `customers` table for requested customerId in query or body
- * 2. Or queries `users` table for user's assigned customer_id
- * 3. Or falls back to first customer in `customers` table
+ * Authenticated user JWT token ALWAYS takes priority, looking up users.customer_id directly.
  */
 async function resolveCustomerId(req) {
-  // 1. Explicit query or body parameter from frontend selection
-  if (req.query && req.query.customerId) {
-    const qCid = req.query.customerId.trim().toUpperCase();
-    const [rows] = await sequelize.query(
-      `SELECT customer_id FROM customers WHERE customer_id = :qCid`,
-      { replacements: { qCid } }
-    );
-    if (rows.length > 0) return rows[0].customer_id;
-  }
-
-  if (req.body && req.body.customerId) {
-    const bCid = req.body.customerId.trim().toUpperCase();
-    const [rows] = await sequelize.query(
-      `SELECT customer_id FROM customers WHERE customer_id = :bCid`,
-      { replacements: { bCid } }
-    );
-    if (rows.length > 0) return rows[0].customer_id;
-  }
-
-  // 2. Resolve from JWT Token by looking up users table directly
+  // 1. Resolve from authenticated JWT Token by looking up users table directly
   const authHeader = req.headers["authorization"] || req.headers["x-access-token"];
   if (authHeader) {
     try {
@@ -47,6 +26,25 @@ async function resolveCustomerId(req) {
     } catch (e) {
       // ignore token parse error
     }
+  }
+
+  // 2. Fallback query / body parameter for testing
+  if (req.query && req.query.customerId) {
+    const qCid = req.query.customerId.trim().toUpperCase();
+    const [rows] = await sequelize.query(
+      `SELECT customer_id FROM customers WHERE customer_id = :qCid`,
+      { replacements: { qCid } }
+    );
+    if (rows.length > 0) return rows[0].customer_id;
+  }
+
+  if (req.body && req.body.customerId) {
+    const bCid = req.body.customerId.trim().toUpperCase();
+    const [rows] = await sequelize.query(
+      `SELECT customer_id FROM customers WHERE customer_id = :bCid`,
+      { replacements: { bCid } }
+    );
+    if (rows.length > 0) return rows[0].customer_id;
   }
 
   // 3. Fallback: Query first customer from customers database table
@@ -136,17 +134,6 @@ exports.getDashboardData = async (req, res) => {
       { replacements: { customerId } }
     );
 
-    // 9. All available customers directly from customers and accounts tables
-    const [allCustomers] = await sequelize.query(
-      `SELECT c.customer_id, c.full_name, c.email, c.city,
-              COALESCE(SUM(a.available_balance), 0) as total_balance,
-              COUNT(DISTINCT a.account_id) as accounts_count
-       FROM customers c
-       LEFT JOIN accounts a ON c.customer_id = a.customer_id
-       GROUP BY c.customer_id, c.full_name, c.email, c.city
-       ORDER BY c.customer_id ASC`
-    );
-
     // Calculations based strictly on database values
     const totalAvailableBalance = accounts.reduce((acc, a) => acc + parseFloat(a.available_balance || 0), 0);
     const totalLedgerBalance = accounts.reduce((acc, a) => acc + parseFloat(a.ledger_balance || 0), 0);
@@ -171,16 +158,7 @@ exports.getDashboardData = async (req, res) => {
     return res.status(200).json({
       success: true,
       data: {
-        activeCustomerId: customerId,
         customer,
-        availableCustomers: allCustomers.map(ac => ({
-          customerId: ac.customer_id,
-          name: ac.full_name,
-          city: ac.city,
-          email: ac.email,
-          totalBalance: parseFloat(ac.total_balance),
-          accountsCount: parseInt(ac.accounts_count, 10)
-        })),
         summary: {
           totalAvailableBalance: Math.round(totalAvailableBalance * 100) / 100,
           totalLedgerBalance: Math.round(totalLedgerBalance * 100) / 100,
