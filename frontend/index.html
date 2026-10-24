@@ -416,13 +416,6 @@
       cursor: pointer;
     }
 
-    .virtual-keypad-trigger {
-      color: #0066cc;
-      text-decoration: none;
-      cursor: pointer;
-      font-size: 0.75rem;
-    }
-    .virtual-keypad-trigger:hover { text-decoration: underline; }
 
     .forgot-link-box {
       margin-bottom: 1.5rem;
@@ -466,34 +459,6 @@
       background: #dc2626;
     }
 
-    /* SCRAMBLED VIRTUAL KEYPAD */
-    .scrambled-keypad-panel {
-      background: #f3f4f6;
-      border: 1px solid #d1d5db;
-      border-radius: 6px;
-      padding: 0.65rem;
-      margin-bottom: 1rem;
-      display: none;
-    }
-    body.high-contrast .scrambled-keypad-panel { background: #27272a; border-color: #52525b; }
-
-    .keypad-keys-container {
-      display: grid;
-      grid-template-columns: repeat(5, 1fr);
-      gap: 0.35rem;
-    }
-    .key-btn {
-      background: #ffffff;
-      border: 1px solid #d1d5db;
-      padding: 0.35rem;
-      font-size: 0.85rem;
-      font-weight: 700;
-      border-radius: 4px;
-      cursor: pointer;
-      color: var(--text-dark);
-    }
-    body.high-contrast .key-btn { background: #18181b; color: #fff; border-color: #3f3f46; }
-    .key-btn:hover { background: #0066cc; color: #fff; }
 
     /* FOOTER WARNING BAR */
     .bottom-safety-bar {
@@ -717,15 +682,8 @@
       </div>
     </div>
 
-    <!-- ACCESSIBILITY CONTROLS (IMAGE 4 SPEC) -->
+    <!-- ACCESSIBILITY CONTROLS -->
     <div class="accessibility-bar">
-      <div class="font-size-group">
-        <span>Font size</span>
-        <button type="button" class="font-pill active" onclick="setFontScale('0.95rem', this)">A</button>
-        <button type="button" class="font-pill" onclick="setFontScale('1.05rem', this)">A+</button>
-        <button type="button" class="font-pill" onclick="setFontScale('1.15rem', this)">A++</button>
-      </div>
-
       <label class="contrast-wrapper" title="Toggle High Contrast Mode">
         <span>High contrast mode</span>
         <span class="beta-badge">Beta</span>
@@ -747,8 +705,6 @@
       <button class="quick-preset-btn" type="button" onclick="quickFill('98234105', 'BankBuddy@2026')">🔑 CRN: 98234105</button>
       <button class="quick-preset-btn" type="button" onclick="quickFill('elena', 'BankBuddy@2026')">👤 Username: elena</button>
       <button class="quick-preset-btn" type="button" onclick="quickFill('4441', 'BankBuddy@2026')">💳 Card: 4441</button>
-      <a href="desktop.html" class="quick-preset-btn" style="text-decoration: none; background: #003366; color: #fff; font-weight: 700;">🖥️ Open Desktop Page</a>
-      <a href="chat.html" class="quick-preset-btn" style="text-decoration: none; background: #6b38d4; color: #fff; font-weight: 700;">💬 Open Chat Page</a>
     </div>
   </div>
 
@@ -861,22 +817,12 @@
           </button>
         </div>
 
-        <!-- VIRTUAL KEYPAD (SCRAMBLED ON-SCREEN NUMPAD) -->
-        <div class="scrambled-keypad-panel" id="virtual-keypad-panel">
-          <div style="display: flex; justify-content: space-between; font-size: 0.7rem; font-weight: 700; margin-bottom: 0.4rem; color: var(--text-muted);">
-            <span>SECURE SCRAMBLED KEYPAD</span>
-            <span style="cursor: pointer;" onclick="toggleVirtualKeypad(false)">✕</span>
-          </div>
-          <div class="keypad-keys-container" id="keypad-keys-container"></div>
-        </div>
-
-        <!-- REMEMBER CRN & VIRTUAL KEYPAD LINK -->
+        <!-- REMEMBER CRN -->
         <div class="login-options-row">
           <label class="remember-crn-label">
             <input type="checkbox" id="remember-crn-check" checked>
             <span>Remember my CRN</span>
           </label>
-          <span class="virtual-keypad-trigger" onclick="toggleVirtualKeypad()">Use virtual keypad</span>
         </div>
 
         <!-- FORGOT DETAILS LINK -->
@@ -1193,11 +1139,6 @@
     };
 
     // Accessibility handlers
-    function setFontScale(scale, btn) {
-      document.documentElement.style.setProperty('--font-scale', scale);
-      document.querySelectorAll('.font-pill').forEach(p => p.classList.remove('active'));
-      btn.classList.add('active');
-    }
 
     function toggleHighContrast(isHigh) {
       if (isHigh) {
@@ -1261,53 +1202,6 @@
       hideKotakAlert();
     }
 
-    // Scrambled Virtual Keypad
-    function toggleVirtualKeypad(forceState) {
-      const panel = document.getElementById('virtual-keypad-panel');
-      const isVisible = panel.style.display === 'block';
-      const show = forceState !== undefined ? forceState : !isVisible;
-
-      if (show) {
-        panel.style.display = 'block';
-        const digits = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9].sort(() => Math.random() - 0.5);
-        const container = document.getElementById('keypad-keys-container');
-        container.innerHTML = digits.map(d => `
-          <button type="button" class="key-btn" onclick="pressKey('${d}')">${d}</button>
-        `).join('') + `
-          <button type="button" class="key-btn" style="color: #ed1c24;" onclick="backspaceKey()">⌫</button>
-          <button type="button" class="key-btn" style="color: #6b7280;" onclick="clearKeys()">CLR</button>
-        `;
-      } else {
-        panel.style.display = 'none';
-      }
-    }
-
-    function pressKey(d) {
-      const activeEl = document.activeElement;
-      const target = (activeEl && (activeEl.id === 'login-id-field' || activeEl.id === 'login-pass-field'))
-        ? activeEl
-        : document.getElementById('login-id-field');
-      target.value += d;
-      checkButtonActive();
-    }
-
-    function backspaceKey() {
-      const activeEl = document.activeElement;
-      const target = (activeEl && (activeEl.id === 'login-id-field' || activeEl.id === 'login-pass-field'))
-        ? activeEl
-        : document.getElementById('login-id-field');
-      target.value = target.value.slice(0, -1);
-      checkButtonActive();
-    }
-
-    function clearKeys() {
-      const activeEl = document.activeElement;
-      const target = (activeEl && (activeEl.id === 'login-id-field' || activeEl.id === 'login-pass-field'))
-        ? activeEl
-        : document.getElementById('login-id-field');
-      target.value = '';
-      checkButtonActive();
-    }
 
     function showKotakAlert(msg) {
       const box = document.getElementById('login-alert-box');
