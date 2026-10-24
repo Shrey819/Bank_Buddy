@@ -1,0 +1,744 @@
+<!-- Bank Buddy AI Chat Agent - Minimalist Autonomous Assistant -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <script>
+    if (localStorage.getItem('bankBuddyContrast') === 'true') {
+      document.documentElement.classList.add('high-contrast', 'dark');
+    }
+  </script>
+  <meta charset="utf-8">
+  <meta content="width=device-width, initial-scale=1.0" name="viewport">
+  <title>Bank Buddy — AI Banking Chat</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet">
+  <style>
+    @layer base {
+      html, body { margin: 0; padding: 0; }
+      body { overscroll-behavior: none; }
+    }
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 9999px; }
+  
+/* ==========================================================================
+       CHAT DARK MODE / HIGH CONTRAST (ALL ELEMENTS)
+       ========================================================================== */
+    html.high-contrast,
+    body.high-contrast,
+    html.dark,
+    body.dark {
+      background-color: #0b0f19 !important;
+      color: #f1f5f9 !important;
+    }
+
+    /* Global Sidebar in Dark Mode */
+    body.high-contrast aside#global-sidebar,
+    body.dark aside#global-sidebar {
+      background-color: #0f172a !important;
+      border-color: #1e293b !important;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4) !important;
+    }
+    body.high-contrast aside#global-sidebar .bg-white,
+    body.dark aside#global-sidebar .bg-white {
+      background-color: #1e293b !important;
+      border-color: #334155 !important;
+    }
+    body.high-contrast aside#global-sidebar .bg-slate-50,
+    body.dark aside#global-sidebar .bg-slate-50 {
+      background-color: #1e293b !important;
+      border-color: #334155 !important;
+    }
+    body.high-contrast aside#global-sidebar input,
+    body.dark aside#global-sidebar input {
+      background-color: #1e293b !important;
+      border-color: #334155 !important;
+      color: #f8fafc !important;
+    }
+    body.high-contrast aside#global-sidebar input::placeholder,
+    body.dark aside#global-sidebar input::placeholder {
+      color: #94a3b8 !important;
+    }
+    body.high-contrast aside#global-sidebar .text-slate-900,
+    body.high-contrast aside#global-sidebar .text-slate-800,
+    body.high-contrast aside#global-sidebar .text-slate-700,
+    body.dark aside#global-sidebar .text-slate-900,
+    body.dark aside#global-sidebar .text-slate-800,
+    body.dark aside#global-sidebar .text-slate-700 {
+      color: #f8fafc !important;
+    }
+    body.high-contrast aside#global-sidebar .text-slate-600,
+    body.high-contrast aside#global-sidebar .text-slate-500,
+    body.high-contrast aside#global-sidebar .text-slate-400,
+    body.dark aside#global-sidebar .text-slate-600,
+    body.dark aside#global-sidebar .text-slate-500,
+    body.dark aside#global-sidebar .text-slate-400 {
+      color: #94a3b8 !important;
+    }
+    body.high-contrast aside#global-sidebar .border-slate-200,
+    body.high-contrast aside#global-sidebar .border-slate-200\/80,
+    body.dark aside#global-sidebar .border-slate-200,
+    body.dark aside#global-sidebar .border-slate-200\/80 {
+      border-color: #1e293b !important;
+    }
+    body.high-contrast aside#global-sidebar .hover\:bg-slate-100:hover,
+    body.dark aside#global-sidebar .hover\:bg-slate-100:hover {
+      background-color: #1e293b !important;
+    }
+
+    /* Active Sidebar Navigation Pill on Chat */
+    body.high-contrast aside#global-sidebar #nav-chat.bg-indigo-50,
+    body.dark aside#global-sidebar #nav-chat.bg-indigo-50 {
+      background-color: rgba(99, 102, 241, 0.2) !important;
+      color: #a5b4fc !important;
+      border-color: rgba(99, 102, 241, 0.4) !important;
+    }
+
+    /* Main Chat Layout */
+    body.high-contrast .bg-background,
+    body.dark .bg-background {
+      background-color: #0b0f19 !important;
+    }
+    body.high-contrast .border-surface-container-high,
+    body.high-contrast .border-surface-container-high\/60,
+    body.dark .border-surface-container-high,
+    body.dark .border-surface-container-high\/60 {
+      border-color: #1f2937 !important;
+    }
+    body.high-contrast .text-on-surface,
+    body.dark .text-on-surface {
+      color: #f8fafc !important;
+    }
+    body.high-contrast .text-on-surface-variant,
+    body.dark .text-on-surface-variant {
+      color: #94a3b8 !important;
+    }
+
+    /* Empty state card */
+    body.high-contrast #empty-chat-state .bg-primary\/10,
+    body.dark #empty-chat-state .bg-primary\/10 {
+      background-color: rgba(37, 99, 235, 0.2) !important;
+      color: #38bdf8 !important;
+    }
+
+    /* Suggestion Prompt Chips */
+    body.high-contrast .prompt-chip,
+    body.dark .prompt-chip {
+      background-color: #111827 !important;
+      border-color: #1f2937 !important;
+      color: #cbd5e1 !important;
+    }
+    body.high-contrast .prompt-chip:hover,
+    body.dark .prompt-chip:hover {
+      background-color: #1e293b !important;
+      color: #ffffff !important;
+      border-color: #374151 !important;
+    }
+
+    /* User Message Bubble */
+    body.high-contrast #chat-thread .bg-on-surface,
+    body.dark #chat-thread .bg-on-surface {
+      background-color: #1e293b !important;
+      color: #f8fafc !important;
+      border: 1px solid #334155 !important;
+    }
+
+    /* AI Message Card */
+    body.high-contrast #chat-thread .bg-surface-container-lowest,
+    body.dark #chat-thread .bg-surface-container-lowest {
+      background-color: #111827 !important;
+      border-color: #1f2937 !important;
+      color: #f8fafc !important;
+    }
+    body.high-contrast #chat-thread .bg-surface-container-low,
+    body.dark #chat-thread .bg-surface-container-low {
+      background-color: #1e293b !important;
+      border-color: #334155 !important;
+    }
+    body.high-contrast #chat-thread code,
+    body.dark #chat-thread code {
+      background-color: #0f172a !important;
+      color: #38bdf8 !important;
+      border: 1px solid #334155 !important;
+    }
+    body.high-contrast #chat-thread .bg-primary\/10,
+    body.dark #chat-thread .bg-primary\/10 {
+      background-color: rgba(37, 99, 235, 0.2) !important;
+      border-color: rgba(37, 99, 235, 0.4) !important;
+    }
+    body.high-contrast #chat-thread .bg-surface-container-high,
+    body.dark #chat-thread .bg-surface-container-high {
+      background-color: #334155 !important;
+    }
+
+    /* Bottom Prompt Box */
+    body.high-contrast .bg-surface-container-lowest,
+    body.dark .bg-surface-container-lowest {
+      background-color: #111827 !important;
+      border-color: #1f2937 !important;
+    }
+    body.high-contrast #chat-input,
+    body.dark #chat-input {
+      color: #f8fafc !important;
+    }
+    body.high-contrast #chat-input::placeholder,
+    body.dark #chat-input::placeholder {
+      color: #64748b !important;
+    }
+  </style>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            "surface-variant": "#dae2fd",
+            "primary": "#0058be",
+            "primary-container": "#2170e4",
+            "on-primary": "#ffffff",
+            "secondary": "#6b38d4",
+            "secondary-container": "#8455ef",
+            "on-secondary": "#ffffff",
+            "background": "#faf8ff",
+            "surface": "#faf8ff",
+            "surface-container": "#eaedff",
+            "surface-container-high": "#e2e7ff",
+            "surface-container-low": "#f2f3ff",
+            "surface-container-lowest": "#ffffff",
+            "on-surface": "#131b2e",
+            "on-surface-variant": "#424754",
+            "outline": "#727785",
+            "outline-variant": "#c2c6d6",
+            "error": "#ba1a1a",
+          },
+          fontFamily: {
+            sans: ["'Plus Jakarta Sans'", "sans-serif"],
+          }
+        }
+      }
+    };
+  </script>
+</head>
+<body class="bg-background font-sans text-on-surface antialiased">
+
+    <!-- ==============================================================
+       GLOBAL SIDEBAR: BANK BUDDY TRUST SHIELD, SEARCH, NAV, DOWNSIDE CONTROLS & PROFILE
+       ============================================================== -->
+  <aside class="fixed left-0 top-0 bottom-0 w-64 bg-white border-r border-slate-200/80 z-40 flex flex-col justify-between py-5 px-4 shadow-sm overflow-y-auto" id="global-sidebar">
+    <div class="flex flex-col gap-4">
+      
+      <!-- 1. Brand Logo Group with Bank Buddy Trust Shield -->
+      <a href="desktop.html" class="flex items-center gap-3 px-1 py-1 group">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-[#002244] via-[#003366] to-[#0284c7] flex items-center justify-center shadow-md shadow-blue-900/20 group-hover:scale-105 transition-transform duration-200 shrink-0">
+          <svg width="24" height="24" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M18 3L5 8.5V17C5 25.5 10.7 33.3 18 35C25.3 33.3 31 25.5 31 17V8.5L18 3Z" fill="#003366"/>
+            <path d="M18 5L7 9.5V17C7 24.3 11.9 31.2 18 32.8C24.1 31.2 29 24.3 29 17V9.5L18 5Z" stroke="#38bdf8" stroke-width="1.2" fill="none"/>
+            <path d="M13 18L16.5 21.5L23.5 14.5" stroke="#fbbf24" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+            <circle cx="18" cy="10" r="1.5" fill="#38bdf8"/>
+          </svg>
+        </div>
+        <div class="flex flex-col">
+          <span class="text-xl font-extrabold tracking-tight text-slate-900 leading-none">Bank <span class="text-[#0284c7]">Buddy</span></span>
+          <span class="text-[9px] font-bold text-slate-500 tracking-wider uppercase mt-1">Autonomous Wealth</span>
+        </div>
+      </a>
+
+      <!-- 2. Search Pill -->
+      <div class="relative">
+        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <circle cx="11" cy="11" r="8"></circle>
+            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+          </svg>
+        </div>
+        <input id="sidebar-search-input" type="text" placeholder="Search transactions... ⌘K" class="w-full pl-8 pr-3 py-1.5 text-xs bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 text-slate-800 placeholder:text-slate-400 transition" />
+      </div>
+
+      <div class="h-px bg-slate-200/80 my-0.5"></div>
+
+      <!-- 3. Navigation Menu: Desktop, Chat, Logout -->
+      <nav class="flex flex-col gap-1.5" aria-label="Sidebar Navigation">
+        <!-- Desktop Link -->
+        <a class="nav-item flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs transition-all text-slate-600 hover:text-slate-900 hover:bg-slate-100 font-medium" href="desktop.html" id="nav-desktop">
+          <div class="flex items-center gap-2.5">
+            <svg class="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+              <path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+              <polyline points="9 22 9 12 15 12 15 22"></polyline>
+            </svg>
+            <span>Desktop</span>
+          </div>
+          
+        </a>
+
+        <!-- Chat Link -->
+        <a class="nav-item flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs transition-all bg-indigo-50 text-indigo-700 font-bold border border-indigo-200/60 shadow-sm" href="chat.html" id="nav-chat">
+          <div class="flex items-center gap-2.5">
+            <svg class="w-4 h-4 text-indigo-600" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+              <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+            </svg>
+            <span>Chat</span>
+          </div>
+          <span class="w-1.5 h-1.5 rounded-full bg-indigo-600 animate-pulse"></span>
+        </a>
+
+        <!-- Logout Link -->
+        <a class="nav-item flex items-center gap-2.5 px-3.5 py-2.5 rounded-xl text-xs font-medium text-rose-600 hover:bg-rose-50 transition-all cursor-pointer" onclick="handleLogout(event)" href="login.html">
+          <svg class="w-4 h-4 text-rose-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+            <polyline points="16 17 21 12 16 7"></polyline>
+            <line x1="21" y1="12" x2="9" y2="12"></line>
+          </svg>
+          <span>Logout</span>
+        </a>
+      </nav>
+    </div>
+
+    <!-- 4. Downside: High Contrast Mode Toggle & User Profile -->
+    <div class="flex flex-col gap-3 pt-3 border-t border-slate-200/80">
+      <!-- High Contrast Mode Toggle (BETA Spec) -->
+      <div class="flex items-center justify-between px-3 py-2 rounded-xl bg-slate-50 border border-slate-200/80">
+        <div class="flex items-center gap-1.5">
+          <span class="text-xs font-semibold text-slate-700">Display Mode</span>
+        </div>
+        <label class="relative inline-flex items-center cursor-pointer" title="Toggle High Contrast Mode">
+          <input type="checkbox" id="contrast-toggle" class="sr-only peer" onchange="toggleHighContrast(this.checked)">
+          <div class="w-8 h-4 bg-slate-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-3 after:w-3 after:transition-all peer-checked:bg-blue-600"></div>
+        </label>
+      </div>
+
+      <!-- User Profile Card & Direct Logout -->
+      <div class="flex items-center justify-between gap-2 px-1">
+        <div class="flex items-center gap-2.5 overflow-hidden">
+          <div class="relative shrink-0">
+            <div class="w-9 h-9 rounded-full ring-2 ring-indigo-500/20 bg-gradient-to-tr from-purple-200 via-pink-100 to-indigo-100 flex items-center justify-center font-bold text-xs text-indigo-700">
+              ER
+            </div>
+            <span class="absolute bottom-0 right-0 w-2 h-2 bg-emerald-500 border border-white rounded-full"></span>
+          </div>
+          <div class="flex flex-col overflow-hidden">
+            <span class="user-name-display text-xs font-bold text-slate-900 truncate">Elena Rostova</span>
+            <span class="user-crn-display text-[9px] font-semibold text-indigo-600 truncate">CRN: 98234105 &bull; Private</span>
+          </div>
+        </div>
+        <a href="login.html" onclick="handleLogout(event)" class="p-1.5 text-slate-400 hover:text-red-600 rounded-lg hover:bg-slate-100 transition shrink-0 cursor-pointer" title="Logout &amp; Return to Login">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+            <polyline points="16 17 21 12 16 7"></polyline>
+            <line x1="21" y1="12" x2="9" y2="12"></line>
+          </svg>
+        </a>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ==============================================================
+       MAIN CHAT WORKSPACE (MINIMAL, CLEAN, NO TOP HEADER)
+       ============================================================== -->
+  <div class="pl-64 min-h-screen flex flex-col bg-background">
+    <main class="flex-1 max-w-4xl w-full mx-auto px-6 py-8 flex flex-col justify-between">
+      
+      <!-- Minimalist Top Context Bar -->
+      <div class="flex items-center justify-between pb-4 border-b border-surface-container-high/60 mb-6">
+        <div class="flex items-center gap-3">
+          <div class="w-8 h-8 rounded-xl bg-primary/10 text-primary flex items-center justify-center">
+            <span class="material-symbols-outlined text-[18px]">smart_toy</span>
+          </div>
+          <div>
+            <h1 class="text-base font-bold text-on-surface leading-tight">Bank Buddy AI Banking Assistant</h1>
+            <div class="flex items-center gap-1.5 text-xs text-on-surface-variant font-medium">
+              <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+              <span>Elena's Private Vault &bull; Zero Hallucination Mode</span>
+            </div>
+          </div>
+        </div>
+        <div class="flex items-center gap-2">
+          <button type="button" onclick="document.getElementById('chat-thread').innerHTML=''" class="text-xs text-on-surface-variant hover:text-on-surface px-3 py-1.5 rounded-lg hover:bg-surface-container transition" title="Clear chat messages">
+            Clear
+          </button>
+        </div>
+      </div>
+
+      <!-- Main Conversational Feed -->
+      <div class="flex flex-col gap-6 w-full flex-1 mb-6" id="chat-thread">
+        <!-- Clean Empty State (Removed default hardcoded chat) -->
+        <div id="empty-chat-state" class="flex flex-col items-center justify-center py-20 text-center text-on-surface-variant my-auto">
+          <div class="w-14 h-14 rounded-2xl bg-primary/10 text-primary flex items-center justify-center mb-3 shadow-sm">
+            <span class="material-symbols-outlined text-[30px]">smart_toy</span>
+          </div>
+          <h2 class="text-base font-bold text-on-surface">Bank Buddy AI Banking Assistant</h2>
+          <p class="text-xs text-on-surface-variant max-w-sm mt-1">
+            Zero-hallucination deterministic banking. Ask balances, transactions, card controls, or click a suggestion below to begin.
+          </p>
+        </div>
+      </div>
+
+      <!-- Quick Action Prompt Suggestion Pills -->
+      <div class="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-none pt-2">
+        <button class="prompt-chip px-3 py-1.5 rounded-full bg-surface-container-lowest hover:bg-surface-container-high text-on-surface text-xs font-medium transition-all shadow-sm shrink-0 flex items-center gap-1.5 border border-surface-container-high/60" type="button">
+          💳 Turn ON contactless limits
+        </button>
+        <button class="prompt-chip px-3 py-1.5 rounded-full bg-surface-container-lowest hover:bg-surface-container-high text-on-surface text-xs font-medium transition-all shadow-sm shrink-0 flex items-center gap-1.5 border border-surface-container-high/60" type="button">
+          📊 What is my next EMI amount?
+        </button>
+        <button class="prompt-chip px-3 py-1.5 rounded-full bg-surface-container-lowest hover:bg-surface-container-high text-on-surface text-xs font-medium transition-all shadow-sm shrink-0 flex items-center gap-1.5 border border-surface-container-high/60" type="button">
+          🛡️ Report unrecognized charge
+        </button>
+        <button class="prompt-chip px-3 py-1.5 rounded-full bg-surface-container-lowest hover:bg-surface-container-high text-on-surface text-xs font-medium transition-all shadow-sm shrink-0 flex items-center gap-1.5 border border-surface-container-high/60" type="button">
+          📈 Project 6-month compound yield
+        </button>
+      </div>
+
+      <!-- Minimal Floating Bottom Prompt Box -->
+      <div class="bg-surface-container-lowest p-2.5 rounded-2xl shadow-sm border border-surface-container-high flex flex-col gap-1.5">
+        <div class="flex items-center gap-2">
+          <button aria-label="Attach documents" class="p-2 rounded-xl text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high transition-all" title="Attach Receipt" type="button">
+            <span class="material-symbols-outlined text-[20px]">attach_file</span>
+          </button>
+          <input class="w-full bg-transparent text-on-surface placeholder:text-on-surface-variant/70 text-sm focus:outline-none py-1.5" id="chat-input" placeholder="Ask about balances, cards, loans, or transfers..." type="text">
+          <div class="flex items-center gap-1.5 shrink-0">
+            <button aria-label="Voice input" class="p-2 rounded-xl text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high transition-all" title="Voice Input" type="button">
+              <span class="material-symbols-outlined text-[20px]">mic</span>
+            </button>
+            <button aria-label="Send query" class="w-9 h-9 rounded-xl bg-primary hover:bg-primary-container text-on-primary flex items-center justify-center transition-all shadow-sm" id="send-btn" type="button">
+              <span class="material-symbols-outlined text-[18px]">arrow_upward</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+    </main>
+  </div>
+
+    <!-- Global Contrast & Accessibility Controller -->
+  <script>
+    function toggleHighContrast(isHigh) {
+      if (isHigh) {
+        document.documentElement.classList.add('high-contrast', 'dark');
+        if (document.body) document.body.classList.add('high-contrast', 'dark');
+        localStorage.setItem('bankBuddyContrast', 'true');
+      } else {
+        document.documentElement.classList.remove('high-contrast', 'dark');
+        if (document.body) document.body.classList.remove('high-contrast', 'dark');
+        localStorage.setItem('bankBuddyContrast', 'false');
+      }
+      const toggle = document.getElementById('contrast-toggle');
+      if (toggle) toggle.checked = isHigh;
+    }
+    window.toggleHighContrast = toggleHighContrast;
+
+    // Instant check & sync
+    if (localStorage.getItem('bankBuddyContrast') === 'true') {
+      document.documentElement.classList.add('high-contrast', 'dark');
+      if (document.body) document.body.classList.add('high-contrast', 'dark');
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+      if (localStorage.getItem('bankBuddyContrast') === 'true') {
+        document.documentElement.classList.add('high-contrast', 'dark');
+        if (document.body) document.body.classList.add('high-contrast', 'dark');
+        const toggle = document.getElementById('contrast-toggle');
+        if (toggle) toggle.checked = true;
+      }
+      const toggle = document.getElementById('contrast-toggle');
+      if (toggle) {
+        toggle.addEventListener('change', function() {
+          toggleHighContrast(this.checked);
+        });
+      }
+
+      // Quick Search ⌘K shortcut
+      window.addEventListener('keydown', function(e) {
+        if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+          e.preventDefault();
+          const s = document.getElementById('sidebar-search-input');
+          if (s) s.focus();
+        }
+      });
+
+      const sidebarSearch = document.getElementById('sidebar-search-input');
+      if (sidebarSearch) {
+        sidebarSearch.addEventListener('keydown', function(e) {
+          if (e.key === 'Enter') {
+            const val = sidebarSearch.value.trim();
+            if (val) {
+              sidebarSearch.value = '';
+              const mainInput = document.getElementById('chat-input');
+              const mainSend = document.getElementById('send-btn');
+              if (mainInput && mainSend) {
+                mainInput.value = val;
+                mainSend.click();
+              }
+            }
+          }
+        });
+      }
+    });
+  </script>
+
+  <!-- Interactive Logic -->
+  <script>
+    (function() {
+      // Helper to attach card toggle listener
+      function attachToggleListener(btnId, thumbId, badgeId, textId) {
+        const btn = document.getElementById(btnId);
+        const thumb = document.getElementById(thumbId);
+        const badge = document.getElementById(badgeId);
+        const text = document.getElementById(textId);
+        let isLocked = true;
+
+        if (btn) {
+          btn.addEventListener('click', function() {
+            isLocked = !isLocked;
+            if (isLocked) {
+              btn.classList.remove('bg-primary');
+              btn.classList.add('bg-surface-container-high');
+              thumb.classList.remove('translate-x-5', 'bg-white');
+              thumb.classList.add('translate-x-0', 'bg-outline-variant');
+              badge.className = 'px-2.5 py-1 rounded-full bg-error/10 text-error text-[11px] font-bold flex items-center gap-1';
+              badge.innerHTML = '<span class="w-2 h-2 rounded-full bg-error"></span> FROZEN / LOCKED';
+              text.className = 'text-[11px] text-error font-medium';
+              text.innerText = 'Card Active State: OFF (Locked for transactions)';
+            } else {
+              btn.classList.remove('bg-surface-container-high');
+              btn.classList.add('bg-primary');
+              thumb.classList.remove('translate-x-0', 'bg-outline-variant');
+              thumb.classList.add('translate-x-5', 'bg-white');
+              badge.className = 'px-2.5 py-1 rounded-full bg-primary/10 text-primary text-[11px] font-bold flex items-center gap-1';
+              badge.innerHTML = '<span class="w-2 h-2 rounded-full bg-primary animate-pulse"></span> ACTIVE & UNRESTRICTED';
+              text.className = 'text-[11px] text-primary font-medium';
+              text.innerText = 'Card Active State: ON (Instant authorization enabled)';
+            }
+          });
+        }
+      }
+
+      const chatInput = document.getElementById('chat-input');
+      const sendBtn = document.getElementById('send-btn');
+      const chatThread = document.getElementById('chat-thread');
+      let toggleCount = 0;
+
+      function handleSend(customText) {
+        const text = (customText || (chatInput ? chatInput.value : '')).trim();
+        if (!text || !chatThread) return;
+        if (chatInput) chatInput.value = '';
+
+        // Hide empty state placeholder
+        const emptyState = document.getElementById('empty-chat-state');
+        if (emptyState) emptyState.style.display = 'none';
+
+        // 1. Append User Turn
+        const userTurn = document.createElement('div');
+        userTurn.className = 'flex items-start justify-end gap-3 pl-8';
+        userTurn.innerHTML = `
+          <div class="flex flex-col items-end gap-1 max-w-xl">
+            <div class="px-4 py-3 rounded-2xl rounded-tr-sm bg-on-surface text-surface-container-lowest text-sm leading-relaxed shadow-sm">
+              ${text}
+            </div>
+            <span class="text-[10px] text-on-surface-variant pr-1">Just now</span>
+          </div>
+          <div class="w-8 h-8 rounded-full bg-primary/10 text-primary font-bold text-xs flex items-center justify-center shrink-0 border border-primary/20">
+            ER
+          </div>
+        `;
+        chatThread.appendChild(userTurn);
+        window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+
+        // 2. Simulate AI Assistant Response
+        setTimeout(() => {
+          const aiTurn = document.createElement('div');
+          aiTurn.className = 'flex items-start gap-3 pr-8';
+          const lower = text.toLowerCase();
+
+          if (lower.includes('freeze') || lower.includes('lock') || lower.includes('card')) {
+            toggleCount++;
+            const btnId = 'card-toggle-btn-' + toggleCount;
+            const thumbId = 'card-toggle-thumb-' + toggleCount;
+            const badgeId = 'card-status-badge-' + toggleCount;
+            const textId = 'card-state-text-' + toggleCount;
+
+            aiTurn.innerHTML = `
+              <div class="w-8 h-8 rounded-xl bg-secondary text-on-secondary flex items-center justify-center shrink-0 shadow-sm">
+                <span class="material-symbols-outlined text-[18px]">credit_card</span>
+              </div>
+              <div class="flex flex-col gap-2 max-w-2xl w-full">
+                <div class="bg-surface-container-lowest p-5 rounded-2xl border border-surface-container-high/60 shadow-sm flex flex-col gap-3">
+                  <div class="flex items-center justify-between pb-3 border-b border-surface-container-high/60">
+                    <div class="flex items-center gap-2.5">
+                      <div class="w-10 h-7 rounded-md bg-slate-900 text-white flex items-center justify-center text-[10px] font-mono font-bold tracking-wider">
+                        4441
+                      </div>
+                      <div>
+                        <div class="text-xs font-bold text-on-surface">Bank Buddy Vault Debit</div>
+                        <div class="text-[10px] text-on-surface-variant">Cardholder: Elena Rostova</div>
+                      </div>
+                    </div>
+                    <span id="${badgeId}" class="px-2.5 py-1 rounded-full bg-error/10 text-error text-[11px] font-bold flex items-center gap-1">
+                      <span class="w-2 h-2 rounded-full bg-error"></span> FROZEN / LOCKED
+                    </span>
+                  </div>
+                  <div class="flex items-center justify-between p-3.5 rounded-xl bg-surface-container-low border border-surface-container-high">
+                    <div class="flex flex-col">
+                      <span class="text-xs font-bold text-on-surface">Card Freeze Switch</span>
+                      <span id="${textId}" class="text-[11px] text-error font-medium">Card Active State: OFF (Locked for transactions)</span>
+                    </div>
+                    <button id="${btnId}" class="w-12 h-7 rounded-full bg-surface-container-high transition-colors relative flex items-center px-1 focus:outline-none" type="button" aria-label="Toggle card freeze status">
+                      <div id="${thumbId}" class="w-5 h-5 rounded-full bg-outline-variant shadow-sm transition-transform translate-x-0"></div>
+                    </button>
+                  </div>
+                  <div class="text-xs text-on-surface-variant leading-relaxed">
+                    Debit card *4441 is locked. Transactions will be rejected with code <code class="bg-slate-100 px-1 py-0.5 rounded text-[11px] font-mono">BB-LOCKED</code>. Click the switch above anytime to toggle.
+                  </div>
+                </div>
+                <span class="text-[10px] text-on-surface-variant pl-1">Executed by Card Guard Agent &bull; 42ms</span>
+              </div>
+            `;
+            chatThread.appendChild(aiTurn);
+            attachToggleListener(btnId, thumbId, badgeId, textId);
+          } else if (lower.includes('balance') || lower.includes('surplus') || lower.includes('emi') || lower.includes('amount')) {
+            aiTurn.innerHTML = `
+              <div class="w-8 h-8 rounded-xl bg-primary text-on-primary flex items-center justify-center shrink-0 shadow-sm">
+                <span class="material-symbols-outlined text-[18px]">smart_toy</span>
+              </div>
+              <div class="flex flex-col gap-2 max-w-2xl w-full">
+                <div class="bg-surface-container-lowest p-5 rounded-2xl border border-surface-container-high/60 shadow-sm flex flex-col gap-3">
+                  <p class="text-sm text-on-surface leading-relaxed">
+                    Here is your verified liquid ledger breakdown, <strong>Elena</strong>:
+                  </p>
+                  <div class="grid grid-cols-3 gap-2.5 text-center">
+                    <div class="p-3 rounded-xl bg-surface-container-low border border-surface-container-high">
+                      <div class="text-[10px] text-on-surface-variant uppercase font-semibold">Checking</div>
+                      <div class="text-base font-bold text-on-surface mt-0.5">₹99,500.00</div>
+                    </div>
+                    <div class="p-3 rounded-xl bg-surface-container-low border border-surface-container-high">
+                      <div class="text-[10px] text-on-surface-variant uppercase font-semibold">Sapphire Due</div>
+                      <div class="text-base font-bold text-error mt-0.5">-₹9,500.00</div>
+                    </div>
+                    <div class="p-3 rounded-xl bg-primary/10 border border-primary/20">
+                      <div class="text-[10px] text-primary uppercase font-bold">Safe Surplus</div>
+                      <div class="text-base font-extrabold text-primary mt-0.5">₹90,000.00</div>
+                    </div>
+                  </div>
+                </div>
+                <span class="text-[10px] text-on-surface-variant pl-1">Bank Buddy Core &bull; 85ms</span>
+              </div>
+            `;
+            chatThread.appendChild(aiTurn);
+          } else {
+            aiTurn.innerHTML = `
+              <div class="w-8 h-8 rounded-xl bg-primary text-on-primary flex items-center justify-center shrink-0 shadow-sm">
+                <span class="material-symbols-outlined text-[18px]">smart_toy</span>
+              </div>
+              <div class="flex flex-col gap-2 max-w-2xl w-full">
+                <div class="bg-surface-container-lowest p-5 rounded-2xl border border-surface-container-high/60 shadow-sm flex flex-col gap-2.5">
+                  <p class="text-sm text-on-surface leading-relaxed">
+                    I have processed your request: "<em>${text}</em>". Account telemetry and ISO-20022 security policies confirmed 100% compliant.
+                  </p>
+                  <div class="p-2.5 rounded-xl bg-surface-container-low flex items-center justify-between text-xs">
+                    <span class="text-on-surface-variant">Deterministic Safety Check</span>
+                    <span class="text-primary font-bold">100% Verified Safe</span>
+                  </div>
+                </div>
+                <span class="text-[10px] text-on-surface-variant pl-1">Bank Buddy Core &bull; 110ms</span>
+              </div>
+            `;
+            chatThread.appendChild(aiTurn);
+          }
+          window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+        }, 500);
+      }
+
+      // Prompt Chips click to send
+      document.querySelectorAll('.prompt-chip').forEach(chip => {
+        chip.addEventListener('click', () => {
+          const text = chip.innerText.replace(/^[^\w]+/, '').trim();
+          handleSend(text);
+        });
+      });
+
+      if (sendBtn) sendBtn.addEventListener('click', () => handleSend());
+      if (chatInput) {
+        chatInput.addEventListener('keydown', (e) => {
+          if (e.key === 'Enter') handleSend();
+        });
+      }
+    })();
+  </script>
+<script>
+  // End-to-end Session Guard & Auth Management
+  async function syncSession() {
+    const raw = localStorage.getItem('bankBuddyUser');
+    if (!raw) {
+      window.location.href = 'login.html';
+      return;
+    }
+    try {
+      const userObj = JSON.parse(raw);
+      const token = userObj.token || userObj.accessToken;
+      if (!token) {
+        window.location.href = 'login.html';
+        return;
+      }
+
+      if (userObj.name) {
+        const nameElems = document.querySelectorAll('.user-name-display');
+        nameElems.forEach(el => el.textContent = userObj.name);
+        const initials = userObj.name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
+        const avatarElems = document.querySelectorAll('.user-avatar-display');
+        avatarElems.forEach(el => el.textContent = initials || 'BB');
+      }
+      if (userObj.crn) {
+        const crnElems = document.querySelectorAll('.user-crn-display');
+        crnElems.forEach(el => el.textContent = 'CRN: ' + userObj.crn + ' • Private');
+      }
+
+      // Verify active session with backend /api/v1/me
+      try {
+        const res = await fetch('/api/v1/me', {
+          headers: { 'Authorization': 'Bearer ' + token }
+        });
+        // Only invalidate and redirect if explicitly 401 Unauthorized or 403 Forbidden
+        if (res.status === 401 || res.status === 403) {
+          localStorage.removeItem('bankBuddyUser');
+          window.location.href = 'login.html';
+        }
+      } catch (netErr) {
+        // Preserve session gracefully on network hiccups or static file servers
+      }
+    } catch (err) {
+      // Graceful offline/network fallback
+    }
+  }
+
+  async function handleLogout(e) {
+    if (e) e.preventDefault();
+    try {
+      const raw = localStorage.getItem('bankBuddyUser');
+      if (raw) {
+        const userObj = JSON.parse(raw);
+        const token = userObj.token || userObj.accessToken;
+        if (token) {
+          await fetch('/api/v1/logout', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': 'Bearer ' + token
+            }
+          });
+        }
+      }
+    } catch (err) {
+      console.warn('Logout notification error:', err);
+    } finally {
+      localStorage.removeItem('bankBuddyUser');
+      window.location.href = 'login.html';
+    }
+  }
+
+  window.handleLogout = handleLogout;
+  window.syncSession = syncSession;
+  document.addEventListener('DOMContentLoaded', syncSession);
+</script>
+</body>
+</html>
